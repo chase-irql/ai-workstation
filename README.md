@@ -43,3 +43,12 @@ See `docs/phase-1-results.md` for measurements and caveats.
 - `indexes/`: future BM25/vector indexes; ignored by Git.
 
 Do not compare harnesses using different model tags, contexts, prompts, seed commits, or runtime settings. Change one variable at a time.
+
+## Wikipedia dump
+
+The English Wikipedia articles-only multistream dump is stored under `corpora/raw/wikipedia/`. Downloads use BITS for resumability and are verified against Wikimedia's published SHA1 checksums.
+
+```powershell
+.\scripts\download-wikipedia.ps1 -DumpDate 20260801
+.\scripts\get-wikipedia-download-status.ps1 -DumpDate 20260801
+```
