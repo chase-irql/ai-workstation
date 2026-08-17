@@ -3,6 +3,7 @@
 /corpora/raw/**
 /indexes/**
 /results/runs/**
+/results/ollama-environment-snapshot.json
 /runtime/**
 
 # Keep directory placeholders
@@ -19,4 +20,3 @@ __pycache__/
 .venv/
 node_modules/
 *.log
-

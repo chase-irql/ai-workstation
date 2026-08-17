@@ -1,0 +1,59 @@
+{
+  "captured_at": "2026-08-17T15:30:13.4153956-04:00",
+  "model_id": "devstral-small-2",
+  "ollama_model": "devstral-small-2:24b-instruct-2512-q4_K_M",
+  "quantization": "Q4_K_M",
+  "capabilities": [
+    "completion",
+    "vision",
+    "tools"
+  ],
+  "context_requested": 65536,
+  "response": "LOCAL_MODEL_OK",
+  "load_duration_ns": 15160757900,
+  "prompt_tokens": 562,
+  "prompt_duration_ns": 18113406000,
+  "output_tokens": 5,
+  "output_duration_ns": 1681945000,
+  "gpu_before": {
+    "name": "NVIDIA GeForce RTX 5080",
+    "driver": "610.62",
+    "memory_total_mib": 16303,
+    "memory_used_mib": 2448,
+    "memory_free_mib": 13530,
+    "utilization_percent": 8,
+    "power_watts": 45.57
+  },
+  "gpu_after": {
+    "name": "NVIDIA GeForce RTX 5080",
+    "driver": "610.62",
+    "memory_total_mib": 16303,
+    "memory_used_mib": 15834,
+    "memory_free_mib": 144,
+    "utilization_percent": 99,
+    "power_watts": 79.21
+  },
+  "ollama_ps": {
+    "models": [
+      {
+        "name": "devstral-small-2:24b-instruct-2512-q4_K_M",
+        "model": "devstral-small-2:24b-instruct-2512-q4_K_M",
+        "size": 20789403318,
+        "digest": "24277f07f62db8f9cb68e9dfc679ea1818a7fbac47a50eff0a701d3f645b63c8",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "mistral3",
+          "families": [
+            "mistral3"
+          ],
+          "parameter_size": "24.0B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-08-17T15:35:13.3416445-04:00",
+        "size_vram": 13581722582,
+        "context_length": 65536
+      }
+    ]
+  }
+}

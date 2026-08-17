@@ -55,7 +55,7 @@ $snapshotPath = Join-Path (Get-ProjectRoot) 'results\ollama-environment-snapshot
 $snapshot | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
 
 if ($RestartApp) {
-    $exe = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe'
+    $exe = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama app.exe'
     if (-not (Test-Path -LiteralPath $exe)) { throw "Ollama executable not found at $exe" }
     if ($PSCmdlet.ShouldProcess('Ollama app', 'Restart to apply environment settings')) {
         Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -like 'ollama*' } | Stop-Process -Force
@@ -77,4 +77,3 @@ if ($RestartApp) {
 Write-Host "Ollama store: $target"
 Write-Host "Context: $ContextLength; Flash Attention: 1; KV cache: q8_0; Parallel: 1; Loaded models: 1"
 Write-Host "Previous model store was retained; no source data was deleted."
-

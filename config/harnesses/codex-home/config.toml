@@ -1,0 +1,12 @@
+model = "devstral-small-2:24b-instruct-2512-q4_K_M"
+model_provider = "ollama-benchmark"
+model_catalog_json = "D:\\ai-workstation\\config\\harnesses\\codex-models.json"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+web_search = "disabled"
+
+[model_providers.ollama-benchmark]
+name = "Ollama local benchmark"
+base_url = "http://127.0.0.1:11434/v1/"
+wire_api = "responses"
+

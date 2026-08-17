@@ -21,13 +21,21 @@ $runDir = Join-Path $root "results\runs\$runId"
 $workspace = Join-Path $runDir 'workspace'
 New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 New-Item -ItemType Directory -Force -Path $workspace | Out-Null
-Get-ChildItem -LiteralPath $seed -Force | ForEach-Object {
-    Copy-Item -LiteralPath $_.FullName -Destination $workspace -Recurse -Force
+Get-ChildItem -LiteralPath $seed -Recurse -File -Force |
+    Where-Object { $_.FullName -notmatch '[\\/]__pycache__[\\/]' -and $_.Extension -ne '.pyc' } |
+    ForEach-Object {
+        $relative = $_.FullName.Substring($seed.Length).TrimStart('\','/')
+        $destination = Join-Path $workspace $relative
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+        Copy-Item -LiteralPath $_.FullName -Destination $destination -Force
 }
 & git -C $workspace init --quiet
 & git -C $workspace config user.name 'Local AI Benchmark'
 & git -C $workspace config user.email 'benchmark@localhost'
+& git -C $workspace config core.autocrlf false
 & git -C $workspace add --all
+$env:GIT_AUTHOR_DATE = '2000-01-01T00:00:00Z'
+$env:GIT_COMMITTER_DATE = '2000-01-01T00:00:00Z'
 & git -C $workspace commit --quiet -m 'benchmark seed'
 if ($LASTEXITCODE -ne 0) { throw 'Failed to initialize benchmark workspace.' }
 
@@ -41,7 +49,8 @@ $exitCode = -1
 Push-Location $workspace
 try {
     if ($Harness -eq 'codex') {
-        Get-Content -Raw -LiteralPath $promptPath | & codex exec --ignore-user-config --ephemeral --oss --local-provider ollama -m $model.ollama_model -s workspace-write -a never --json -C $workspace - 2>&1 | Tee-Object -FilePath $rawLog
+        $env:CODEX_HOME = Join-Path $root 'config\harnesses\codex-home'
+        Get-Content -Raw -LiteralPath $promptPath | & codex exec --ephemeral --approve-for-me --ignore-rules -m $model.ollama_model -c 'web_search="disabled"' --json -C $workspace - 2>&1 | Tee-Object -FilePath $rawLog
         $exitCode = $LASTEXITCODE
     } else {
         $env:OPENCODE_CONFIG = Join-Path $root 'config\harnesses\opencode.json'
@@ -56,6 +65,41 @@ try {
 
 $finished = Get-Date
 $gpuAfter = Get-GpuSnapshot
+$events = @()
+if (Test-Path -LiteralPath $rawLog) {
+    foreach ($line in Get-Content -LiteralPath $rawLog) {
+        if ($line.TrimStart().StartsWith('{')) {
+            try { $events += ($line | ConvertFrom-Json) } catch { }
+        }
+    }
+}
+$toolCalls = 0
+$failedToolCalls = 0
+$inputTokens = 0L
+$outputTokens = 0L
+foreach ($event in $events) {
+    if ($Harness -eq 'codex') {
+        if ($event.type -eq 'item.completed' -and $event.item.type -eq 'command_execution') {
+            $toolCalls++
+            if ($event.item.status -notin @('completed','success') -or ($null -ne $event.item.exit_code -and $event.item.exit_code -ne 0)) {
+                $failedToolCalls++
+            }
+        }
+        if ($event.type -eq 'turn.completed' -and $event.usage) {
+            $inputTokens += [long]$event.usage.input_tokens
+            $outputTokens += [long]$event.usage.output_tokens
+        }
+    } else {
+        if ($event.type -eq 'tool_use') {
+            $toolCalls++
+            if ($event.part.state.status -ne 'completed') { $failedToolCalls++ }
+        }
+        if ($event.type -eq 'step_finish' -and $event.part.tokens) {
+            $inputTokens += [long]$event.part.tokens.input
+            $outputTokens += [long]$event.part.tokens.output
+        }
+    }
+}
 $verifyLog = Join-Path $runDir 'verification.txt'
 Push-Location $workspace
 try {
@@ -64,6 +108,7 @@ try {
     & git status --short | Set-Content -LiteralPath (Join-Path $runDir 'git-status.txt') -Encoding UTF8
     & git diff --stat | Set-Content -LiteralPath (Join-Path $runDir 'diff-stat.txt') -Encoding UTF8
     & git diff --binary | Set-Content -LiteralPath (Join-Path $runDir 'changes.patch') -Encoding UTF8
+    $numstat = @(& git diff --numstat)
 } finally {
     Pop-Location
 }
@@ -80,8 +125,13 @@ $metadata = [ordered]@{
     finished_at = $finished.ToString('o')
     wall_seconds = [math]::Round(($finished - $started).TotalSeconds, 3)
     harness_exit_code = $exitCode
+    tool_calls_observed = $toolCalls
+    failed_tool_calls_observed = $failedToolCalls
+    input_tokens_observed = $inputTokens
+    output_tokens_observed = $outputTokens
     verification_exit_code = $verifyExit
     passed = ($verifyExit -eq 0)
+    files_changed = $numstat.Count
     seed_commit = (& git -C $workspace rev-parse HEAD).Trim()
     context_tokens = (Get-ModelRegistry).defaults.context_tokens
     kv_cache = (Get-ModelRegistry).defaults.kv_cache

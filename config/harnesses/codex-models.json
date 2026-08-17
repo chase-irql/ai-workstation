@@ -1,0 +1,77 @@
+{
+  "models": [
+    {
+      "slug": "devstral-small-2:24b-instruct-2512-q4_K_M",
+      "display_name": "Devstral Small 2 Q4_K_M",
+      "base_instructions": "",
+      "context_window": 65536,
+      "default_verbosity": "low",
+      "experimental_supported_tools": [],
+      "input_modalities": ["text", "image"],
+      "priority": 0,
+      "shell_type": "default",
+      "support_verbosity": true,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [],
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": false,
+      "truncation_policy": { "limit": 10000, "mode": "bytes" },
+      "visibility": "list"
+    },
+    {
+      "slug": "qwen3-coder:30b-a3b-q4_K_M",
+      "display_name": "Qwen3-Coder 30B-A3B Q4_K_M",
+      "base_instructions": "",
+      "context_window": 65536,
+      "default_verbosity": "low",
+      "experimental_supported_tools": [],
+      "input_modalities": ["text"],
+      "priority": 1,
+      "shell_type": "default",
+      "support_verbosity": true,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [],
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": false,
+      "truncation_policy": { "limit": 10000, "mode": "bytes" },
+      "visibility": "list"
+    },
+    {
+      "slug": "glm-4.7-flash:q4_K_M",
+      "display_name": "GLM-4.7-Flash Q4_K_M",
+      "base_instructions": "",
+      "context_window": 65536,
+      "default_verbosity": "low",
+      "experimental_supported_tools": [],
+      "input_modalities": ["text"],
+      "priority": 2,
+      "shell_type": "default",
+      "support_verbosity": true,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [],
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": false,
+      "truncation_policy": { "limit": 10000, "mode": "bytes" },
+      "visibility": "list"
+    },
+    {
+      "slug": "nemotron-3-nano:30b-a3b-q4_K_M",
+      "display_name": "Nemotron-3-Nano 30B-A3B Q4_K_M",
+      "base_instructions": "",
+      "context_window": 65536,
+      "default_verbosity": "low",
+      "experimental_supported_tools": [],
+      "input_modalities": ["text"],
+      "priority": 3,
+      "shell_type": "default",
+      "support_verbosity": true,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [],
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": false,
+      "truncation_policy": { "limit": 10000, "mode": "bytes" },
+      "visibility": "list"
+    }
+  ]
+}
+
