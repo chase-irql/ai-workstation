@@ -1,9 +1,11 @@
 # Large or generated data
 /models/**
 /corpora/raw/**
+/corpora/processed/**
 /indexes/**
 /results/runs/**
 /results/suites/**
+/results/rag/**
 /results/ollama-environment-snapshot.json
 /runtime/**
 /config/harnesses/codex-home/**
@@ -12,6 +14,7 @@
 # Keep directory placeholders
 !/models/.gitkeep
 !/corpora/raw/.gitkeep
+!/corpora/processed/.gitkeep
 !/indexes/.gitkeep
 !/results/runs/.gitkeep
 !/results/suites/.gitkeep

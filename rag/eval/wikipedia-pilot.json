@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "name": "Wikipedia 10K CPU BM25 pilot",
+  "candidate_chunks": 50,
+  "document_cutoff": 5,
+  "cases": [
+    {
+      "query": "political philosophy abolish hierarchy",
+      "expected_titles": ["Anarchism"]
+    },
+    {
+      "query": "surface reflectivity incoming radiation",
+      "expected_titles": ["Albedo"]
+    },
+    {
+      "query": "Greek hero Trojan War heel",
+      "expected_titles": ["Achilles"]
+    },
+    {
+      "query": "sixteenth United States president emancipation",
+      "expected_titles": ["Abraham Lincoln"]
+    },
+    {
+      "query": "North African country capital Algiers",
+      "expected_titles": ["Algeria"]
+    },
+    {
+      "query": "war Union Confederacy",
+      "expected_titles": ["American Civil War"]
+    },
+    {
+      "query": "first humans land Moon 1969",
+      "expected_titles": ["Apollo 11"]
+    },
+    {
+      "query": "NASA lunar missions program",
+      "expected_titles": ["Apollo program"]
+    }
+  ]
+}

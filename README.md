@@ -52,3 +52,13 @@ The English Wikipedia articles-only multistream dump is stored under `corpora/ra
 .\scripts\download-wikipedia.ps1 -DumpDate 20260801
 .\scripts\get-wikipedia-download-status.ps1 -DumpDate 20260801
 ```
+
+The CPU-only extraction and BM25 pilot does not load Ollama or use the GPU:
+
+```powershell
+.\scripts\run-wikipedia-pilot.ps1 -MaxArticles 10000
+.\scripts\query-wikipedia.ps1 -Query 'Apollo guidance computer'
+.\scripts\evaluate-wikipedia.ps1
+```
+
+See `docs/rag-phase-2-results.md` for the verified-corpus and retrieval results.
