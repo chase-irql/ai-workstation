@@ -10,3 +10,28 @@ name = "Ollama local benchmark"
 base_url = "http://127.0.0.1:11434/v1/"
 wire_api = "responses"
 
+# These bundled skills are unrelated to the coding benchmark and otherwise
+# consume a large fraction of a local model's prompt budget.
+[[skills.config]]
+path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\imagegen"
+enabled = false
+
+[[skills.config]]
+path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\openai-docs"
+enabled = false
+
+[[skills.config]]
+path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\plugin-creator"
+enabled = false
+
+[[skills.config]]
+path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\review-agent"
+enabled = false
+
+[[skills.config]]
+path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\skill-creator"
+enabled = false
+
+[[skills.config]]
+path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\skill-installer"
+enabled = false

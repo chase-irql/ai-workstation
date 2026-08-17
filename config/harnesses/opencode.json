@@ -2,6 +2,13 @@
   "$schema": "https://opencode.ai/config.json",
   "share": "disabled",
   "enabled_providers": ["ollama"],
+  "permission": {
+    "*": "allow",
+    "skill": "deny",
+    "external_directory": "deny",
+    "webfetch": "deny",
+    "websearch": "deny"
+  },
   "compaction": {
     "auto": true,
     "prune": true,
@@ -35,4 +42,3 @@
     }
   }
 }
-

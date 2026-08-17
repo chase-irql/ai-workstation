@@ -9,7 +9,8 @@ This repository is the control plane for a private, replaceable-model AI worksta
 - Harnesses: Codex CLI 0.147.0 and OpenCode 1.18.18.
 - Fair-comparison context: 65,536 tokens for both harnesses.
 - Memory controls: Flash Attention, q8_0 KV cache, one loaded model, one parallel request.
-- Initial model order: Devstral Small 2 Q4_K_M, Qwen3-Coder 30B-A3B Q4_K_M, then GLM-4.7-Flash Q4_K_M.
+- Installed models: Devstral Small 2 Q4_K_M, Qwen3-Coder 30B-A3B Q4_K_M, and GLM-4.7-Flash Q4_K_M.
+- Initial ledger benchmark: OpenCode passed all three pairings; Codex passed Devstral and GLM but failed Qwen after corrupting the edited file. These are single-trial sanity results, not a final ranking.
 
 `D:` is a 1 TB NVMe volume with about 954 GiB usable free space at initialization. The computer has roughly 4 TB of NVMe storage in total, but only this 1 TB volume is currently dedicated to the project.
 
@@ -27,6 +28,8 @@ Run PowerShell from this directory:
 ```
 
 Each benchmark run gets a fresh isolated Git workspace under `results/runs/` and records harness output, verification output, the final diff, timing, and environment metadata.
+
+See `docs/phase-1-results.md` for measurements and caveats.
 
 ## Layout
 

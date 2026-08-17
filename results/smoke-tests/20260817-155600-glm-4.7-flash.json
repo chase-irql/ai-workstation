@@ -1,0 +1,59 @@
+{
+  "captured_at": "2026-08-17T15:56:15.0355515-04:00",
+  "model_id": "glm-4.7-flash",
+  "ollama_model": "glm-4.7-flash:q4_K_M",
+  "quantization": "Q4_K_M",
+  "capabilities": [
+    "completion",
+    "tools",
+    "thinking"
+  ],
+  "context_requested": 65536,
+  "response": "LOCAL_MODEL_OK",
+  "load_duration_ns": 9162683800,
+  "prompt_tokens": 12,
+  "prompt_duration_ns": 3785573000,
+  "output_tokens": 64,
+  "output_duration_ns": 1070262999,
+  "gpu_before": {
+    "name": "NVIDIA GeForce RTX 5080",
+    "driver": "610.62",
+    "memory_total_mib": 16303,
+    "memory_used_mib": 2169,
+    "memory_free_mib": 13809,
+    "utilization_percent": 6,
+    "power_watts": 42.65
+  },
+  "gpu_after": {
+    "name": "NVIDIA GeForce RTX 5080",
+    "driver": "610.62",
+    "memory_total_mib": 16303,
+    "memory_used_mib": 15781,
+    "memory_free_mib": 197,
+    "utilization_percent": 43,
+    "power_watts": 78.58
+  },
+  "ollama_ps": {
+    "models": [
+      {
+        "name": "glm-4.7-flash:q4_K_M",
+        "model": "glm-4.7-flash:q4_K_M",
+        "size": 21249235350,
+        "digest": "4475827791a269b02c8ec49b1c3bc1abb5846bacf3fae015b75d33986322d8f6",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "glm4moelite",
+          "families": [
+            "glm4moelite"
+          ],
+          "parameter_size": "29.9B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-08-17T16:01:14.9922967-04:00",
+        "size_vram": 14560662649,
+        "context_length": 65536
+      }
+    ]
+  }
+}

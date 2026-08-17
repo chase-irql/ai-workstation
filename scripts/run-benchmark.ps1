@@ -57,9 +57,14 @@ try {
         $exitCode = $LASTEXITCODE
     } else {
         $env:OPENCODE_CONFIG = Join-Path $root 'config\harnesses\opencode.json'
+        $env:OPENCODE_CONFIG_DIR = Join-Path $root 'runtime\opencode-config'
+        $env:XDG_CONFIG_HOME = Join-Path $root 'runtime\xdg-config'
+        New-Item -ItemType Directory -Force -Path $env:OPENCODE_CONFIG_DIR | Out-Null
+        New-Item -ItemType Directory -Force -Path $env:XDG_CONFIG_HOME | Out-Null
         $env:OPENCODE_DISABLE_AUTOUPDATE = 'true'
         $env:OPENCODE_AUTO_SHARE = 'false'
-        & opencode run --format json --dir $workspace -m "ollama/$($model.ollama_model)" $task.prompt 2>&1 | Tee-Object -FilePath $rawLog
+        $env:OPENCODE_DISABLE_CLAUDE_CODE = '1'
+        & opencode run --pure --format json --dir $workspace -m "ollama/$($model.ollama_model)" $task.prompt 2>&1 | Tee-Object -FilePath $rawLog
         $exitCode = $LASTEXITCODE
     }
 } finally {
