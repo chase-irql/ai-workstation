@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "ledger-refund",
+  "category": "diagnose-and-fix",
+  "seed_repository": "benchmarks/seeds/ledger-cli",
+  "prompt": "Users report that ledger totals become too large whenever a refund is present. Diagnose the cause, make the smallest correct fix without changing the public API, and run the repository's tests. Do not merely explain the issue; implement and verify the fix.",
+  "verify": {
+    "command": "python",
+    "args": ["-m", "unittest", "discover", "-s", "tests", "-v"]
+  }
+}
+

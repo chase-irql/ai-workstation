@@ -1,0 +1,13 @@
+# Reference profile. The benchmark runner uses --ignore-user-config plus explicit
+# flags so personal Codex settings cannot bias a run.
+model_provider = "ollama"
+oss_provider = "ollama"
+sandbox_mode = "workspace-write"
+approval_policy = "never"
+web_search = "disabled"
+
+[model_providers.local_benchmark]
+name = "Ollama local benchmark"
+base_url = "http://127.0.0.1:11434/v1/"
+wire_api = "responses"
+

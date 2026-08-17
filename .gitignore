@@ -1,0 +1,22 @@
+# Large or generated data
+/models/**
+/corpora/raw/**
+/indexes/**
+/results/runs/**
+/runtime/**
+
+# Keep directory placeholders
+!/models/.gitkeep
+!/corpora/raw/.gitkeep
+!/indexes/.gitkeep
+!/results/runs/.gitkeep
+!/runtime/.gitkeep
+
+# Local caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+*.log
+

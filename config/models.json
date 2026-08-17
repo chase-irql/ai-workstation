@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "defaults": {
+    "context_tokens": 65536,
+    "max_output_tokens": 8192,
+    "runtime": "ollama",
+    "kv_cache": "q8_0",
+    "flash_attention": true
+  },
+  "models": [
+    {
+      "id": "devstral-small-2",
+      "ollama_model": "devstral-small-2:24b-instruct-2512-q4_K_M",
+      "role": "coding",
+      "architecture": "dense-24b",
+      "quantization": "Q4_K_M",
+      "download_gb": 15,
+      "priority": 1,
+      "notes": "First latency/residency baseline; official Ollama tag supports tools and vision."
+    },
+    {
+      "id": "qwen3-coder-30b",
+      "ollama_model": "qwen3-coder:30b-a3b-q4_K_M",
+      "role": "coding",
+      "architecture": "moe-30b-a3b",
+      "quantization": "Q4_K_M",
+      "download_gb": 19,
+      "priority": 2,
+      "notes": "Primary coding candidate. Official Ollama library currently exposes Q4_K_M rather than the proposed Q3_K_M."
+    },
+    {
+      "id": "glm-4.7-flash",
+      "ollama_model": "glm-4.7-flash:q4_K_M",
+      "role": "general-agent",
+      "architecture": "moe-30b-a3b",
+      "quantization": "Q4_K_M",
+      "download_gb": 19,
+      "priority": 3,
+      "notes": "General agent/reasoning comparison after the coding baselines."
+    },
+    {
+      "id": "nemotron-3-nano-30b",
+      "ollama_model": "nemotron-3-nano:30b-a3b-q4_K_M",
+      "role": "general-agent",
+      "architecture": "hybrid-moe-30b-a3.5b",
+      "quantization": "Q4_K_M",
+      "download_gb": 24,
+      "priority": 4,
+      "notes": "Deferred comparison because its official Q4 build is substantially larger."
+    }
+  ]
+}
+

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "enabled_providers": ["ollama"],
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 8192
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local benchmark)",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      },
+      "models": {
+        "devstral-small-2:24b-instruct-2512-q4_K_M": {
+          "name": "Devstral Small 2 Q4_K_M",
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "qwen3-coder:30b-a3b-q4_K_M": {
+          "name": "Qwen3-Coder 30B-A3B Q4_K_M",
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "glm-4.7-flash:q4_K_M": {
+          "name": "GLM-4.7-Flash Q4_K_M",
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "nemotron-3-nano:30b-a3b-q4_K_M": {
+          "name": "Nemotron-3-Nano 30B-A3B Q4_K_M",
+          "limit": { "context": 65536, "output": 8192 }
+        }
+      }
+    }
+  }
+}
+
