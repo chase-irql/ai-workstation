@@ -49,7 +49,10 @@ $exitCode = -1
 Push-Location $workspace
 try {
     if ($Harness -eq 'codex') {
-        $env:CODEX_HOME = Join-Path $root 'config\harnesses\codex-home'
+        $codexHome = Join-Path $root 'runtime\codex-home'
+        New-Item -ItemType Directory -Force -Path $codexHome | Out-Null
+        Copy-Item -LiteralPath (Join-Path $root 'config\harnesses\codex-home\config.toml') -Destination (Join-Path $codexHome 'config.toml') -Force
+        $env:CODEX_HOME = $codexHome
         Get-Content -Raw -LiteralPath $promptPath | & codex exec --ephemeral --approve-for-me --ignore-rules -m $model.ollama_model -c 'web_search="disabled"' --json -C $workspace - 2>&1 | Tee-Object -FilePath $rawLog
         $exitCode = $LASTEXITCODE
     } else {

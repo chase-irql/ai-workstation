@@ -5,6 +5,8 @@
 /results/runs/**
 /results/ollama-environment-snapshot.json
 /runtime/**
+/config/harnesses/codex-home/**
+!/config/harnesses/codex-home/config.toml
 
 # Keep directory placeholders
 !/models/.gitkeep
