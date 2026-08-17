@@ -1,0 +1,23 @@
+diff --git a/src/backup_manifest/paths.py b/src/backup_manifest/paths.py
+--- a/src/backup_manifest/paths.py
++++ b/src/backup_manifest/paths.py
+@@ -5,10 +5,16 @@ from collections.abc import Iterable
+ def normalize_path(path: str) -> str:
+     """Return the platform-independent representation stored in manifests."""
+     normalized = re.sub(r"[/\\]+", "/", path.strip())
+-    return normalized.lstrip("./")
++    while normalized.startswith("./"):
++        normalized = normalized[2:]
++    return normalized
+ 
+ 
+ def is_excluded(path: str, patterns: Iterable[str]) -> bool:
+     """Return whether a manifest path matches an exclusion component."""
+-    normalized = normalize_path(path).casefold()
+-    return any(normalize_path(pattern).casefold() in normalized for pattern in patterns)
++    components = {component.casefold() for component in normalize_path(path).split("/") if component}
++    for pattern in patterns:
++        candidate = normalize_path(pattern).strip("/").casefold()
++        if candidate and candidate in components:
++            return True
++    return False

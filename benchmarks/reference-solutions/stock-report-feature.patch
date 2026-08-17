@@ -1,0 +1,53 @@
+diff --git a/src/stock_report/catalog.py b/src/stock_report/catalog.py
+--- a/src/stock_report/catalog.py
++++ b/src/stock_report/catalog.py
+@@ -5,4 +5,7 @@ from .models import Item
+ 
+ def low_stock(items: Iterable[Item]) -> list[Item]:
+     """Return low-stock items ordered case-insensitively by SKU."""
+-    raise NotImplementedError
++    return sorted(
++        (item for item in items if item.quantity <= item.reorder_level),
++        key=lambda item: item.sku.casefold(),
++    )
+diff --git a/src/stock_report/formatter.py b/src/stock_report/formatter.py
+--- a/src/stock_report/formatter.py
++++ b/src/stock_report/formatter.py
+@@ -11,4 +11,6 @@ def format_inventory(items: Iterable[Item]) -> str:
+ 
+ def format_low_stock(items: Iterable[Item]) -> str:
+     """Render a low-stock report including reorder levels."""
+-    raise NotImplementedError
++    lines = ["SKU | NAME | QTY | REORDER"]
++    lines.extend(f"{item.sku} | {item.name} | {item.quantity} | {item.reorder_level}" for item in items)
++    return "\n".join(lines)
+diff --git a/src/stock_report/cli.py b/src/stock_report/cli.py
+--- a/src/stock_report/cli.py
++++ b/src/stock_report/cli.py
+@@ -2,7 +2,8 @@ import argparse
+ import json
+ from pathlib import Path
+ 
+-from .formatter import format_inventory
++from .catalog import low_stock
++from .formatter import format_inventory, format_low_stock
+ from .models import Item
+ 
+ 
+@@ -14,10 +15,15 @@ def load_items(path: Path) -> list[Item]:
+ def build_parser() -> argparse.ArgumentParser:
+     parser = argparse.ArgumentParser()
++    parser.add_argument("--low-stock", action="store_true")
+     parser.add_argument("inventory", type=Path)
+     return parser
+ 
+ 
+ def main(argv: list[str] | None = None) -> int:
+     args = build_parser().parse_args(argv)
+-    print(format_inventory(load_items(args.inventory)))
++    items = load_items(args.inventory)
++    if args.low_stock:
++        print(format_low_stock(low_stock(items)))
++    else:
++        print(format_inventory(items))
+     return 0

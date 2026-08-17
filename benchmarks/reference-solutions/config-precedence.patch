@@ -1,0 +1,12 @@
+diff --git a/src/config_loader/sources.py b/src/config_loader/sources.py
+--- a/src/config_loader/sources.py
++++ b/src/config_loader/sources.py
+@@ -6,5 +6,6 @@ def overlay(base: Mapping[str, Any], *layers: Mapping[str, Any]) -> dict[str, Any
+     """Overlay mappings in increasing order of precedence."""
+     result = dict(base)
+-    for layer in reversed(layers):
+-        result.update(layer)
++    for layer in layers:
++        supplied = {key: value for key, value in layer.items() if value is not None}
++        result.update(supplied)
+     return result

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "stock-report-feature",
+  "category": "multi-file-feature",
+  "seed_repository": "benchmarks/seeds/stock-report",
+  "prompt": "Add the requested low-stock report to this repository. An item is low-stock when quantity is less than or equal to its reorder level. Implement the catalog filter, the report formatter, and the CLI --low-stock mode without changing existing public behavior. The low-stock report must be sorted case-insensitively by SKU and contain the exact header shown by the tests. Run the full test suite and implement the feature rather than merely describing it.",
+  "verify": {
+    "command": "python",
+    "args": ["-m", "unittest", "discover", "-s", "tests", "-v"]
+  }
+}

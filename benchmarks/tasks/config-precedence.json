@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "config-precedence",
+  "category": "diagnose-failing-test",
+  "seed_repository": "benchmarks/seeds/config-loader",
+  "prompt": "The test suite started failing after environment override support was introduced. Diagnose the actual defect, make the smallest coherent correction without changing the public API, and run the complete test suite. Preserve documented configuration behavior and do not merely weaken or delete tests.",
+  "verify": {
+    "command": "python",
+    "args": ["-m", "unittest", "discover", "-s", "tests", "-v"]
+  }
+}

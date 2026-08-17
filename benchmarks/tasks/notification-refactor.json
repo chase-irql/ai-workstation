@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "notification-refactor",
+  "category": "behavior-preserving-refactor",
+  "seed_repository": "benchmarks/seeds/notification-routing",
+  "prompt": "Refactor the duplicated recipient-normalization logic in the email and SMS modules into one shared normalize_recipient helper in notifications.validation. Both channel modules must import and use that helper, their existing public send functions and behavior must remain unchanged, and neither channel module may retain a local normalize_recipient definition. Run python verify_refactor.py and leave the repository passing. Do not add dependencies.",
+  "verify": {
+    "command": "python",
+    "args": ["verify_refactor.py"]
+  }
+}

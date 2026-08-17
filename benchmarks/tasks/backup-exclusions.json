@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "backup-exclusions",
+  "category": "vague-issue-investigation",
+  "seed_repository": "benchmarks/seeds/backup-manifest",
+  "prompt": "Windows users report that backup exclusions behave unpredictably: unrelated files are sometimes omitted while files inside excluded directories can still appear. Investigate the repository, determine the intended path and exclusion semantics from its documentation and tests, implement a robust fix without changing the public API, and run the full test suite.",
+  "verify": {
+    "command": "python",
+    "args": ["-m", "unittest", "discover", "-s", "tests", "-v"]
+  }
+}
