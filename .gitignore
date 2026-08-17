@@ -3,6 +3,7 @@
 /corpora/raw/**
 /indexes/**
 /results/runs/**
+/results/suites/**
 /results/ollama-environment-snapshot.json
 /runtime/**
 /config/harnesses/codex-home/**
@@ -13,6 +14,7 @@
 !/corpora/raw/.gitkeep
 !/indexes/.gitkeep
 !/results/runs/.gitkeep
+!/results/suites/.gitkeep
 !/runtime/.gitkeep
 
 # Local caches
