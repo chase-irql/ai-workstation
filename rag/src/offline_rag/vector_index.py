@@ -9,7 +9,9 @@ import sys
 import tempfile
 import time
 import uuid
+from collections import deque
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -177,6 +179,36 @@ def _batched(values: Iterable[DocumentEmbeddingRecord], size: int) -> Iterator[l
         yield batch
 
 
+def _embedded_batches(
+    values: Iterable[DocumentEmbeddingRecord],
+    provider: EmbeddingProvider,
+    *,
+    batch_size: int,
+    workers: int,
+) -> Iterator[tuple[list[DocumentEmbeddingRecord], np.ndarray]]:
+    """Embed bounded batches concurrently while yielding them in source order."""
+
+    if workers < 1:
+        raise ValueError("embedding_workers must be positive")
+    batches = _batched(values, batch_size)
+    if workers == 1:
+        for batch in batches:
+            yield batch, provider.embed_documents([record.embedding_text for record in batch])
+        return
+
+    pending: deque[tuple[list[DocumentEmbeddingRecord], Future[np.ndarray]]] = deque()
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="embedding") as executor:
+        for batch in batches:
+            future = executor.submit(provider.embed_documents, [record.embedding_text for record in batch])
+            pending.append((batch, future))
+            if len(pending) >= workers:
+                first_batch, first_future = pending.popleft()
+                yield first_batch, first_future.result()
+        while pending:
+            batch, future = pending.popleft()
+            yield batch, future.result()
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -278,7 +310,8 @@ def build_vector_index(
     provider: EmbeddingProvider,
     *,
     overwrite: bool = False,
-    batch_size: int = 32,
+    batch_size: int = 128,
+    embedding_workers: int = 2,
     max_chunks: int = 2,
     max_characters: int = 8_000,
     progress: Callable[[int, int], None] | None = None,
@@ -287,6 +320,8 @@ def build_vector_index(
 
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
+    if not 1 <= embedding_workers <= 8:
+        raise ValueError("embedding_workers must be between 1 and 8")
     if provider.dimensions < 1:
         raise ValueError("provider dimensions must be positive")
     source_metadata = read_index_metadata(database)
@@ -332,8 +367,12 @@ def build_vector_index(
             max_characters=max_characters,
         )
         insert_sql = "INSERT INTO vector_documents VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        for batch in _batched(records, batch_size):
-            vectors = provider.embed_documents([record.embedding_text for record in batch])
+        for batch, vectors in _embedded_batches(
+            records,
+            provider,
+            batch_size=batch_size,
+            workers=embedding_workers,
+        ):
             if vectors.shape != (len(batch), provider.dimensions):
                 raise RuntimeError(f"Embedding provider returned an unexpected shape: {vectors.shape}")
             index.add(np.ascontiguousarray(vectors, dtype=np.float32))
@@ -356,6 +395,7 @@ def build_vector_index(
             "source_document_count": source_document_count,
             "dimensions": provider.dimensions,
             "provider": dict(provider.provider_metadata),
+            "embedding_execution": {"batch_size": batch_size, "workers": embedding_workers},
             "source_database": str(database.resolve()),
             "source_database_bytes": source_stat.st_size,
             "source_database_mtime_ns": source_stat.st_mtime_ns,
@@ -576,7 +616,8 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--models", type=Path, default=Path("config/models.json"))
     build.add_argument("--model-id")
     build.add_argument("--ollama-url", default="http://127.0.0.1:11434")
-    build.add_argument("--batch-size", type=int, default=32)
+    build.add_argument("--batch-size", type=int, default=128)
+    build.add_argument("--embedding-workers", type=int, default=2)
     build.add_argument("--max-chunks", type=int, default=2)
     build.add_argument("--max-characters", type=int, default=8_000)
     build.add_argument("--overwrite", action="store_true")
@@ -614,6 +655,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             provider,
             overwrite=args.overwrite,
             batch_size=args.batch_size,
+            embedding_workers=args.embedding_workers,
             max_chunks=args.max_chunks,
             max_characters=args.max_characters,
             progress=_progress,

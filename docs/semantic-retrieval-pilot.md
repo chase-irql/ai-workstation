@@ -15,6 +15,10 @@ The first document-level semantic pilot validates the retrieval model and hybrid
 
 The generation is published through an atomic `manifest.json` pointer. A failed authorized rebuild cannot replace the prior readable generation. The manifest binds the vectors to the source database/build identity, embedding configuration, representation settings, dimensions, counts, file sizes, and SHA-256 checksums.
 
+### Throughput tuning
+
+A 512-document local benchmark compared request concurrency and batch sizes. Serial batches of 64 reached 56.74 documents/second; serial batches of 128 reached 58.51 documents/second; two concurrent batches of 128 reached 60.83 documents/second. Four workers did not materially improve on two (60.89 documents/second), indicating that the GPU was saturated. The builder therefore defaults to two bounded embedding workers and batches of 128. Results are yielded in input order, so concurrency does not change vector IDs or reproducibility.
+
 ## Measured challenge results
 
 The immutable eight-query semantic challenge was run with 50 returned candidates per query.
@@ -31,7 +35,7 @@ This is a model/fusion validation, not a claim about whole-Wikipedia approximate
 
 ## Full-corpus projection
 
-The complete SQLite index contains 19,215,907 document records but only 7,215,325 documents with searchable chunks; redirects and empty records do not need vectors. At the measured pilot rate, embedding those documents would take about 38 hours of uninterrupted GPU time.
+The complete SQLite index contains 19,215,907 document records but only 7,215,325 documents with searchable chunks; redirects and empty records do not need vectors. At the tuned two-worker rate, embedding those documents would take about 33 hours of uninterrupted GPU time.
 
 A flat 256-dimensional float32 vector matrix would use about 6.88 GiB. Extrapolating the standalone pilot metadata would add about 12.75 GiB, for roughly 19.6 GiB before filesystem overhead. Storage is acceptable, but a multi-day build must gain durable resume support before it is launched. A production design should also compare exact flat search with IVF-PQ or another FAISS ANN index on a larger representative shard, and should avoid duplicating lead text already present in the source SQLite database.
 

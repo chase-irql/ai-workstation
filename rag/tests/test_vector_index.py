@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from typing import Any
@@ -58,6 +59,13 @@ class FailingEmbeddingProvider(FakeEmbeddingProvider):
         raise RuntimeError("intentional provider failure")
 
 
+class OutOfOrderEmbeddingProvider(FakeEmbeddingProvider):
+    def embed_documents(self, texts: list[str]) -> np.ndarray:
+        if texts and "Apollo Guidance Computer" in texts[0]:
+            time.sleep(0.02)
+        return super().embed_documents(texts)
+
+
 class VectorIndexTests(unittest.TestCase):
     def prepare(self, root: Path) -> tuple[Path, Path]:
         processed = root / "processed"
@@ -79,13 +87,14 @@ class VectorIndexTests(unittest.TestCase):
     def test_vector_build_search_and_manifest_validation(self):
         with tempfile.TemporaryDirectory() as directory:
             database, destination = self.prepare(Path(directory))
-            result = build_vector_index(database, destination, FakeEmbeddingProvider(), batch_size=2)
+            provider = OutOfOrderEmbeddingProvider()
+            result = build_vector_index(database, destination, provider, batch_size=1, embedding_workers=2)
             self.assertEqual(result["document_count"], 2)
             self.assertEqual(result["source_document_count"], 3)
             self.assertEqual(result["dimensions"], 5)
             self.assertEqual(load_vector_manifest(destination)["generation"], result["generation"])
             with VectorIndex(destination) as index:
-                results = semantic_search(index, FakeEmbeddingProvider(), "lunar navigation", limit=3)
+                results = semantic_search(index, provider, "lunar navigation", limit=3)
             self.assertEqual(results[0]["document_id"], "enwiki:100")
             self.assertIn("Wikipedia — Apollo Guidance Computer", results[0]["citation"])
             self.assertEqual(results[0]["ranking_reason"], "semantic")

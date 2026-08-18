@@ -2,7 +2,8 @@
 param(
     [ValidatePattern('^\d{8}$')][string]$DumpDate = '20260801',
     [ValidateRange(100, 1000000)][int]$PilotArticles = 10000,
-    [ValidateRange(1, 512)][int]$BatchSize = 64,
+    [ValidateRange(1, 512)][int]$BatchSize = 128,
+    [ValidateRange(1, 8)][int]$EmbeddingWorkers = 2,
     [string]$ModelId,
     [switch]$Force,
     [switch]$Unload
@@ -29,6 +30,7 @@ $buildArguments = @(
     '--database', $database,
     '--output', $vectorDirectory,
     '--batch-size', $BatchSize,
+    '--embedding-workers', $EmbeddingWorkers,
     '--max-chunks', 1,
     '--max-characters', 4000
 ) + $commonModelArguments
