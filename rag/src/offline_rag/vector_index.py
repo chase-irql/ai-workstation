@@ -28,6 +28,8 @@ from .retrieval import search_documents
 
 VECTOR_SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
+BUILD_STATE_NAME = ".build-state.json"
+BUILD_STATE_SCHEMA_VERSION = 1
 
 
 METADATA_SCHEMA = """
@@ -96,6 +98,7 @@ def iter_document_embedding_records(
     *,
     max_chunks: int = 2,
     max_characters: int = 8_000,
+    start_after_document_id: str | None = None,
 ) -> Iterator[DocumentEmbeddingRecord]:
     """Stream title and leading article text without loading the corpus into memory."""
 
@@ -114,10 +117,10 @@ def iter_document_embedding_records(
                        d.source_timestamp, c.chunk_instance_id, c.heading_path, c.text, c.ordinal
                 FROM documents d
                 JOIN chunks c ON c.document_id = d.document_id
-                WHERE c.ordinal < ?
+                WHERE c.ordinal < ? AND d.document_id > ?
                 ORDER BY d.document_id, c.ordinal, c.row_id
                 """,
-                (max_chunks,),
+                (max_chunks, start_after_document_id or ""),
             )
         else:
             rows = connection.execute(
@@ -131,8 +134,10 @@ def iter_document_embedding_records(
                        ) - 1 AS ordinal
                 FROM documents d
                 JOIN chunks c ON c.document_id = d.document_id
+                WHERE d.document_id > ?
                 ORDER BY d.document_id, c.section_index, c.chunk_index, c.row_id
-                """
+                """,
+                (start_after_document_id or "",),
             )
         current_id: str | None = None
         document: dict[str, Any] | None = None
@@ -235,6 +240,119 @@ def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
         raise
 
 
+def _safe_local_path(directory: Path, name: object) -> Path:
+    if not isinstance(name, str) or not name or Path(name).name != name:
+        raise ValueError(f"Unsafe vector build filename: {name!r}")
+    path = (directory / name).resolve()
+    if path.parent != directory.resolve():
+        raise ValueError(f"Vector build file escapes its directory: {name!r}")
+    return path
+
+
+def _load_build_state(directory: Path) -> dict[str, Any] | None:
+    path = directory / BUILD_STATE_NAME
+    if not path.exists():
+        return None
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict) or int(value.get("schema_version", 0)) != BUILD_STATE_SCHEMA_VERSION:
+        raise ValueError(f"Unsupported semantic build checkpoint: {path}")
+    for key in ("raw_vectors_file", "metadata_file", "final_faiss_file", "final_metadata_file"):
+        _safe_local_path(directory, value.get(key))
+    return value
+
+
+def _remove_build_checkpoint(directory: Path, state: Mapping[str, Any]) -> None:
+    """Remove only files named by a validated semantic build checkpoint."""
+
+    for key in ("raw_vectors_file", "metadata_file", "final_faiss_file", "final_metadata_file"):
+        path = _safe_local_path(directory, state.get(key))
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+    try:
+        (directory / BUILD_STATE_NAME).unlink()
+    except FileNotFoundError:
+        pass
+
+
+def _checkpoint_build(
+    directory: Path,
+    state: Mapping[str, Any],
+    raw_stream: Any,
+    connection: sqlite3.Connection,
+    count: int,
+    last_document_id: str | None,
+) -> dict[str, Any]:
+    """Durably commit raw vectors before publishing the matching metadata count."""
+
+    raw_stream.flush()
+    os.fsync(raw_stream.fileno())
+    connection.commit()
+    updated = {
+        **state,
+        "checkpointed_at": datetime.now(timezone.utc).isoformat(),
+        "completed_documents": count,
+        "last_document_id": last_document_id,
+        "raw_vector_bytes": count * int(state["dimensions"]) * np.dtype(np.float32).itemsize,
+    }
+    _atomic_write_json(directory / BUILD_STATE_NAME, updated)
+    return updated
+
+
+def _reconcile_build_checkpoint(
+    directory: Path,
+    state: Mapping[str, Any],
+) -> tuple[sqlite3.Connection, Any, int, str | None, dict[str, Any]]:
+    """Roll raw vectors and SQLite metadata back to their common durable prefix."""
+
+    raw_path = _safe_local_path(directory, state["raw_vectors_file"])
+    metadata_path = _safe_local_path(directory, state["metadata_file"])
+    final_metadata = _safe_local_path(directory, state["final_metadata_file"])
+    if not metadata_path.exists() and final_metadata.exists():
+        os.replace(final_metadata, metadata_path)
+    if not metadata_path.exists() and int(state.get("completed_documents", 0)) == 0:
+        connection = sqlite3.connect(metadata_path)
+        connection.executescript(METADATA_SCHEMA)
+        connection.commit()
+        connection.close()
+    if not metadata_path.is_file():
+        raise FileNotFoundError(f"Semantic checkpoint metadata is missing: {metadata_path}")
+    if not raw_path.exists():
+        raw_path.touch()
+    connection = sqlite3.connect(metadata_path)
+    raw_stream = raw_path.open("r+b")
+    try:
+        dimensions = int(state["dimensions"])
+        bytes_per_vector = dimensions * np.dtype(np.float32).itemsize
+        raw_size = raw_path.stat().st_size
+        complete_raw_vectors = raw_size // bytes_per_vector
+        metadata_count = int(connection.execute("SELECT count(*) FROM vector_documents").fetchone()[0])
+        consistent_count = min(complete_raw_vectors, metadata_count)
+        connection.execute("DELETE FROM vector_documents WHERE vector_id >= ?", (consistent_count,))
+        connection.commit()
+        raw_stream.truncate(consistent_count * bytes_per_vector)
+        raw_stream.seek(0, os.SEEK_END)
+        row = connection.execute(
+            "SELECT document_id FROM vector_documents WHERE vector_id = ?",
+            (consistent_count - 1,),
+        ).fetchone()
+        last_document_id = str(row[0]) if row is not None else None
+        updated = _checkpoint_build(
+            directory,
+            state,
+            raw_stream,
+            connection,
+            consistent_count,
+            last_document_id,
+        )
+        return connection, raw_stream, consistent_count, last_document_id, updated
+    except BaseException:
+        raw_stream.close()
+        connection.close()
+        raise
+
+
 def load_vector_manifest(directory: Path) -> dict[str, Any]:
     path = directory / MANIFEST_NAME
     if not path.is_file():
@@ -310,18 +428,25 @@ def build_vector_index(
     provider: EmbeddingProvider,
     *,
     overwrite: bool = False,
+    resume: bool = False,
+    restart: bool = False,
     batch_size: int = 128,
     embedding_workers: int = 2,
+    checkpoint_interval: int = 4_096,
     max_chunks: int = 2,
     max_characters: int = 8_000,
     progress: Callable[[int, int], None] | None = None,
 ) -> dict[str, Any]:
-    """Build a document-level cosine index and atomically publish its manifest."""
+    """Build an atomic vector generation through a resumable raw-vector checkpoint."""
 
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
     if not 1 <= embedding_workers <= 8:
         raise ValueError("embedding_workers must be between 1 and 8")
+    if checkpoint_interval < 1:
+        raise ValueError("checkpoint_interval must be positive")
+    if resume and restart:
+        raise ValueError("resume and restart are mutually exclusive")
     if provider.dimensions < 1:
         raise ValueError("provider dimensions must be positive")
     source_metadata = read_index_metadata(database)
@@ -340,31 +465,97 @@ def build_vector_index(
     if expected_documents < 1:
         raise ValueError("Source index has no searchable documents with chunks")
     directory.mkdir(parents=True, exist_ok=True)
-    previous: dict[str, Any] | None = None
     manifest_path = directory / MANIFEST_NAME
-    if manifest_path.exists():
-        if not overwrite:
-            raise FileExistsError(f"Vector index already exists: {directory}; authorize overwrite explicitly")
-        previous = load_vector_manifest(directory)
+    previous = load_vector_manifest(directory) if manifest_path.exists() else None
+    state = _load_build_state(directory)
+    if state is not None and previous is not None and state.get("generation") == previous.get("generation"):
+        # Publication succeeded and only checkpoint cleanup was interrupted.
+        for key in ("raw_vectors_file", "metadata_file"):
+            try:
+                _safe_local_path(directory, state[key]).unlink()
+            except FileNotFoundError:
+                pass
+        try:
+            (directory / BUILD_STATE_NAME).unlink()
+        except FileNotFoundError:
+            pass
+        return previous
+    if state is not None and restart:
+        _remove_build_checkpoint(directory, state)
+        state = None
+    elif state is not None and not resume:
+        raise RuntimeError(
+            f"An incomplete semantic build exists in {directory}; use resume=True or restart=True explicitly"
+        )
+    elif state is None and resume:
+        raise FileNotFoundError(f"No semantic build checkpoint exists in {directory}")
+    if previous is not None and state is None and not overwrite:
+        raise FileExistsError(f"Vector index already exists: {directory}; authorize overwrite explicitly")
 
-    generation = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
-    final_faiss = directory / f"vectors-{generation}.faiss"
-    final_metadata = directory / f"metadata-{generation}.sqlite3"
+    source_identity = {
+        "database": str(database.resolve()),
+        "bytes": source_stat.st_size,
+        "mtime_ns": source_stat.st_mtime_ns,
+        "schema_version": source_metadata.get("schema_version", 1),
+        "build_id": source_metadata.get("build_id"),
+        "document_count": source_document_count,
+        "searchable_document_count": expected_documents,
+    }
+    required_configuration = {
+        "dimensions": provider.dimensions,
+        "provider": dict(provider.provider_metadata),
+        "source_identity": source_identity,
+        "content_configuration": {"max_chunks": max_chunks, "max_characters": max_characters},
+        "embedding_execution": {"batch_size": batch_size, "workers": embedding_workers},
+    }
+    if state is None:
+        generation = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
+        state = {
+            "schema_version": BUILD_STATE_SCHEMA_VERSION,
+            "status": "building",
+            "generation": generation,
+            "started_at": datetime.now(timezone.utc).isoformat(),
+            "completed_documents": 0,
+            "last_document_id": None,
+            "raw_vector_bytes": 0,
+            "raw_vectors_file": f".vectors-{generation}.f32.partial",
+            "metadata_file": f".metadata-{generation}.sqlite3.partial",
+            "final_faiss_file": f"vectors-{generation}.faiss",
+            "final_metadata_file": f"metadata-{generation}.sqlite3",
+            "replaces_generation": previous.get("generation") if previous is not None else None,
+            **required_configuration,
+        }
+        _atomic_write_json(directory / BUILD_STATE_NAME, state)
+    else:
+        for key, expected in required_configuration.items():
+            if state.get(key) != expected:
+                raise ValueError(f"Semantic build checkpoint mismatch for {key}")
+        expected_replacement = previous.get("generation") if previous is not None else None
+        if state.get("replaces_generation") != expected_replacement:
+            raise ValueError("Semantic build checkpoint replacement target changed")
+
+    generation = str(state["generation"])
+    raw_vectors = _safe_local_path(directory, state["raw_vectors_file"])
+    temporary_metadata = _safe_local_path(directory, state["metadata_file"])
+    final_faiss = _safe_local_path(directory, state["final_faiss_file"])
+    final_metadata = _safe_local_path(directory, state["final_metadata_file"])
     temporary_faiss = directory / f".{final_faiss.name}.building"
-    temporary_metadata = directory / f".{final_metadata.name}.building"
-    index = faiss.IndexFlatIP(provider.dimensions)
-    connection: sqlite3.Connection | None = None
     started = time.monotonic()
+    connection: sqlite3.Connection | None = None
+    raw_stream: Any | None = None
     count = 0
+    last_document_id: str | None = None
+    last_checkpoint_count = 0
     published_files = False
     manifest_published = False
     try:
-        connection = sqlite3.connect(temporary_metadata)
-        connection.executescript(METADATA_SCHEMA)
+        connection, raw_stream, count, last_document_id, state = _reconcile_build_checkpoint(directory, state)
+        last_checkpoint_count = count
         records = iter_document_embedding_records(
             database,
             max_chunks=max_chunks,
             max_characters=max_characters,
+            start_after_document_id=last_document_id,
         )
         insert_sql = "INSERT INTO vector_documents VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         for batch, vectors in _embedded_batches(
@@ -375,14 +566,33 @@ def build_vector_index(
         ):
             if vectors.shape != (len(batch), provider.dimensions):
                 raise RuntimeError(f"Embedding provider returned an unexpected shape: {vectors.shape}")
-            index.add(np.ascontiguousarray(vectors, dtype=np.float32))
+            vectors = np.ascontiguousarray(vectors, dtype=np.float32)
+            raw_stream.write(vectors.tobytes(order="C"))
             connection.executemany(insert_sql, _metadata_rows(batch, count))
             count += len(batch)
-            if count % max(batch_size, 256) == 0:
-                connection.commit()
+            last_document_id = batch[-1].document_id
+            if count - last_checkpoint_count >= checkpoint_interval:
+                state = _checkpoint_build(
+                    directory,
+                    state,
+                    raw_stream,
+                    connection,
+                    count,
+                    last_document_id,
+                )
+                last_checkpoint_count = count
                 if progress is not None:
                     progress(count, expected_documents)
-        connection.commit()
+        state = _checkpoint_build(
+            directory,
+            state,
+            raw_stream,
+            connection,
+            count,
+            last_document_id,
+        )
+        if progress is not None and count != last_checkpoint_count:
+            progress(count, expected_documents)
         if count != expected_documents:
             raise RuntimeError(f"Source document count changed: expected {expected_documents}, indexed {count}")
         final_source_stat = database.stat()
@@ -394,16 +604,22 @@ def build_vector_index(
             "document_count": count,
             "source_document_count": source_document_count,
             "dimensions": provider.dimensions,
-            "provider": dict(provider.provider_metadata),
-            "embedding_execution": {"batch_size": batch_size, "workers": embedding_workers},
-            "source_database": str(database.resolve()),
-            "source_database_bytes": source_stat.st_size,
-            "source_database_mtime_ns": source_stat.st_mtime_ns,
-            "source_schema_version": source_metadata.get("schema_version", 1),
-            "source_build_id": source_metadata.get("build_id"),
-            "content_configuration": {"max_chunks": max_chunks, "max_characters": max_characters},
+            "provider": state["provider"],
+            "embedding_execution": state["embedding_execution"],
+            "source_database": source_identity["database"],
+            "source_database_bytes": source_identity["bytes"],
+            "source_database_mtime_ns": source_identity["mtime_ns"],
+            "source_schema_version": source_identity["schema_version"],
+            "source_build_id": source_identity["build_id"],
+            "content_configuration": state["content_configuration"],
             "index_configuration": {"type": "IndexFlatIP", "metric": "cosine_on_l2_normalized_vectors"},
+            "checkpoint_configuration": {
+                "format": "float32-row-major",
+                "interval_documents": checkpoint_interval,
+                "resume_supported": True,
+            },
         }
+        connection.execute("DELETE FROM vector_metadata")
         connection.executemany(
             "INSERT INTO vector_metadata(key, value_json) VALUES (?, ?)",
             ((key, _json(value)) for key, value in sorted(build_metadata.items())),
@@ -411,6 +627,16 @@ def build_vector_index(
         connection.commit()
         connection.close()
         connection = None
+        raw_stream.close()
+        raw_stream = None
+
+        index = faiss.IndexFlatIP(provider.dimensions)
+        matrix = np.memmap(raw_vectors, dtype=np.float32, mode="r", shape=(count, provider.dimensions))
+        try:
+            for offset in range(0, count, 100_000):
+                index.add(np.ascontiguousarray(matrix[offset : offset + 100_000]))
+        finally:
+            del matrix
         faiss.write_index(index, str(temporary_faiss))
         _validate_generation(temporary_faiss, temporary_metadata, count, provider.dimensions)
         os.replace(temporary_faiss, final_faiss)
@@ -436,21 +662,46 @@ def build_vector_index(
         _atomic_write_json(manifest_path, manifest)
         manifest_published = True
     except BaseException:
+        if connection is not None and raw_stream is not None:
+            try:
+                state = _checkpoint_build(
+                    directory,
+                    state,
+                    raw_stream,
+                    connection,
+                    count,
+                    last_document_id,
+                )
+            except BaseException:
+                pass
+        if raw_stream is not None:
+            raw_stream.close()
         if connection is not None:
             connection.close()
-        for path in (temporary_faiss, temporary_metadata):
+        try:
+            temporary_faiss.unlink()
+        except FileNotFoundError:
+            pass
+        if final_metadata.exists() and not manifest_published:
             try:
-                path.unlink()
-            except FileNotFoundError:
+                os.replace(final_metadata, temporary_metadata)
+            except OSError:
                 pass
         if published_files and not manifest_published:
-            for path in (final_faiss, final_metadata):
-                try:
-                    path.unlink()
-                except FileNotFoundError:
-                    pass
+            try:
+                final_faiss.unlink()
+            except FileNotFoundError:
+                pass
         raise
 
+    try:
+        raw_vectors.unlink()
+    except FileNotFoundError:
+        pass
+    try:
+        (directory / BUILD_STATE_NAME).unlink()
+    except FileNotFoundError:
+        pass
     if previous is not None:
         for file_value in previous["files"].values():
             old_path = directory / str(file_value["name"])
@@ -618,9 +869,12 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     build.add_argument("--batch-size", type=int, default=128)
     build.add_argument("--embedding-workers", type=int, default=2)
+    build.add_argument("--checkpoint-interval", type=int, default=4_096)
     build.add_argument("--max-chunks", type=int, default=2)
     build.add_argument("--max-characters", type=int, default=8_000)
     build.add_argument("--overwrite", action="store_true")
+    build.add_argument("--resume", action="store_true")
+    build.add_argument("--restart", action="store_true")
     query = subparsers.add_parser("query")
     query.add_argument("--database", type=Path, required=True)
     query.add_argument("--index", type=Path, required=True)
@@ -654,8 +908,11 @@ def main(argv: Iterable[str] | None = None) -> int:
             args.output,
             provider,
             overwrite=args.overwrite,
+            resume=args.resume,
+            restart=args.restart,
             batch_size=args.batch_size,
             embedding_workers=args.embedding_workers,
+            checkpoint_interval=args.checkpoint_interval,
             max_chunks=args.max_chunks,
             max_characters=args.max_characters,
             progress=_progress,

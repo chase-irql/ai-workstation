@@ -15,6 +15,8 @@ The first document-level semantic pilot validates the retrieval model and hybrid
 
 The generation is published through an atomic `manifest.json` pointer. A failed authorized rebuild cannot replace the prior readable generation. The manifest binds the vectors to the source database/build identity, embedding configuration, representation settings, dimensions, counts, file sizes, and SHA-256 checksums.
 
+The production builder uses an append-only float32 vector checkpoint paired with transactional SQLite metadata. Vector bytes are flushed and `fsync`ed before the matching metadata commit. On resume, the builder reconciles both files to their largest common complete prefix, truncates unmatched bytes or rows, validates the source/model/configuration identity, and continues after the last committed document ID. FAISS is constructed from the completed memory-mapped checkpoint only during final publication, avoiding repeated multi-gigabyte FAISS rewrites.
+
 ### Throughput tuning
 
 A 512-document local benchmark compared request concurrency and batch sizes. Serial batches of 64 reached 56.74 documents/second; serial batches of 128 reached 58.51 documents/second; two concurrent batches of 128 reached 60.83 documents/second. Four workers did not materially improve on two (60.89 documents/second), indicating that the GPU was saturated. The builder therefore defaults to two bounded embedding workers and batches of 128. Results are yielded in input order, so concurrency does not change vector IDs or reproducibility.
@@ -37,7 +39,7 @@ This is a model/fusion validation, not a claim about whole-Wikipedia approximate
 
 The complete SQLite index contains 19,215,907 document records but only 7,215,325 documents with searchable chunks; redirects and empty records do not need vectors. At the tuned two-worker rate, embedding those documents would take about 33 hours of uninterrupted GPU time.
 
-A flat 256-dimensional float32 vector matrix would use about 6.88 GiB. Extrapolating the standalone pilot metadata would add about 12.75 GiB, for roughly 19.6 GiB before filesystem overhead. Storage is acceptable, but a multi-day build must gain durable resume support before it is launched. A production design should also compare exact flat search with IVF-PQ or another FAISS ANN index on a larger representative shard, and should avoid duplicating lead text already present in the source SQLite database.
+A flat 256-dimensional float32 vector matrix would use about 6.88 GiB. Extrapolating the standalone pilot metadata would add about 12.75 GiB, for roughly 19.6 GiB before filesystem overhead. During construction, the resumable raw-vector checkpoint temporarily adds another 6.88 GiB. Storage is therefore safe on the current D drive. A later optimization should compare exact flat search with IVF-PQ or another FAISS ANN index on a representative shard and avoid duplicating lead text already present in the source SQLite database.
 
 ## Reproduce
 
@@ -55,6 +57,23 @@ The script selects the highest-priority embedding model from `config/models.json
 - [Qwen3-Embedding model card](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B): 32K context, instruction-aware retrieval, and 32–1024 Matryoshka dimensions.
 - [FAISS](https://github.com/facebookresearch/faiss): exact and approximate dense-vector similarity indexes.
 
-## Remaining gate before a full build
+## Full build and recovery
 
-Implement resumable raw-vector checkpoints and validate a production FAISS index on a larger, representative corpus sample. A dedicated cross-encoder reranker is not yet present; current reranking is deterministic BM25/semantic RRF. The full BM25 service remains the production endpoint until a complete semantic generation passes the same integrity, retrieval, and agent tests.
+Start the complete document-level generation in the background and inspect its durable checkpoint with:
+
+```powershell
+.\scripts\run-wikipedia-semantic-full.ps1 -Background
+.\scripts\get-wikipedia-semantic-status.ps1
+```
+
+If Windows, Ollama, or the build process stops, resume the common durable prefix with:
+
+```powershell
+.\scripts\run-wikipedia-semantic-full.ps1 -Resume -Background
+```
+
+Discarding an incomplete generation requires the explicit `-Restart` switch. Replacing an already published generation separately requires `-Force`; neither operation touches the BM25 database or unrelated files.
+
+A synthetic test suite covers interruption, inconsistent raw/metadata tails, configuration mismatch, explicit restart, atomic replacement, and deterministic concurrent ordering. A real Ollama process-level test was also forcibly terminated at 1,792 documents, resumed to all 7,540 searchable pilot documents, atomically published, and returned `Albedo` as the top result for the semantic reflectivity query.
+
+A dedicated cross-encoder reranker is not yet present; current reranking is deterministic BM25/semantic RRF. The full BM25 service remains the production endpoint until the complete semantic generation passes integrity, retrieval, latency, and agent tests.

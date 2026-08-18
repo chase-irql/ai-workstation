@@ -125,4 +125,13 @@ The semantic stage selects its embedding model from `config/models.json`, publis
 .\scripts\run-wikipedia-semantic-pilot.ps1 -Unload
 ```
 
-The measured pilot raised Success@10 on the semantic challenge from 0.625 for BM25 to 1.0 for both semantic and hybrid search. See `docs/semantic-retrieval-pilot.md` for exact metrics, storage projections, limitations, and the full-corpus gate.
+The measured pilot raised Success@10 on the semantic challenge from 0.625 for BM25 to 1.0 for both semantic and hybrid search. See `docs/semantic-retrieval-pilot.md` for exact metrics, storage projections, limitations, and recovery behavior.
+
+Full semantic construction is resumable and runs independently of the existing BM25 service:
+
+```powershell
+.\scripts\run-wikipedia-semantic-full.ps1 -Background
+.\scripts\get-wikipedia-semantic-status.ps1
+```
+
+Raw vector bytes are durably written before their SQLite provenance rows are committed. Resume reconciles both checkpoint files to their common complete prefix and validates the source database, embedding model, dimensions, representation, and execution settings before continuing. Use `-Resume` after interruption or the explicit `-Restart` switch to discard only the recognized incomplete semantic generation.

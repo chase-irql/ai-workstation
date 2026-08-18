@@ -59,6 +59,17 @@ class FailingEmbeddingProvider(FakeEmbeddingProvider):
         raise RuntimeError("intentional provider failure")
 
 
+class FailAfterOneEmbeddingProvider(FakeEmbeddingProvider):
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def embed_documents(self, texts: list[str]) -> np.ndarray:
+        self.calls += 1
+        if self.calls > 1:
+            raise RuntimeError("interrupted after one batch")
+        return super().embed_documents(texts)
+
+
 class OutOfOrderEmbeddingProvider(FakeEmbeddingProvider):
     def embed_documents(self, texts: list[str]) -> np.ndarray:
         if texts and "Apollo Guidance Computer" in texts[0]:
@@ -110,6 +121,76 @@ class VectorIndexTests(unittest.TestCase):
                 build_vector_index(database, destination, FailingEmbeddingProvider(), batch_size=2, overwrite=True)
             self.assertEqual((destination / "manifest.json").read_bytes(), before)
             self.assertEqual(load_vector_manifest(destination)["document_count"], 2)
+
+    def test_interrupted_build_resumes_from_consistent_vector_metadata_prefix(self):
+        with tempfile.TemporaryDirectory() as directory:
+            database, destination = self.prepare(Path(directory))
+            with self.assertRaisesRegex(RuntimeError, "interrupted after one batch"):
+                build_vector_index(
+                    database,
+                    destination,
+                    FailAfterOneEmbeddingProvider(),
+                    batch_size=1,
+                    embedding_workers=1,
+                    checkpoint_interval=1,
+                )
+            state_path = destination / ".build-state.json"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(state["completed_documents"], 1)
+            raw = destination / state["raw_vectors_file"]
+            self.assertEqual(raw.stat().st_size, 5 * 4)
+
+            # Simulate a crash after extra vector bytes reached disk but before
+            # their SQLite row committed. Resume must truncate the raw tail.
+            with raw.open("ab") as stream:
+                stream.write(np.ones(5, dtype=np.float32).tobytes())
+            result = build_vector_index(
+                database,
+                destination,
+                FakeEmbeddingProvider(),
+                resume=True,
+                batch_size=1,
+                embedding_workers=1,
+                checkpoint_interval=1,
+            )
+            self.assertEqual(result["document_count"], 2)
+            self.assertFalse(state_path.exists())
+            self.assertFalse(raw.exists())
+            with VectorIndex(destination) as index:
+                self.assertEqual(
+                    semantic_search(index, FakeEmbeddingProvider(), "lunar navigation", limit=2)[0]["document_id"],
+                    "enwiki:100",
+                )
+
+    def test_checkpoint_mismatch_is_rejected_and_restart_is_explicit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            database, destination = self.prepare(Path(directory))
+            with self.assertRaisesRegex(RuntimeError, "interrupted after one batch"):
+                build_vector_index(
+                    database,
+                    destination,
+                    FailAfterOneEmbeddingProvider(),
+                    batch_size=1,
+                    embedding_workers=1,
+                )
+            with self.assertRaisesRegex(ValueError, "embedding_execution"):
+                build_vector_index(
+                    database,
+                    destination,
+                    FakeEmbeddingProvider(),
+                    resume=True,
+                    batch_size=2,
+                    embedding_workers=1,
+                )
+            result = build_vector_index(
+                database,
+                destination,
+                FakeEmbeddingProvider(),
+                restart=True,
+                batch_size=2,
+                embedding_workers=1,
+            )
+            self.assertEqual(result["document_count"], 2)
 
     def test_hybrid_fusion_returns_provenance_and_both_ranks(self):
         with tempfile.TemporaryDirectory() as directory:

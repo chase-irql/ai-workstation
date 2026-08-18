@@ -6,6 +6,8 @@ param(
     [ValidateRange(1, 8)][int]$EmbeddingWorkers = 2,
     [string]$ModelId,
     [switch]$Force,
+    [switch]$Resume,
+    [switch]$Restart,
     [switch]$Unload
 )
 
@@ -31,10 +33,13 @@ $buildArguments = @(
     '--output', $vectorDirectory,
     '--batch-size', $BatchSize,
     '--embedding-workers', $EmbeddingWorkers,
+    '--checkpoint-interval', 4096,
     '--max-chunks', 1,
     '--max-characters', 4000
 ) + $commonModelArguments
 if ($Force) { $buildArguments += '--overwrite' }
+if ($Resume) { $buildArguments += '--resume' }
+if ($Restart) { $buildArguments += '--restart' }
 
 try {
     & $python @buildArguments
