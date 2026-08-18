@@ -30,6 +30,7 @@ VECTOR_SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
 BUILD_STATE_NAME = ".build-state.json"
 BUILD_STATE_SCHEMA_VERSION = 1
+VECTOR_METADATA_SCHEMA_VERSION = 2
 
 
 METADATA_SCHEMA = """
@@ -53,6 +54,17 @@ CREATE TABLE vector_metadata (
 """
 
 
+VECTOR_CONTENT_SCHEMA = """
+CREATE TABLE IF NOT EXISTS vector_content (
+    vector_id INTEGER PRIMARY KEY,
+    embedding_text_sha256 TEXT NOT NULL,
+    reused_from_generation TEXT,
+    reused_from_vector_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS vector_content_sha256_idx ON vector_content(embedding_text_sha256);
+"""
+
+
 @dataclass(frozen=True)
 class DocumentEmbeddingRecord:
     document_id: str
@@ -65,6 +77,12 @@ class DocumentEmbeddingRecord:
     heading_path: tuple[str, ...]
     lead_text: str
     embedding_text: str
+
+
+def embedding_text_sha256(text: str) -> str:
+    """Identify the exact text representation supplied to the embedding model."""
+
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _json(value: object) -> str:
@@ -221,6 +239,169 @@ def _embedded_batches(
         while pending:
             batch, future = pending.popleft()
             yield batch, future.result()
+
+
+class _VectorReuseSource:
+    """Read compatible vectors from a previously published generation in bounded batches."""
+
+    def __init__(
+        self,
+        directory: Path,
+        provider: EmbeddingProvider,
+        content_configuration: Mapping[str, int],
+        *,
+        verify_checksums: bool,
+    ) -> None:
+        self.directory = directory.resolve()
+        self.manifest = load_vector_manifest(self.directory)
+        if int(self.manifest["dimensions"]) != provider.dimensions:
+            raise ValueError("Reuse generation embedding dimensions do not match the selected provider")
+        if self.manifest.get("provider") != dict(provider.provider_metadata):
+            raise ValueError("Reuse generation embedding provider does not match the selected provider")
+        if self.manifest.get("content_configuration") != dict(content_configuration):
+            raise ValueError("Reuse generation content configuration does not match the requested configuration")
+        if verify_checksums:
+            verify_vector_index(self.directory)
+        self.generation = str(self.manifest["generation"])
+        self.manifest_path = self.directory / MANIFEST_NAME
+        self.faiss_path = self.directory / str(self.manifest["files"]["faiss"]["name"])
+        self.metadata_path = self.directory / str(self.manifest["files"]["metadata"]["name"])
+        self.initial_file_stats = self._file_stats()
+        self.index = faiss.read_index(str(self.faiss_path))
+        self.connection = _connect_read_only(self.metadata_path)
+        self.has_fingerprints = self.connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='vector_content'"
+        ).fetchone() is not None
+        if not self.has_fingerprints and int(content_configuration["max_chunks"]) != 1:
+            self.close()
+            raise ValueError(
+                "Legacy reuse generations without representation fingerprints are safe only with max_chunks=1"
+            )
+        self.max_characters = int(content_configuration["max_characters"])
+
+    @property
+    def identity(self) -> dict[str, Any]:
+        return {
+            "directory": str(self.directory),
+            "generation": self.generation,
+            "document_count": int(self.manifest["document_count"]),
+            "source_build_id": self.manifest.get("source_build_id"),
+            "manifest_sha256": _sha256(self.manifest_path),
+            "faiss_sha256": self.manifest["files"]["faiss"].get("sha256"),
+            "metadata_sha256": self.manifest["files"]["metadata"].get("sha256"),
+            "file_stats": self.initial_file_stats,
+        }
+
+    def assert_unchanged(self) -> None:
+        current = self._file_stats()
+        if current != self.initial_file_stats:
+            raise RuntimeError("Reuse generation changed during semantic index construction")
+
+    def _file_stats(self) -> dict[str, list[int]]:
+        values: dict[str, list[int]] = {}
+        for path in (self.manifest_path, self.faiss_path, self.metadata_path):
+            stat = path.stat()
+            values[path.name] = [stat.st_size, stat.st_mtime_ns]
+        return values
+
+    def close(self) -> None:
+        if getattr(self, "connection", None) is not None:
+            self.connection.close()
+            self.connection = None  # type: ignore[assignment]
+        self.index = None  # type: ignore[assignment]
+
+    def resolve(
+        self,
+        records: Sequence[DocumentEmbeddingRecord],
+        dimensions: int,
+    ) -> tuple[np.ndarray, list[int], list[int | None]]:
+        """Return reused vectors, positions still requiring embedding, and their source IDs."""
+
+        document_ids = [record.document_id for record in records]
+        placeholders = ",".join("?" for _ in document_ids)
+        fingerprint_column = "vc.embedding_text_sha256" if self.has_fingerprints else "NULL"
+        fingerprint_join = "LEFT JOIN vector_content vc ON vc.vector_id = vd.vector_id" if self.has_fingerprints else ""
+        rows = self.connection.execute(
+            f"""
+            SELECT vd.vector_id, vd.document_id, vd.title, vd.lead_text,
+                   {fingerprint_column} AS embedding_text_sha256
+            FROM vector_documents vd
+            {fingerprint_join}
+            WHERE vd.document_id IN ({placeholders})
+            """,
+            document_ids,
+        ).fetchall()
+        prior = {str(row["document_id"]): row for row in rows}
+        vectors = np.empty((len(records), dimensions), dtype=np.float32)
+        missing: list[int] = []
+        reused_from: list[int | None] = [None] * len(records)
+        reused_positions: list[int] = []
+        reused_ids: list[int] = []
+        for position, record in enumerate(records):
+            row = prior.get(record.document_id)
+            if row is None:
+                missing.append(position)
+                continue
+            prior_fingerprint = row["embedding_text_sha256"]
+            if prior_fingerprint is None:
+                prior_text = f"{row['title']}\n\n{str(row['lead_text'])[:self.max_characters]}"
+                prior_fingerprint = embedding_text_sha256(prior_text)
+            if str(prior_fingerprint) != embedding_text_sha256(record.embedding_text):
+                missing.append(position)
+                continue
+            vector_id = int(row["vector_id"])
+            reused_positions.append(position)
+            reused_ids.append(vector_id)
+            reused_from[position] = vector_id
+        if reused_ids:
+            reconstructed = self.index.reconstruct_batch(np.asarray(reused_ids, dtype=np.int64))
+            vectors[np.asarray(reused_positions, dtype=np.int64)] = np.asarray(reconstructed, dtype=np.float32)
+        return vectors, missing, reused_from
+
+
+def _reuse_aware_batches(
+    values: Iterable[DocumentEmbeddingRecord],
+    provider: EmbeddingProvider,
+    reuse: _VectorReuseSource,
+    *,
+    batch_size: int,
+    workers: int,
+) -> Iterator[tuple[list[DocumentEmbeddingRecord], np.ndarray, list[int | None]]]:
+    """Reuse matching rows and concurrently embed only the misses, preserving source order."""
+
+    if workers < 1:
+        raise ValueError("embedding_workers must be positive")
+    pending: deque[
+        tuple[list[DocumentEmbeddingRecord], np.ndarray, list[int], list[int | None], Future[np.ndarray] | None]
+    ] = deque()
+
+    def finish(
+        item: tuple[
+            list[DocumentEmbeddingRecord], np.ndarray, list[int], list[int | None], Future[np.ndarray] | None
+        ],
+    ) -> tuple[list[DocumentEmbeddingRecord], np.ndarray, list[int | None]]:
+        batch, vectors, missing, reused_from, future = item
+        if future is not None:
+            embedded = future.result()
+            if embedded.shape != (len(missing), provider.dimensions):
+                raise RuntimeError(f"Embedding provider returned an unexpected shape: {embedded.shape}")
+            vectors[np.asarray(missing, dtype=np.int64)] = embedded
+        return batch, np.ascontiguousarray(vectors, dtype=np.float32), reused_from
+
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="embedding") as executor:
+        for batch in _batched(values, batch_size):
+            vectors, missing, reused_from = reuse.resolve(batch, provider.dimensions)
+            future = None
+            if missing:
+                future = executor.submit(
+                    provider.embed_documents,
+                    [batch[position].embedding_text for position in missing],
+                )
+            pending.append((batch, vectors, missing, reused_from, future))
+            if len(pending) >= workers:
+                yield finish(pending.popleft())
+        while pending:
+            yield finish(pending.popleft())
 
 
 def _sha256(path: Path) -> str:
@@ -474,6 +655,23 @@ def _validate_generation(index_path: Path, metadata_path: Path, expected: int, d
         ).fetchone()
         if expected and identifiers != (0, expected - 1, expected):
             raise RuntimeError("Vector metadata IDs are not contiguous")
+        has_content = connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='vector_content'"
+        ).fetchone() is not None
+        if has_content:
+            content_count = int(connection.execute("SELECT count(*) FROM vector_content").fetchone()[0])
+            orphaned = int(
+                connection.execute(
+                    "SELECT count(*) FROM vector_content vc "
+                    "LEFT JOIN vector_documents vd ON vd.vector_id = vc.vector_id "
+                    "WHERE vd.vector_id IS NULL"
+                ).fetchone()[0]
+            )
+            if content_count != expected or orphaned:
+                raise RuntimeError(
+                    f"Vector content provenance mismatch: expected {expected}, found {content_count}, "
+                    f"orphaned {orphaned}"
+                )
     finally:
         connection.close()
     if expected:
@@ -497,9 +695,11 @@ def build_vector_index(
     checkpoint_interval: int = 4_096,
     max_chunks: int = 2,
     max_characters: int = 8_000,
+    reuse_from: Path | None = None,
+    verify_reuse_checksums: bool = True,
     progress: Callable[[int, int], None] | None = None,
 ) -> dict[str, Any]:
-    """Build an atomic vector generation through a resumable raw-vector checkpoint."""
+    """Build an atomic vector generation, optionally reusing unchanged prior vectors."""
 
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
@@ -563,13 +763,29 @@ def build_vector_index(
         "document_count": source_document_count,
         "searchable_document_count": expected_documents,
     }
+    content_configuration = {"max_chunks": max_chunks, "max_characters": max_characters}
+    reuse_source: _VectorReuseSource | None = None
+    reuse_identity: dict[str, Any] | None = None
+    if reuse_from is not None:
+        reuse_source = _VectorReuseSource(
+            reuse_from,
+            provider,
+            content_configuration,
+            verify_checksums=verify_reuse_checksums,
+        )
+        reuse_identity = reuse_source.identity
+    reuse_enabled = reuse_identity is not None
+    if state is not None and state.get("reuse_identity") is not None and reuse_identity is None:
+        raise ValueError("Semantic build checkpoint requires the original reuse generation")
     required_configuration = {
         "dimensions": provider.dimensions,
         "provider": dict(provider.provider_metadata),
         "source_identity": source_identity,
-        "content_configuration": {"max_chunks": max_chunks, "max_characters": max_characters},
+        "content_configuration": content_configuration,
         "embedding_execution": {"batch_size": batch_size, "workers": embedding_workers},
     }
+    if reuse_identity is not None:
+        required_configuration["reuse_identity"] = reuse_identity
     if state is None:
         generation = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
         state = {
@@ -585,15 +801,27 @@ def build_vector_index(
             "final_faiss_file": f"vectors-{generation}.faiss",
             "final_metadata_file": f"metadata-{generation}.sqlite3",
             "replaces_generation": previous.get("generation") if previous is not None else None,
+            "metadata_schema_version": VECTOR_METADATA_SCHEMA_VERSION,
+            "documents_reused": 0,
+            "documents_embedded": 0,
             **required_configuration,
         }
-        _atomic_write_json(directory / BUILD_STATE_NAME, state)
+        try:
+            _atomic_write_json(directory / BUILD_STATE_NAME, state)
+        except BaseException:
+            if reuse_source is not None:
+                reuse_source.close()
+            raise
     else:
         for key, expected in required_configuration.items():
             if state.get(key) != expected:
+                if reuse_source is not None:
+                    reuse_source.close()
                 raise ValueError(f"Semantic build checkpoint mismatch for {key}")
         expected_replacement = previous.get("generation") if previous is not None else None
         if state.get("replaces_generation") != expected_replacement:
+            if reuse_source is not None:
+                reuse_source.close()
             raise ValueError("Semantic build checkpoint replacement target changed")
 
     generation = str(state["generation"])
@@ -612,6 +840,20 @@ def build_vector_index(
     manifest_published = False
     try:
         connection, raw_stream, count, last_document_id, state = _reconcile_build_checkpoint(directory, state)
+        metadata_schema_version = int(state.get("metadata_schema_version", 1))
+        if metadata_schema_version >= 2:
+            connection.executescript(VECTOR_CONTENT_SCHEMA)
+            connection.execute("DELETE FROM vector_content WHERE vector_id >= ?", (count,))
+            connection.commit()
+            reused_count = int(
+                connection.execute(
+                    "SELECT count(*) FROM vector_content WHERE reused_from_vector_id IS NOT NULL"
+                ).fetchone()[0]
+            )
+            embedded_count = count - reused_count
+        else:
+            reused_count = 0
+            embedded_count = count
         last_checkpoint_count = count
         records = iter_document_embedding_records(
             database,
@@ -620,20 +862,57 @@ def build_vector_index(
             start_after_document_id=last_document_id,
         )
         insert_sql = "INSERT INTO vector_documents VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        for batch, vectors in _embedded_batches(
-            records,
-            provider,
-            batch_size=batch_size,
-            workers=embedding_workers,
-        ):
+        if reuse_source is not None:
+            batches: Iterable[tuple[list[DocumentEmbeddingRecord], np.ndarray, list[int | None]]] = (
+                _reuse_aware_batches(
+                    records,
+                    provider,
+                    reuse_source,
+                    batch_size=batch_size,
+                    workers=embedding_workers,
+                )
+            )
+        else:
+            batches = (
+                (batch, vectors, [None] * len(batch))
+                for batch, vectors in _embedded_batches(
+                    records,
+                    provider,
+                    batch_size=batch_size,
+                    workers=embedding_workers,
+                )
+            )
+        for batch, vectors, reused_from in batches:
             if vectors.shape != (len(batch), provider.dimensions):
                 raise RuntimeError(f"Embedding provider returned an unexpected shape: {vectors.shape}")
             vectors = np.ascontiguousarray(vectors, dtype=np.float32)
             raw_stream.write(vectors.tobytes(order="C"))
             connection.executemany(insert_sql, _metadata_rows(batch, count))
+            if metadata_schema_version >= 2:
+                connection.executemany(
+                    "INSERT INTO vector_content(vector_id, embedding_text_sha256, "
+                    "reused_from_generation, reused_from_vector_id) VALUES (?, ?, ?, ?)",
+                    (
+                        (
+                            count + offset,
+                            embedding_text_sha256(record.embedding_text),
+                            reuse_source.generation if prior_vector_id is not None and reuse_source is not None else None,
+                            prior_vector_id,
+                        )
+                        for offset, (record, prior_vector_id) in enumerate(zip(batch, reused_from, strict=True))
+                    ),
+                )
+            batch_reused = sum(value is not None for value in reused_from)
+            reused_count += batch_reused
+            embedded_count += len(batch) - batch_reused
             count += len(batch)
             last_document_id = batch[-1].document_id
             if count - last_checkpoint_count >= checkpoint_interval:
+                state = {
+                    **state,
+                    "documents_reused": reused_count,
+                    "documents_embedded": embedded_count,
+                }
                 state = _checkpoint_build(
                     directory,
                     state,
@@ -645,6 +924,11 @@ def build_vector_index(
                 last_checkpoint_count = count
                 if progress is not None:
                     progress(count, expected_documents)
+        state = {
+            **state,
+            "documents_reused": reused_count,
+            "documents_embedded": embedded_count,
+        }
         state = _checkpoint_build(
             directory,
             state,
@@ -662,6 +946,7 @@ def build_vector_index(
             raise RuntimeError("Source database changed during semantic index construction")
         build_metadata = {
             "schema_version": VECTOR_SCHEMA_VERSION,
+            "metadata_schema_version": metadata_schema_version,
             "built_at": datetime.now(timezone.utc).isoformat(),
             "document_count": count,
             "source_document_count": source_document_count,
@@ -680,6 +965,13 @@ def build_vector_index(
                 "interval_documents": checkpoint_interval,
                 "resume_supported": True,
             },
+            "reuse": {
+                "enabled": reuse_enabled,
+                "base": reuse_identity,
+                "documents_reused": reused_count,
+                "documents_embedded": embedded_count,
+                "reuse_rate": round(reused_count / count, 8) if count else 0.0,
+            },
         }
         connection.execute("DELETE FROM vector_metadata")
         connection.executemany(
@@ -691,6 +983,10 @@ def build_vector_index(
         connection = None
         raw_stream.close()
         raw_stream = None
+        if reuse_source is not None:
+            reuse_source.assert_unchanged()
+            reuse_source.close()
+            reuse_source = None
 
         index = faiss.IndexFlatIP(provider.dimensions)
         matrix = np.memmap(raw_vectors, dtype=np.float32, mode="r", shape=(count, provider.dimensions))
@@ -740,6 +1036,8 @@ def build_vector_index(
             raw_stream.close()
         if connection is not None:
             connection.close()
+        if reuse_source is not None:
+            reuse_source.close()
         try:
             temporary_faiss.unlink()
         except FileNotFoundError:
@@ -934,6 +1232,16 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--checkpoint-interval", type=int, default=4_096)
     build.add_argument("--max-chunks", type=int, default=2)
     build.add_argument("--max-characters", type=int, default=8_000)
+    build.add_argument(
+        "--reuse-from",
+        type=Path,
+        help="Compatible published vector generation used to reuse unchanged document vectors",
+    )
+    build.add_argument(
+        "--skip-reuse-checksums",
+        action="store_true",
+        help="Trust recorded reuse-generation file sizes instead of rehashing its files",
+    )
     build.add_argument("--overwrite", action="store_true")
     build.add_argument("--resume", action="store_true")
     build.add_argument("--restart", action="store_true")
@@ -989,6 +1297,8 @@ def main(argv: Iterable[str] | None = None) -> int:
             checkpoint_interval=args.checkpoint_interval,
             max_chunks=args.max_chunks,
             max_characters=args.max_characters,
+            reuse_from=args.reuse_from,
+            verify_reuse_checksums=not args.skip_reuse_checksums,
             progress=_progress,
         )
     elif args.command == "query":

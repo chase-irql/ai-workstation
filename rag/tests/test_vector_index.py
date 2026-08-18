@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 import tempfile
 import time
@@ -207,6 +208,54 @@ class VectorIndexTests(unittest.TestCase):
                 embedding_workers=1,
             )
             self.assertEqual(result["document_count"], 2)
+
+    def test_current_code_resumes_a_version_1_metadata_checkpoint(self):
+        """The active production process can leave this exact legacy checkpoint."""
+
+        with tempfile.TemporaryDirectory() as directory:
+            database, destination = self.prepare(Path(directory))
+            with self.assertRaisesRegex(RuntimeError, "interrupted after one batch"):
+                build_vector_index(
+                    database,
+                    destination,
+                    FailAfterOneEmbeddingProvider(),
+                    batch_size=1,
+                    embedding_workers=1,
+                    checkpoint_interval=1,
+                    max_chunks=1,
+                )
+            state_path = destination / ".build-state.json"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            metadata_path = destination / state["metadata_file"]
+            connection = sqlite3.connect(metadata_path)
+            connection.execute("DROP TABLE vector_content")
+            connection.commit()
+            connection.close()
+            state.pop("metadata_schema_version")
+            state.pop("documents_reused")
+            state.pop("documents_embedded")
+            state_path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+            result = build_vector_index(
+                database,
+                destination,
+                FakeEmbeddingProvider(),
+                resume=True,
+                batch_size=1,
+                embedding_workers=1,
+                checkpoint_interval=1,
+                max_chunks=1,
+            )
+            self.assertEqual(result["metadata_schema_version"], 1)
+            manifest_metadata = destination / result["files"]["metadata"]["name"]
+            connection = sqlite3.connect(manifest_metadata)
+            try:
+                has_content = connection.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='vector_content'"
+                ).fetchone()
+            finally:
+                connection.close()
+            self.assertIsNone(has_content)
 
     def test_hybrid_fusion_returns_provenance_and_both_ranks(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -135,3 +135,14 @@ Full semantic construction is resumable and runs independently of the existing B
 ```
 
 Raw vector bytes are durably written before their SQLite provenance rows are committed. Resume reconciles both checkpoint files to their common complete prefix and validates the source database, embedding model, dimensions, representation, and execution settings before continuing. Use `-Resume` after interruption or the explicit `-Restart` switch to discard only the recognized incomplete semantic generation.
+
+## Updating Wikipedia
+
+New dumps are built beside the serving generation. After building the new BM25 database, calculate the exact semantic delta without loading a model, then reuse unchanged vectors:
+
+```powershell
+.\scripts\plan-wikipedia-update.ps1 -PreviousDumpDate 20260801 -DumpDate 20260901
+.\scripts\run-wikipedia-semantic-full.ps1 -DumpDate 20260901 -ReuseFromDumpDate 20260801 -Background
+```
+
+Reuse requires matching stable document IDs, exact embedding-input hashes, provider identity, dimensions, and representation settings. New source and citation metadata is always written even when the vector is copied. See `docs/wikipedia-corpus-updates.md` for the complete download, build, verification, cutover, rollback, and compatibility process.

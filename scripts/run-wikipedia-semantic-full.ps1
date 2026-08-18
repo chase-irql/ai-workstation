@@ -5,6 +5,8 @@ param(
     [ValidateRange(1, 8)][int]$EmbeddingWorkers = 2,
     [ValidateRange(128, 1000000)][int]$CheckpointInterval = 4096,
     [string]$ModelId,
+    [ValidatePattern('^\d{8}$')][string]$ReuseFromDumpDate,
+    [switch]$SkipReuseChecksums,
     [switch]$Force,
     [switch]$Resume,
     [switch]$Restart,
@@ -17,6 +19,9 @@ $root = Get-ProjectRoot
 $python = Join-Path $root '.venv\Scripts\python.exe'
 $database = Join-Path $root "indexes\wikipedia\enwiki-$DumpDate-full.sqlite3"
 $vectorDirectory = Join-Path $root "indexes\wikipedia\enwiki-$DumpDate-semantic-full"
+$reuseDirectory = if ($ReuseFromDumpDate) {
+    Join-Path $root "indexes\wikipedia\enwiki-$ReuseFromDumpDate-semantic-full"
+} else { $null }
 $runtime = Join-Path $root 'runtime\wikipedia-semantic-full'
 $pidPath = Join-Path $runtime 'build.pid'
 $sessionPath = Join-Path $runtime 'session.json'
@@ -30,6 +35,15 @@ $env:PYTHONPATH = Join-Path $root 'rag\src'
 
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) { throw "Python virtual environment not found: $python" }
 if (-not (Test-Path -LiteralPath $database -PathType Leaf)) { throw "Full Wikipedia database not found: $database" }
+if ($ReuseFromDumpDate -and $ReuseFromDumpDate -eq $DumpDate) {
+    throw '-ReuseFromDumpDate must identify the previous dump, not the destination dump.'
+}
+if ($SkipReuseChecksums -and -not $ReuseFromDumpDate) {
+    throw '-SkipReuseChecksums requires -ReuseFromDumpDate.'
+}
+if ($reuseDirectory -and -not (Test-Path -LiteralPath (Join-Path $reuseDirectory 'manifest.json') -PathType Leaf)) {
+    throw "Previous semantic generation not found: $reuseDirectory"
+}
 if ($Resume -and $Restart) { throw '-Resume and -Restart are mutually exclusive.' }
 if ($Background -and $Unload) { throw '-Unload is available only for foreground builds; background models expire through Ollama keep-alive.' }
 
@@ -45,6 +59,8 @@ $arguments = @(
     '--max-characters', 4000
 )
 if ($ModelId) { $arguments += @('--model-id', $ModelId) }
+if ($reuseDirectory) { $arguments += @('--reuse-from', $reuseDirectory) }
+if ($SkipReuseChecksums) { $arguments += '--skip-reuse-checksums' }
 if ($Force) { $arguments += '--overwrite' }
 if ($Resume) { $arguments += '--resume' }
 if ($Restart) { $arguments += '--restart' }
@@ -96,6 +112,7 @@ Move-Item -LiteralPath "$pidPath.tmp" -Destination $pidPath -Force
     embedding_workers = $EmbeddingWorkers
     checkpoint_interval = $CheckpointInterval
     resume = [bool]$Resume
+    reuse_from_dump_date = $ReuseFromDumpDate
 } | ConvertTo-Json | Set-Content -LiteralPath "$sessionPath.tmp" -Encoding utf8
 Move-Item -LiteralPath "$sessionPath.tmp" -Destination $sessionPath -Force
 
