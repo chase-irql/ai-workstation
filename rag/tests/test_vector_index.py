@@ -19,6 +19,7 @@ from offline_rag.vector_index import (
     VectorIndex,
     build_vector_index,
     hybrid_search,
+    iter_document_embedding_records,
     load_vector_manifest,
     semantic_search,
 )
@@ -94,6 +95,20 @@ class VectorIndexTests(unittest.TestCase):
         self.assertAlmostEqual(float(np.linalg.norm(values[0])), 1.0, places=6)
         with self.assertRaises(ValueError):
             normalize_rows(np.zeros((1, 2), dtype=np.float32), 2)
+
+    def test_document_stream_resumes_strictly_after_last_id(self):
+        with tempfile.TemporaryDirectory() as directory:
+            database, _ = self.prepare(Path(directory))
+            all_records = list(iter_document_embedding_records(database, max_chunks=2))
+            resumed = list(
+                iter_document_embedding_records(
+                    database,
+                    max_chunks=2,
+                    start_after_document_id=all_records[0].document_id,
+                )
+            )
+            self.assertEqual([record.document_id for record in resumed], [record.document_id for record in all_records[1:]])
+            self.assertTrue(all(record.embedding_text.startswith(record.title) for record in all_records))
 
     def test_vector_build_search_and_manifest_validation(self):
         with tempfile.TemporaryDirectory() as directory:

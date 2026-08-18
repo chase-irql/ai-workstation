@@ -115,10 +115,10 @@ def iter_document_embedding_records(
                 """
                 SELECT d.document_id, d.corpus, d.title, d.source_url, d.source_version,
                        d.source_timestamp, c.chunk_instance_id, c.heading_path, c.text, c.ordinal
-                FROM documents d
-                JOIN chunks c ON c.document_id = d.document_id
+                FROM documents d INDEXED BY sqlite_autoindex_documents_1
+                JOIN chunks c INDEXED BY chunks_document_id_idx ON c.document_id = d.document_id
                 WHERE c.ordinal < ? AND d.document_id > ?
-                ORDER BY d.document_id, c.ordinal, c.row_id
+                ORDER BY d.document_id
                 """,
                 (max_chunks, start_after_document_id or ""),
             )
@@ -141,16 +141,18 @@ def iter_document_embedding_records(
             )
         current_id: str | None = None
         document: dict[str, Any] | None = None
-        chunks: list[str] = []
+        chunks: list[tuple[int, str]] = []
+        lead_ordinal: int | None = None
         for row in rows:
             document_id = str(row["document_id"])
             if current_id is not None and document_id != current_id:
                 assert document is not None
-                combined = "\n\n".join(chunks)[:max_characters]
+                combined = "\n\n".join(text for _, text in sorted(chunks))[:max_characters]
                 yield DocumentEmbeddingRecord(embedding_text=f"{document['title']}\n\n{combined}", **document)
                 chunks = []
             if document_id != current_id:
                 current_id = document_id
+                lead_ordinal = int(row["ordinal"])
                 document = {
                     "document_id": document_id,
                     "corpus": str(row["corpus"]),
@@ -162,10 +164,17 @@ def iter_document_embedding_records(
                     "heading_path": _heading_parts(str(row["heading_path"])),
                     "lead_text": str(row["text"]),
                 }
-            if int(row["ordinal"]) < max_chunks:
-                chunks.append(str(row["text"]))
+            ordinal = int(row["ordinal"])
+            if lead_ordinal is None or ordinal < lead_ordinal:
+                assert document is not None
+                lead_ordinal = ordinal
+                document["lead_chunk_id"] = str(row["chunk_instance_id"])
+                document["heading_path"] = _heading_parts(str(row["heading_path"]))
+                document["lead_text"] = str(row["text"])
+            if ordinal < max_chunks:
+                chunks.append((ordinal, str(row["text"])))
         if document is not None:
-            combined = "\n\n".join(chunks)[:max_characters]
+            combined = "\n\n".join(text for _, text in sorted(chunks))[:max_characters]
             yield DocumentEmbeddingRecord(embedding_text=f"{document['title']}\n\n{combined}", **document)
     finally:
         connection.close()
