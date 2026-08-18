@@ -4,6 +4,10 @@ import bz2
 import re
 from pathlib import Path
 
+import numpy as np
+
+from offline_rag.embeddings import normalize_rows
+
 
 MEDIAWIKI_FIXTURE = """<?xml version="1.0" encoding="utf-8"?>
 <mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/">
@@ -65,3 +69,40 @@ def write_multistream_archive(directory: Path) -> tuple[Path, Path]:
     archive.write_bytes(bytes(archive_bytes))
     index.write_bytes(bz2.compress(("\n".join(index_lines) + "\n").encode("utf-8")))
     return archive, index
+
+
+class CountingFakeEmbeddingProvider:
+    """Deterministic semantic fixture that records document and query calls."""
+
+    dimensions = 5
+
+    def __init__(self) -> None:
+        self.document_calls = 0
+        self.query_calls = 0
+
+    @property
+    def provider_metadata(self) -> dict[str, object]:
+        return {"provider": "fake", "model_id": "test-embedding", "dimensions": self.dimensions}
+
+    def _vectors(self, texts: list[str]) -> np.ndarray:
+        vectors = []
+        groups = (
+            ("apollo", "lunar", "moon", "rope memory", "guidance computer"),
+            ("reciprocal", "fusion", "ranking"),
+            ("c++", "cpp", "std::vector", "programming"),
+            ("redirect",),
+        )
+        for text in texts:
+            lowered = text.casefold()
+            vector = [float(any(term in lowered for term in group)) for group in groups]
+            vector.append(0.01)
+            vectors.append(vector)
+        return normalize_rows(np.asarray(vectors, dtype=np.float32), self.dimensions)
+
+    def embed_documents(self, texts: list[str]) -> np.ndarray:
+        self.document_calls += 1
+        return self._vectors(texts)
+
+    def embed_query(self, query: str) -> np.ndarray:
+        self.query_calls += 1
+        return self._vectors([query])[0]

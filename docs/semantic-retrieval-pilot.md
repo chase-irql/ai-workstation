@@ -77,3 +77,17 @@ Discarding an incomplete generation requires the explicit `-Restart` switch. Rep
 A synthetic test suite covers interruption, inconsistent raw/metadata tails, configuration mismatch, explicit restart, atomic replacement, and deterministic concurrent ordering. A real Ollama process-level test was also forcibly terminated at 1,792 documents, resumed to all 7,540 searchable pilot documents, atomically published, and returned `Albedo` as the top result for the semantic reflectivity query.
 
 A dedicated cross-encoder reranker is not yet present; current reranking is deterministic BM25/semantic RRF. The full BM25 service remains the production endpoint until the complete semantic generation passes integrity, retrieval, latency, and agent tests.
+
+## Serving and agent integration
+
+The HTTP and MCP layers support explicit `bm25`, `semantic`, and `hybrid` retrieval modes. BM25 is still the safe default before full verification. Supplying a published vector directory enables the other modes without loading it immediately. Health/status requests report configuration, publication, load state, available modes, prior load errors, and query-cache statistics.
+
+The HTTP request field is `retrieval_mode`; the MCP `search_wikipedia` argument is `retrieval`. Both use the same retrieval runtime and preserve the prior BM25 query-mode controls. Vector search is serialized around the shared read-only FAISS/SQLite metadata pair so threaded HTTP requests cannot misuse a SQLite connection. Query embedding calls remain concurrent outside that short search lock and use a bounded thread-safe LRU cache.
+
+After the automated verifier records a passing result for the published generation:
+
+```powershell
+.\scripts\enable-wikipedia-hybrid.ps1
+```
+
+The guarded activation refuses an absent, failed, or generation-mismatched verification result. It updates the HTTP service and MCP command only after those checks, exercises a real hybrid request, and normally unloads the embedding model after the smoke test. The FAISS index occupies system RAM when first used; the query embedding model consumes GPU memory only while Ollama keeps it loaded.

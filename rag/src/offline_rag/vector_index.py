@@ -7,6 +7,7 @@ import os
 import sqlite3
 import sys
 import tempfile
+import threading
 import time
 import uuid
 from collections import deque
@@ -106,7 +107,11 @@ def _citation(record: Mapping[str, Any]) -> str:
 def _connect_read_only(database: Path) -> sqlite3.Connection:
     if not database.is_file():
         raise FileNotFoundError(database)
-    connection = sqlite3.connect(f"{database.resolve().as_uri()}?mode=ro", uri=True)
+    connection = sqlite3.connect(
+        f"{database.resolve().as_uri()}?mode=ro",
+        uri=True,
+        check_same_thread=False,
+    )
     connection.row_factory = sqlite3.Row
     return connection
 
@@ -1081,6 +1086,7 @@ class VectorIndex:
         self.manifest = load_vector_manifest(self.directory)
         self.index = faiss.read_index(str(self.directory / self.manifest["files"]["faiss"]["name"]))
         self.connection = _connect_read_only(self.directory / self.manifest["files"]["metadata"]["name"])
+        self._search_lock = threading.Lock()
         if self.index.ntotal != int(self.manifest["document_count"]):
             self.close()
             raise RuntimeError("Loaded FAISS count does not match its manifest")
@@ -1103,15 +1109,16 @@ class VectorIndex:
         if vector.shape != (self.index.d,):
             raise ValueError(f"Expected query vector shape {(self.index.d,)}, got {vector.shape}")
         vector = np.ascontiguousarray(vector.reshape(1, -1), dtype=np.float32)
-        scores, identifiers = self.index.search(vector, min(limit, self.index.ntotal))
-        ordered_ids = [int(value) for value in identifiers[0] if int(value) >= 0]
-        if not ordered_ids:
-            return []
-        placeholders = ",".join("?" for _ in ordered_ids)
-        rows = self.connection.execute(
-            f"SELECT * FROM vector_documents WHERE vector_id IN ({placeholders})",
-            ordered_ids,
-        ).fetchall()
+        with self._search_lock:
+            scores, identifiers = self.index.search(vector, min(limit, self.index.ntotal))
+            ordered_ids = [int(value) for value in identifiers[0] if int(value) >= 0]
+            if not ordered_ids:
+                return []
+            placeholders = ",".join("?" for _ in ordered_ids)
+            rows = self.connection.execute(
+                f"SELECT * FROM vector_documents WHERE vector_id IN ({placeholders})",
+                ordered_ids,
+            ).fetchall()
         by_id = {int(row["vector_id"]): dict(row) for row in rows}
         results: list[dict[str, Any]] = []
         for rank, (vector_id, score) in enumerate(zip(ordered_ids, scores[0], strict=True), start=1):

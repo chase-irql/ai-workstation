@@ -80,6 +80,16 @@ The default URL is `http://127.0.0.1:8765/`. API endpoints are:
 - `POST /v1/search` with `{"query":"Apollo program","mode":"and","limit":8}`;
 - `GET /v1/documents/enwiki%3A1461?offset=0&limit=20` for ordered source chunks.
 
+The search body also accepts `retrieval_mode` with `bm25`, `semantic`, or `hybrid`. BM25 remains the default unless a verified semantic generation is explicitly enabled. Semantic resources are lazy: service startup and health checks do not load FAISS or invoke Ollama. The first semantic/hybrid request loads the vector index into system RAM and invokes the local embedding model; a bounded in-memory LRU avoids regenerating embeddings for repeated query strings.
+
+After full semantic verification passes, perform the guarded service and MCP cutover with:
+
+```powershell
+.\scripts\enable-wikipedia-hybrid.ps1
+```
+
+The activation script requires a passing verification status bound to the published generation, restarts the HTTP service with hybrid as its default, updates the selected MCP harness configuration, runs a real hybrid smoke query, and unloads the embedding model afterward by default. BM25 remains selectable and works without Ollama or GPU access.
+
 Requests are bounded, the service has no write endpoints, and it binds only to localhost by default. Binding to `0.0.0.0` makes it reachable from the LAN and should be done only on a trusted network; this initial service does not provide authentication or TLS.
 
 ## Agent access through MCP
@@ -90,6 +100,8 @@ The same read-only index is exposed as a local stdio MCP server with four tools:
 - `retrieve_wikipedia_context` expands one search hit with a small neighboring window;
 - `retrieve_wikipedia_document` returns a deliberately small ordered page from a selected document;
 - `wikipedia_index_status` reports the corpus version, build identity, and counts.
+
+When semantic retrieval is configured, `search_wikipedia` accepts `retrieval` as `default`, `bm25`, `semantic`, or `hybrid`. This adds no new tool names, so existing agents and prompts remain compatible.
 
 Exact-title promotion returns the article's lead chunk instead of an arbitrary short section. Agents are instructed to use the evidence already present in search results and prefer neighboring-context retrieval, preventing whole-article reads from consuming the model context window.
 

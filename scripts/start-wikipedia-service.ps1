@@ -3,6 +3,10 @@ param(
     [ValidatePattern('^\d{8}$')][string]$DumpDate = '20260801',
     [string]$ListenAddress = '127.0.0.1',
     [ValidateRange(1, 65535)][int]$Port = 8765,
+    [ValidateSet('bm25', 'semantic', 'hybrid')][string]$RetrievalMode = 'bm25',
+    [ValidateRange(0, 4096)][int]$QueryCacheSize = 256,
+    [string]$ModelId,
+    [switch]$EnableSemantic,
     [switch]$Background
 )
 
@@ -10,6 +14,8 @@ param(
 $root = Get-ProjectRoot
 $python = Join-Path $root '.venv\Scripts\python.exe'
 $database = Join-Path $root "indexes\wikipedia\enwiki-$DumpDate-full.sqlite3"
+$vectorDirectory = Join-Path $root "indexes\wikipedia\enwiki-$DumpDate-semantic-full"
+$models = Join-Path $root 'config\models.json'
 $runtime = Join-Path $root 'runtime\wikipedia-service'
 $pidPath = Join-Path $runtime 'service.pid'
 $stdoutPath = Join-Path $runtime 'service.stdout.log'
@@ -22,6 +28,10 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $database -PathType Leaf)) {
     throw "Published Wikipedia database not found: $database"
 }
+$semanticEnabled = $EnableSemantic -or $RetrievalMode -ne 'bm25'
+if ($semanticEnabled -and -not (Test-Path -LiteralPath (Join-Path $vectorDirectory 'manifest.json') -PathType Leaf)) {
+    throw "Published semantic generation not found: $vectorDirectory"
+}
 
 $arguments = @(
     '-m', 'offline_rag.service',
@@ -29,6 +39,15 @@ $arguments = @(
     '--host', $ListenAddress,
     '--port', "$Port"
 )
+if ($semanticEnabled) {
+    $arguments += @(
+        '--vector-index', $vectorDirectory,
+        '--models', $models,
+        '--default-retrieval', $RetrievalMode,
+        '--query-cache-size', "$QueryCacheSize"
+    )
+    if ($ModelId) { $arguments += @('--model-id', $ModelId) }
+}
 
 if (-not $Background) {
     & $python @arguments
@@ -74,6 +93,7 @@ if ($ready) {
         url = "http://$($ListenAddress):$Port/"
         documents = $health.index.document_count
         chunks = $health.index.chunk_count
+        retrieval = $health.retrieval
         database = $database
     } | ConvertTo-Json
     return

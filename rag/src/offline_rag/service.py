@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import time
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -11,7 +10,9 @@ from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
 
 from .bm25 import QUERY_MODES
-from .retrieval import index_status, retrieve_document, search_documents
+from .embeddings import EmbeddingProvider, OllamaEmbeddingClient, load_embedding_model_config
+from .retrieval import retrieve_document
+from .retrieval_runtime import RETRIEVAL_MODES, RetrievalRuntime, RetrievalUnavailableError
 
 
 MAX_REQUEST_BYTES = 64 * 1024
@@ -30,7 +31,7 @@ INDEX_HTML = """<!doctype html>
     main { width:min(980px,calc(100% - 32px)); margin:0 auto; padding:48px 0 80px; }
     h1 { margin:0; font-size:clamp(2rem,7vw,4rem); letter-spacing:-.055em; }
     .tagline,.meta { color:var(--muted); }
-    form { display:grid; grid-template-columns:1fr auto auto; gap:10px; margin:30px 0 16px; }
+    form { display:grid; grid-template-columns:1fr auto auto auto; gap:10px; margin:30px 0 16px; }
     input,select,button { border:1px solid var(--line); border-radius:10px; padding:12px 14px; font:inherit; color:var(--text); background:#0f1628; }
     input:focus,select:focus,button:focus { outline:2px solid var(--accent); outline-offset:2px; }
     button { cursor:pointer; background:#245da8; border-color:#397bd0; font-weight:700; }
@@ -50,9 +51,10 @@ INDEX_HTML = """<!doctype html>
 </head>
 <body><main>
   <h1>Offline Wikipedia</h1>
-  <p class="tagline">Local, source-backed search. No Internet, cloud, model, or GPU required.</p>
+  <p class="tagline">Local, source-backed retrieval. BM25 is CPU-only; semantic modes use a local embedding model.</p>
   <form id="search-form">
     <input id="query" name="q" maxlength="2000" autofocus required placeholder="Search 19 million Wikipedia articles">
+    <select id="retrieval" aria-label="Retrieval mode"><option value="bm25">BM25</option><option value="hybrid">Hybrid</option><option value="semantic">Semantic</option></select>
     <select id="mode" aria-label="Query mode"><option value="and">All terms</option><option value="or">Any term</option><option value="phrase">Phrase</option><option value="exact">Exact tokens</option></select>
     <button type="submit">Search</button>
   </form>
@@ -60,17 +62,17 @@ INDEX_HTML = """<!doctype html>
   <section id="results"></section>
 </main>
 <script>
-const form=document.querySelector('#search-form'), query=document.querySelector('#query'), mode=document.querySelector('#mode'), status=document.querySelector('#status'), results=document.querySelector('#results');
+const form=document.querySelector('#search-form'), query=document.querySelector('#query'), retrieval=document.querySelector('#retrieval'), mode=document.querySelector('#mode'), status=document.querySelector('#status'), results=document.querySelector('#results');
 const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
 async function json(url,options){const r=await fetch(url,options);const body=await r.json();if(!r.ok)throw new Error(body.error?.message||`HTTP ${r.status}`);return body}
-async function health(){try{const h=await json('/health');status.textContent=`Ready · ${Number(h.index.document_count||0).toLocaleString()} documents · ${Number(h.index.chunk_count||0).toLocaleString()} chunks`;}catch(e){status.className='error';status.textContent=e.message}}
+async function health(){try{const h=await json('/health'),available=new Set(h.retrieval.available_modes);for(const option of retrieval.options)option.disabled=!available.has(option.value);retrieval.value=h.retrieval.default_mode;status.textContent=`Ready · ${Number(h.index.document_count||0).toLocaleString()} documents · ${Number(h.index.chunk_count||0).toLocaleString()} chunks · ${h.retrieval.available_modes.join(' + ')}`;}catch(e){status.className='error';status.textContent=e.message}}
 function resultCard(item){
   const card=node('article'), title=node('h2'), link=node('a',null,item.title);link.href=item.source_url||'#';link.target='_blank';link.rel='noreferrer';title.append(link);card.append(title);
   if(item.heading_path?.length)card.append(node('div','heading',item.heading_path.join(' › ')));
   card.append(node('div','excerpt',item.text));card.append(node('div','citation',item.citation));
   const button=node('button','secondary','Read article chunks');button.type='button';button.addEventListener('click',async()=>{button.disabled=true;button.textContent='Loading…';try{const d=await json(`/v1/documents/${encodeURIComponent(item.document_id)}?limit=50`);const box=node('div','chunks');for(const c of d.chunks){const heading=c.heading_path?.length?`${c.heading_path.join(' › ')}\n`:'';box.append(node('div','chunk',heading+c.text))}if(d.pagination.has_more)box.append(node('div','meta',`Showing 50 of ${d.pagination.total_chunks} chunks.`));card.append(box);button.remove()}catch(e){button.disabled=false;button.textContent='Retry article';status.className='error';status.textContent=e.message}});card.append(button);return card;
 }
-form.addEventListener('submit',async e=>{e.preventDefault();results.replaceChildren();status.className='meta';status.textContent='Searching local index…';try{const data=await json('/v1/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:query.value,mode:mode.value,limit:12})});status.textContent=`${data.results.length} results in ${data.latency_ms.toFixed(1)} ms`;for(const item of data.results)results.append(resultCard(item));}catch(err){status.className='error';status.textContent=err.message}});
+form.addEventListener('submit',async e=>{e.preventDefault();results.replaceChildren();status.className='meta';status.textContent='Searching local index…';try{const data=await json('/v1/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:query.value,retrieval_mode:retrieval.value,mode:mode.value,limit:12})});status.textContent=`${data.results.length} ${data.retrieval_mode} results in ${data.latency_ms.toFixed(1)} ms`;for(const item of data.results)results.append(resultCard(item));}catch(err){status.className='error';status.textContent=err.message}});
 health();
 </script></body></html>"""
 
@@ -78,6 +80,14 @@ health();
 class WikipediaHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
+
+    def __init__(self, server_address: tuple[str, int], handler: type[BaseHTTPRequestHandler], runtime: RetrievalRuntime):
+        self.retrieval_runtime = runtime
+        super().__init__(server_address, handler)
+
+    def server_close(self) -> None:
+        self.retrieval_runtime.close()
+        super().server_close()
 
 
 def _positive_integer(value: Any, name: str, maximum: int) -> int:
@@ -90,7 +100,7 @@ def _positive_integer(value: Any, name: str, maximum: int) -> int:
     return result
 
 
-def _search_request(database: Path, payload: dict[str, Any]) -> dict[str, Any]:
+def _search_request(runtime: RetrievalRuntime, payload: dict[str, Any]) -> dict[str, Any]:
     query = str(payload.get("query", payload.get("q", ""))).strip()
     if not query:
         raise ValueError("query must not be empty")
@@ -99,23 +109,24 @@ def _search_request(database: Path, payload: dict[str, Any]) -> dict[str, Any]:
     mode = str(payload.get("mode", "and"))
     if mode not in QUERY_MODES:
         raise ValueError(f"mode must be one of: {', '.join(QUERY_MODES)}")
+    retrieval_mode = str(payload.get("retrieval_mode", payload.get("retrieval", runtime.default_mode)))
+    if retrieval_mode not in RETRIEVAL_MODES:
+        raise ValueError(f"retrieval_mode must be one of: {', '.join(RETRIEVAL_MODES)}")
     limit = _positive_integer(payload.get("limit", 8), "limit", 50)
-    started = time.perf_counter()
-    response = search_documents(
-        database,
+    response = runtime.search(
         query,
         limit=limit,
-        mode=mode,
+        query_mode=mode,
+        retrieval_mode=retrieval_mode,
         candidate_limit=min(500, max(80, limit * 10)),
     )
     response["limit"] = limit
-    response["latency_ms"] = round((time.perf_counter() - started) * 1_000, 3)
     return response
 
 
-def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
+def make_handler(runtime: RetrievalRuntime) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
-        server_version = "OfflineWikipedia/0.4"
+        server_version = "OfflineWikipedia/0.5"
 
         def _send_bytes(self, status: int, body: bytes, content_type: str) -> None:
             self.send_response(status)
@@ -158,12 +169,15 @@ def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
                     self._send_bytes(HTTPStatus.NO_CONTENT, b"", "image/x-icon")
                     return
                 if parsed.path in {"/health", "/v1/status"}:
-                    self._send_json(HTTPStatus.OK, {"status": "ok", "index": index_status(database)})
+                    self._send_json(
+                        HTTPStatus.OK,
+                        {"status": "ok", "index": runtime.lexical_status, "retrieval": runtime.status()},
+                    )
                     return
                 if parsed.path == "/v1/search":
                     query = parse_qs(parsed.query, keep_blank_values=True)
                     payload = {key: values[-1] for key, values in query.items()}
-                    self._send_json(HTTPStatus.OK, _search_request(database, payload))
+                    self._send_json(HTTPStatus.OK, _search_request(runtime, payload))
                     return
                 prefix = "/v1/documents/"
                 if parsed.path.startswith(prefix):
@@ -173,7 +187,7 @@ def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
                     limit = _positive_integer(query.get("limit", ["20"])[-1], "limit", 200)
                     self._send_json(
                         HTTPStatus.OK,
-                        retrieve_document(database, document_id, chunk_offset=offset, chunk_limit=limit),
+                        retrieve_document(runtime.database, document_id, chunk_offset=offset, chunk_limit=limit),
                     )
                     return
                 self._error(HTTPStatus.NOT_FOUND, "not_found", "route not found")
@@ -183,17 +197,21 @@ def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
                 self._error(HTTPStatus.BAD_REQUEST, "invalid_request", str(error))
             except FileNotFoundError as error:
                 self._error(HTTPStatus.SERVICE_UNAVAILABLE, "index_unavailable", str(error))
+            except RetrievalUnavailableError as error:
+                self._error(HTTPStatus.SERVICE_UNAVAILABLE, "retrieval_unavailable", str(error))
 
         def do_POST(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
             try:
                 if urlparse(self.path).path != "/v1/search":
                     self._error(HTTPStatus.NOT_FOUND, "not_found", "route not found")
                     return
-                self._send_json(HTTPStatus.OK, _search_request(database, self._payload()))
+                self._send_json(HTTPStatus.OK, _search_request(runtime, self._payload()))
             except (TypeError, ValueError) as error:
                 self._error(HTTPStatus.BAD_REQUEST, "invalid_request", str(error))
             except FileNotFoundError as error:
                 self._error(HTTPStatus.SERVICE_UNAVAILABLE, "index_unavailable", str(error))
+            except RetrievalUnavailableError as error:
+                self._error(HTTPStatus.SERVICE_UNAVAILABLE, "retrieval_unavailable", str(error))
 
         def log_message(self, format: str, *args: object) -> None:
             print(f"{self.address_string()} - {format % args}")
@@ -201,13 +219,28 @@ def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
     return Handler
 
 
-def create_server(database: Path, host: str = "127.0.0.1", port: int = 8765) -> WikipediaHTTPServer:
+def create_server(
+    database: Path,
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    *,
+    vector_directory: Path | None = None,
+    provider_factory: Callable[[], EmbeddingProvider] | None = None,
+    default_retrieval: str = "bm25",
+    query_cache_size: int = 256,
+) -> WikipediaHTTPServer:
     """Create a read-only local Wikipedia HTTP server."""
 
-    index_status(database)
     if not 0 <= port <= 65_535:
         raise ValueError("port must be between 0 and 65535")
-    return WikipediaHTTPServer((host, port), make_handler(database.resolve()))
+    runtime = RetrievalRuntime(
+        database,
+        vector_directory=vector_directory,
+        provider_factory=provider_factory,
+        default_mode=default_retrieval,
+        query_cache_size=query_cache_size,
+    )
+    return WikipediaHTTPServer((host, port), make_handler(runtime), runtime)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -215,12 +248,30 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--vector-index", type=Path)
+    parser.add_argument("--models", type=Path, default=Path("config/models.json"))
+    parser.add_argument("--model-id")
+    parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
+    parser.add_argument("--default-retrieval", choices=RETRIEVAL_MODES, default="bm25")
+    parser.add_argument("--query-cache-size", type=int, default=256)
     return parser
 
 
 def main(argv: Iterable[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    server = create_server(args.database, args.host, args.port)
+    provider_factory = None
+    if args.vector_index is not None:
+        config = load_embedding_model_config(args.models, args.model_id)
+        provider_factory = lambda: OllamaEmbeddingClient(config, base_url=args.ollama_url)
+    server = create_server(
+        args.database,
+        args.host,
+        args.port,
+        vector_directory=args.vector_index,
+        provider_factory=provider_factory,
+        default_retrieval=args.default_retrieval,
+        query_cache_size=args.query_cache_size,
+    )
     host, port = server.server_address[:2]
     print(json.dumps({"status": "ready", "url": f"http://{host}:{port}", "database": str(args.database.resolve())}))
     try:

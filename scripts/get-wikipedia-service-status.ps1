@@ -18,12 +18,24 @@ if (Test-Path -LiteralPath $pidPath) {
 
 try {
     $health = Invoke-RestMethod -Uri "http://$($ListenAddress):$Port/health" -TimeoutSec 3
+    $retrieval = if ($health.PSObject.Properties.Name -contains 'retrieval') {
+        $health.retrieval
+    }
+    else {
+        [ordered]@{
+            default_mode = 'bm25'
+            available_modes = @('bm25')
+            bm25_ready = $true
+            legacy_service = $true
+        }
+    }
     [ordered]@{
         status = $health.status
         pid = $recordedPid
         process_valid = $processValid
         url = "http://$($ListenAddress):$Port/"
         index = $health.index
+        retrieval = $retrieval
     } | ConvertTo-Json -Depth 6
     exit 0
 }
