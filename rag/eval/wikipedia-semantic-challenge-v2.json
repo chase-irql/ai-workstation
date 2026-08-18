@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "name": "English Wikipedia BM25 semantic challenge (non-gating)",
+  "description": "Paraphrase and concept queries retained as a diagnostic challenge for future hybrid/vector retrieval. This suite is not a correctness gate for the lexical SQLite BM25 baseline.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "cases": [
+    {"id": "concept-anarchism-001", "query": "political philosophy abolish hierarchy", "query_type": "conceptual", "relevance": {"enwiki:12": 3}},
+    {"id": "fact-albedo-001", "query": "surface reflectivity incoming radiation", "query_type": "factual", "relevance": {"enwiki:39": 3}},
+    {"id": "fact-achilles-001", "query": "Greek hero Trojan War heel", "query_type": "factual", "relevance": {"enwiki:305": 3}},
+    {"id": "fact-lincoln-001", "query": "sixteenth United States president emancipation", "query_type": "factual", "relevance": {"enwiki:307": 3}},
+    {"id": "fact-algeria-001", "query": "North African country capital Algiers", "query_type": "factual", "relevance": {"enwiki:358": 3}},
+    {"id": "fact-civil-war-001", "query": "war Union Confederacy", "query_type": "factual", "relevance": {"enwiki:863": 3}},
+    {"id": "fact-apollo11-001", "query": "first humans land Moon 1969", "query_type": "factual", "relevance": {"enwiki:662": 3}},
+    {"id": "concept-apollo-program-001", "query": "NASA lunar missions program", "query_type": "conceptual", "relevance": {"enwiki:1461": 3}}
+  ]
+}

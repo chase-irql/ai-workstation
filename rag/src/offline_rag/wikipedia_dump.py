@@ -6,13 +6,16 @@ import hashlib
 import json
 import os
 import re
+import signal
 import sys
+import threading
 import time
 import urllib.parse
 import xml.etree.ElementTree as ET
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any, BinaryIO
 
 import mwparserfromhell
 
@@ -20,6 +23,20 @@ import mwparserfromhell
 SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 MEDIA_NAMESPACES = {"file", "image", "category"}
 REMOVED_TAGS = {"gallery", "ref"}
+CHECKPOINT_SCHEMA_VERSION = 2
+OUTPUT_SCHEMA_VERSION = 1
+RECOGNIZED_OUTPUTS = {
+    "documents.jsonl",
+    "chunks.jsonl",
+    "checkpoint.json",
+    "checkpoint.tmp",
+    "extraction-stats.json",
+    "extraction-stats.tmp",
+}
+
+
+class ExtractionInterrupted(RuntimeError):
+    """Raised after an interrupted extraction has been safely checkpointed."""
 
 
 @dataclass(frozen=True)
@@ -161,7 +178,12 @@ def chunk_section(text: str, max_chars: int = 3200, min_chars: int = 40) -> list
                 current = part
     if current:
         chunks.append(current)
-    return [chunk for chunk in chunks if len(chunk) >= min_chars]
+    if len(chunks) > 1 and len(chunks[-1]) < min_chars:
+        trailing = chunks[-1]
+        if len(chunks[-2]) + 2 + len(trailing) <= max_chars:
+            chunks[-2] = f"{chunks[-2]}\n\n{trailing}"
+            chunks.pop()
+    return chunks
 
 
 def page_records(page: ET.Element, dump_date: str, max_chars: int) -> tuple[Document | None, list[Chunk]]:
@@ -235,9 +257,44 @@ def iter_pages(archive: Path) -> Iterator[ET.Element]:
                 root.clear()
 
 
-def write_json_line(stream, value: object) -> None:
+def write_json_line(stream: BinaryIO, value: object) -> None:
     line = json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n"
     stream.write(line.encode("utf-8"))
+
+
+def atomic_write_json(path: Path, value: object) -> None:
+    """Durably write JSON and replace only the named destination file."""
+
+    temporary_path = path.with_suffix(".tmp")
+    with temporary_path.open("w", encoding="utf-8", newline="\n") as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    temporary_path.replace(path)
+
+
+def archive_identity(archive: Path) -> dict[str, object]:
+    """Identify an archive without rehashing a large verified dump on every resume."""
+
+    stat = archive.stat()
+    identity: dict[str, object] = {
+        "path": str(archive.resolve()),
+        "bytes": stat.st_size,
+        "mtime_ns": stat.st_mtime_ns,
+    }
+    manifest_path = archive.parent / "manifest.json"
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            entry = next((item for item in manifest.get("files", []) if item.get("name") == archive.name), None)
+            if entry and entry.get("verified") and entry.get("sha1"):
+                identity["sha1"] = str(entry["sha1"]).lower()
+                identity["manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+                identity.pop("mtime_ns", None)
+        except (OSError, ValueError, TypeError):
+            pass
+    return identity
 
 
 def save_checkpoint(
@@ -248,47 +305,157 @@ def save_checkpoint(
     document_count: int,
     redirect_count: int,
     chunk_count: int,
-    documents,
-    chunks,
+    documents: BinaryIO,
+    chunks: BinaryIO,
     completed: bool,
-) -> None:
+    stop_reason: str,
+) -> dict[str, object]:
     documents.flush()
     chunks.flush()
     os.fsync(documents.fileno())
     os.fsync(chunks.fileno())
-    state = {
-        "schema_version": 1,
-        "archive": str(archive.resolve()),
-        "archive_size": archive.stat().st_size,
-        "dump_date": dump_date,
-        "max_chunk_characters": max_chars,
+    state: dict[str, object] = {
+        "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "output_schema_version": OUTPUT_SCHEMA_VERSION,
+        "archive_identity": archive_identity(archive),
+        "configuration": {
+            "dump_date": dump_date,
+            "max_chunk_characters": max_chars,
+            "namespace": 0,
+            "chunker": "wikipedia-structural-v1",
+        },
         "documents": document_count,
         "redirects": redirect_count,
         "chunks": chunk_count,
         "documents_offset": documents.tell(),
         "chunks_offset": chunks.tell(),
         "completed": completed,
+        "stop_reason": stop_reason,
     }
-    temporary_path = checkpoint_path.with_suffix(".tmp")
-    temporary_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
-    temporary_path.replace(checkpoint_path)
+    atomic_write_json(checkpoint_path, state)
+    return state
 
 
 def load_checkpoint(checkpoint_path: Path, archive: Path, dump_date: str, max_chars: int) -> dict[str, object]:
+    """Load version-1 or version-2 state and validate all available identity fields."""
+
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Resume checkpoint not found: {checkpoint_path}")
     state = json.loads(checkpoint_path.read_text(encoding="utf-8"))
-    expected = {
-        "schema_version": 1,
-        "archive": str(archive.resolve()),
-        "archive_size": archive.stat().st_size,
-        "dump_date": dump_date,
-        "max_chunk_characters": max_chars,
-    }
-    for key, value in expected.items():
-        if state.get(key) != value:
-            raise ValueError(f"Checkpoint {key} mismatch: expected {value!r}, found {state.get(key)!r}")
+    schema_version = int(state.get("schema_version", 0))
+    if schema_version == 1:
+        expected = {
+            "archive": str(archive.resolve()),
+            "archive_size": archive.stat().st_size,
+            "dump_date": dump_date,
+            "max_chunk_characters": max_chars,
+        }
+        for key, value in expected.items():
+            if state.get(key) != value:
+                raise ValueError(f"Checkpoint {key} mismatch: expected {value!r}, found {state.get(key)!r}")
+        state.setdefault("completed", False)
+        state.setdefault("stop_reason", "archive_complete" if state["completed"] else "in_progress")
+    elif schema_version == CHECKPOINT_SCHEMA_VERSION:
+        expected_identity = archive_identity(archive)
+        found_identity = state.get("archive_identity")
+        if not isinstance(found_identity, dict):
+            raise ValueError("Checkpoint archive_identity is missing or invalid")
+        identity_keys = ("path", "bytes", "sha1", "manifest_sha256") if "sha1" in expected_identity else (
+            "path",
+            "bytes",
+            "mtime_ns",
+        )
+        for key in identity_keys:
+            if key in expected_identity and found_identity.get(key) != expected_identity[key]:
+                raise ValueError(
+                    f"Checkpoint archive identity {key} mismatch: "
+                    f"expected {expected_identity[key]!r}, found {found_identity.get(key)!r}"
+                )
+        configuration = state.get("configuration")
+        if not isinstance(configuration, dict):
+            raise ValueError("Checkpoint configuration is missing or invalid")
+        expected_configuration = {
+            "dump_date": dump_date,
+            "max_chunk_characters": max_chars,
+            "namespace": 0,
+            "chunker": "wikipedia-structural-v1",
+        }
+        for key, value in expected_configuration.items():
+            if configuration.get(key) != value:
+                raise ValueError(
+                    f"Checkpoint configuration {key} mismatch: expected {value!r}, "
+                    f"found {configuration.get(key)!r}"
+                )
+    else:
+        raise ValueError(f"Unsupported checkpoint schema version: {schema_version}")
+    for key in ("documents", "redirects", "chunks", "documents_offset", "chunks_offset"):
+        if not isinstance(state.get(key), int) or int(state[key]) < 0:
+            raise ValueError(f"Checkpoint field {key} must be a nonnegative integer")
     return state
+
+
+def extraction_stats(
+    archive: Path,
+    dump_date: str,
+    max_chars: int,
+    document_count: int,
+    redirect_count: int,
+    chunk_count: int,
+    resumed_from_documents: int,
+    started: float,
+    stop_reason: str,
+    error: BaseException | None = None,
+) -> dict[str, object]:
+    stats: dict[str, object] = {
+        "schema_version": 2,
+        "output_schema_version": OUTPUT_SCHEMA_VERSION,
+        "dump_date": dump_date,
+        "archive": str(archive.resolve()),
+        "documents": document_count,
+        "redirects": redirect_count,
+        "chunks": chunk_count,
+        "max_chunk_characters": max_chars,
+        "resumed_from_documents": resumed_from_documents,
+        "completed": stop_reason == "archive_complete",
+        "stop_reason": stop_reason,
+        "elapsed_seconds": round(time.monotonic() - started, 3),
+    }
+    if error is not None:
+        stats["error"] = {"type": type(error).__name__, "message": str(error)}
+    return stats
+
+
+def validate_extract_arguments(
+    archive: Path,
+    max_articles: int | None,
+    max_chars: int,
+    checkpoint_interval: int,
+    resume: bool,
+    force: bool,
+) -> None:
+    if not archive.is_file():
+        raise FileNotFoundError(f"Archive is not a regular file: {archive}")
+    if max_chars < 1:
+        raise ValueError("max_chars must be positive")
+    if max_articles is not None and max_articles < 1:
+        raise ValueError("max_articles must be positive when provided")
+    if checkpoint_interval < 1:
+        raise ValueError("checkpoint_interval must be positive")
+    if resume and force:
+        raise ValueError("resume and force are mutually exclusive")
+
+
+def rollback_to_checkpoint(documents: BinaryIO, chunks: BinaryIO, state: dict[str, object]) -> None:
+    documents.flush()
+    chunks.flush()
+    documents.truncate(int(state["documents_offset"]))
+    chunks.truncate(int(state["chunks_offset"]))
+    documents.seek(0, os.SEEK_END)
+    chunks.seek(0, os.SEEK_END)
+    documents.flush()
+    chunks.flush()
+    os.fsync(documents.fileno())
+    os.fsync(chunks.fileno())
 
 
 def extract(
@@ -299,19 +466,27 @@ def extract(
     max_chars: int,
     resume: bool = False,
     checkpoint_interval: int = 1000,
+    force: bool = False,
+    stop_requested: Callable[[], bool] | None = None,
 ) -> dict[str, object]:
-    if checkpoint_interval < 1:
-        raise ValueError("checkpoint_interval must be positive")
+    validate_extract_arguments(archive, max_articles, max_chars, checkpoint_interval, resume, force)
+    stop_requested = stop_requested or (lambda: False)
     output.mkdir(parents=True, exist_ok=True)
     documents_path = output / "documents.jsonl"
     chunks_path = output / "chunks.jsonl"
     checkpoint_path = output / "checkpoint.json"
+    stats_path = output / "extraction-stats.json"
+    existing = [output / name for name in RECOGNIZED_OUTPUTS if (output / name).exists()]
+    if existing and not resume and not force:
+        names = ", ".join(sorted(path.name for path in existing))
+        raise FileExistsError(f"Extraction output already exists ({names}); use --resume or --force")
     started = time.monotonic()
     document_count = 0
     redirect_count = 0
     chunk_count = 0
     resumed_from_documents = 0
     mode = "wb"
+    state: dict[str, object] | None = None
 
     if resume:
         state = load_checkpoint(checkpoint_path, archive=archive, dump_date=dump_date, max_chars=max_chars)
@@ -322,50 +497,152 @@ def extract(
         mode = "r+b"
         if not documents_path.exists() or not chunks_path.exists():
             raise FileNotFoundError("Resume output files are missing")
+        if documents_path.stat().st_size < int(state["documents_offset"]):
+            raise ValueError("documents.jsonl is shorter than its checkpointed offset")
+        if chunks_path.stat().st_size < int(state["chunks_offset"]):
+            raise ValueError("chunks.jsonl is shorter than its checkpointed offset")
+
+    if resume and state and state.get("completed") and state.get("stop_reason") == "archive_complete":
+        stats = extraction_stats(
+            archive,
+            dump_date,
+            max_chars,
+            document_count,
+            redirect_count,
+            chunk_count,
+            resumed_from_documents,
+            started,
+            "archive_complete",
+        )
+        atomic_write_json(stats_path, stats)
+        return stats
 
     with documents_path.open(mode) as documents, chunks_path.open(mode) as chunks:
         if resume:
+            assert state is not None
             documents.truncate(int(state["documents_offset"]))
             chunks.truncate(int(state["chunks_offset"]))
             documents.seek(0, os.SEEK_END)
             chunks.seek(0, os.SEEK_END)
+        else:
+            state = save_checkpoint(
+                checkpoint_path,
+                archive,
+                dump_date,
+                max_chars,
+                0,
+                0,
+                0,
+                documents,
+                chunks,
+                completed=False,
+                stop_reason="in_progress",
+            )
+        atomic_write_json(
+            stats_path,
+            extraction_stats(
+                archive,
+                dump_date,
+                max_chars,
+                document_count,
+                redirect_count,
+                chunk_count,
+                resumed_from_documents,
+                started,
+                "in_progress",
+            ),
+        )
 
         remaining_to_skip = resumed_from_documents
-        for page in iter_pages(archive):
-            if remaining_to_skip:
-                if child_text(page, "ns") == "0" and child_text(page, "id"):
-                    remaining_to_skip -= 1
-                continue
-            document, page_chunks = page_records(page, dump_date=dump_date, max_chars=max_chars)
-            if document is None:
-                continue
-            write_json_line(documents, asdict(document))
-            document_count += 1
-            if document.redirect_target:
-                redirect_count += 1
-            for chunk in page_chunks:
-                write_json_line(chunks, asdict(chunk))
-                chunk_count += 1
-            if document_count % checkpoint_interval == 0:
-                save_checkpoint(
+        stop_reason = "in_progress"
+        if max_articles is not None and document_count >= max_articles:
+            stop_reason = "article_limit"
+        else:
+            try:
+                for page in iter_pages(archive):
+                    if stop_requested():
+                        stop_reason = "interrupted"
+                        break
+                    if remaining_to_skip:
+                        if child_text(page, "ns") == "0" and child_text(page, "id"):
+                            remaining_to_skip -= 1
+                        continue
+                    if max_articles is not None and document_count >= max_articles:
+                        stop_reason = "article_limit"
+                        break
+                    document, page_chunks = page_records(page, dump_date=dump_date, max_chars=max_chars)
+                    if document is None:
+                        continue
+                    write_json_line(documents, asdict(document))
+                    document_count += 1
+                    if document.redirect_target:
+                        redirect_count += 1
+                    for chunk in page_chunks:
+                        write_json_line(chunks, asdict(chunk))
+                        chunk_count += 1
+                    if document_count % checkpoint_interval == 0:
+                        state = save_checkpoint(
+                            checkpoint_path,
+                            archive,
+                            dump_date,
+                            max_chars,
+                            document_count,
+                            redirect_count,
+                            chunk_count,
+                            documents,
+                            chunks,
+                            completed=False,
+                            stop_reason="in_progress",
+                        )
+                        print(
+                            f"extracted documents={document_count} chunks={chunk_count}",
+                            file=sys.stderr,
+                            flush=True,
+                        )
+                    if stop_requested():
+                        stop_reason = "interrupted"
+                        break
+                    if max_articles is not None and document_count >= max_articles:
+                        stop_reason = "article_limit"
+                        break
+                else:
+                    if remaining_to_skip:
+                        raise ValueError(
+                            f"Archive ended before {resumed_from_documents} checkpointed documents were found"
+                        )
+                    stop_reason = "archive_complete"
+            except BaseException as error:
+                assert state is not None
+                rollback_to_checkpoint(documents, chunks, state)
+                failed_state = save_checkpoint(
                     checkpoint_path,
                     archive,
                     dump_date,
                     max_chars,
-                    document_count,
-                    redirect_count,
-                    chunk_count,
+                    int(state["documents"]),
+                    int(state["redirects"]),
+                    int(state["chunks"]),
                     documents,
                     chunks,
                     completed=False,
+                    stop_reason="failed",
                 )
-                print(f"extracted documents={document_count} chunks={chunk_count}", file=sys.stderr, flush=True)
-            if max_articles is not None and document_count >= max_articles:
-                break
+                failed_stats = extraction_stats(
+                    archive,
+                    dump_date,
+                    max_chars,
+                    int(failed_state["documents"]),
+                    int(failed_state["redirects"]),
+                    int(failed_state["chunks"]),
+                    resumed_from_documents,
+                    started,
+                    "failed",
+                    error,
+                )
+                atomic_write_json(stats_path, failed_stats)
+                raise
 
-        if remaining_to_skip:
-            raise ValueError(f"Archive ended before {resumed_from_documents} checkpointed documents were found")
-        save_checkpoint(
+        final_state = save_checkpoint(
             checkpoint_path,
             archive,
             dump_date,
@@ -375,21 +652,24 @@ def extract(
             chunk_count,
             documents,
             chunks,
-            completed=True,
+            completed=stop_reason == "archive_complete",
+            stop_reason=stop_reason,
         )
 
-    stats = {
-        "schema_version": 1,
-        "dump_date": dump_date,
-        "archive": str(archive.resolve()),
-        "documents": document_count,
-        "redirects": redirect_count,
-        "chunks": chunk_count,
-        "max_chunk_characters": max_chars,
-        "resumed_from_documents": resumed_from_documents,
-        "elapsed_seconds": round(time.monotonic() - started, 3),
-    }
-    (output / "extraction-stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
+    stats = extraction_stats(
+        archive,
+        dump_date,
+        max_chars,
+        int(final_state["documents"]),
+        int(final_state["redirects"]),
+        int(final_state["chunks"]),
+        resumed_from_documents,
+        started,
+        stop_reason,
+    )
+    atomic_write_json(stats_path, stats)
+    if stop_reason == "interrupted":
+        raise ExtractionInterrupted("Wikipedia extraction interrupted after a durable checkpoint")
     return stats
 
 
@@ -401,21 +681,37 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-articles", type=int)
     parser.add_argument("--max-chars", type=int, default=3200)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--force", action="store_true")
     parser.add_argument("--checkpoint-interval", type=int, default=1000)
     return parser
 
 
 def main(argv: Iterable[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    stats = extract(
-        archive=args.archive,
-        output=args.output,
-        dump_date=args.dump_date,
-        max_articles=args.max_articles,
-        max_chars=args.max_chars,
-        resume=args.resume,
-        checkpoint_interval=args.checkpoint_interval,
-    )
+    shutdown = threading.Event()
+    previous_handler = signal.getsignal(signal.SIGINT)
+
+    def request_shutdown(_signum: int, _frame: Any) -> None:
+        shutdown.set()
+
+    signal.signal(signal.SIGINT, request_shutdown)
+    try:
+        stats = extract(
+            archive=args.archive,
+            output=args.output,
+            dump_date=args.dump_date,
+            max_articles=args.max_articles,
+            max_chars=args.max_chars,
+            resume=args.resume,
+            checkpoint_interval=args.checkpoint_interval,
+            force=args.force,
+            stop_requested=shutdown.is_set,
+        )
+    except ExtractionInterrupted as error:
+        print(str(error), file=sys.stderr)
+        return 130
+    finally:
+        signal.signal(signal.SIGINT, previous_handler)
     print(json.dumps(stats, indent=2))
     return 0
 

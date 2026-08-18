@@ -3,12 +3,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 
 
 CHECKSUM_RE = re.compile(r"^([0-9a-fA-F]{40})\s+\*?(.+)$")
+DUMP_DATE_RE = re.compile(r"^\d{8}$")
 
 
 def sha1(path: Path) -> str:
@@ -20,22 +22,46 @@ def sha1(path: Path) -> str:
 
 
 def expected_checksums(path: Path) -> dict[str, str]:
+    if not path.is_file():
+        raise FileNotFoundError(path)
     values: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
         match = CHECKSUM_RE.match(line)
-        if match:
-            values[match.group(2)] = match.group(1).lower()
+        if not match:
+            raise ValueError(f"Malformed checksum entry in {path} at line {line_number}")
+        name = match.group(2)
+        digest = match.group(1).lower()
+        if name in values and values[name] != digest:
+            raise ValueError(f"Conflicting checksum entries for {name}")
+        values[name] = digest
     return values
 
 
+def atomic_write_json(path: Path, value: object) -> None:
+    temporary = path.with_suffix(".partial")
+    with temporary.open("w", encoding="utf-8", newline="\n") as stream:
+        json.dump(value, stream, indent=2)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    temporary.replace(path)
+
+
 def create_manifest(directory: Path, dump_date: str) -> dict[str, object]:
+    if not directory.is_dir():
+        raise NotADirectoryError(directory)
+    if not DUMP_DATE_RE.fullmatch(dump_date):
+        raise ValueError("dump_date must contain exactly eight digits")
     prefix = f"enwiki-{dump_date}"
     names = [
         f"{prefix}-pages-articles-multistream.xml.bz2",
         f"{prefix}-pages-articles-multistream-index.txt.bz2",
     ]
     checksum_name = f"{prefix}-sha1sums.txt"
-    checksums = expected_checksums(directory / checksum_name)
+    checksum_path = directory / checksum_name
+    checksums = expected_checksums(checksum_path)
     files = []
     for name in names:
         path = directory / name
@@ -55,11 +81,13 @@ def create_manifest(directory: Path, dump_date: str) -> dict[str, object]:
         "source": f"https://dumps.wikimedia.org/enwiki/{dump_date}/",
         "format": "MediaWiki XML, concatenated bzip2 multistream",
         "verified_at": datetime.now(timezone.utc).isoformat(),
+        "checksum_file": {
+            "name": checksum_name,
+            "sha256": hashlib.sha256(checksum_path.read_bytes()).hexdigest(),
+        },
         "files": files,
     }
-    temporary = directory / "manifest.json.partial"
-    temporary.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    temporary.replace(directory / "manifest.json")
+    atomic_write_json(directory / "manifest.json", manifest)
     return manifest
 
 

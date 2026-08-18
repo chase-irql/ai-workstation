@@ -1,0 +1,60 @@
+{
+  "schema_version": 2,
+  "name": "English Wikipedia lexical BM25 verification",
+  "description": "Gating smoke suite for the CPU-only lexical baseline. Semantic paraphrases are evaluated separately in wikipedia-semantic-challenge-v2.json.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "cases": [
+    {
+      "id": "lookup-anarchism-001",
+      "query": "What is anarchism?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:12": 3}
+    },
+    {
+      "id": "fact-albedo-001",
+      "query": "What is albedo?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:39": 3}
+    },
+    {
+      "id": "fact-achilles-001",
+      "query": "Who was Achilles?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:305": 3}
+    },
+    {
+      "id": "fact-lincoln-001",
+      "query": "Who was Abraham Lincoln?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:307": 3}
+    },
+    {
+      "id": "fact-algeria-001",
+      "query": "What is Algeria?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:358": 3}
+    },
+    {
+      "id": "fact-civil-war-001",
+      "query": "What was the American Civil War?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:863": 3}
+    },
+    {
+      "id": "fact-apollo11-001",
+      "query": "What was Apollo 11?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:662": 3}
+    },
+    {
+      "id": "lookup-apollo-program-001",
+      "query": "What was the Apollo program?",
+      "query_type": "entity_lookup",
+      "relevance": {"enwiki:1461": 3}
+    }
+  ]
+}

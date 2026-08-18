@@ -1,1 +1,2 @@
 mwparserfromhell==0.7.2
+zstandard==0.25.0

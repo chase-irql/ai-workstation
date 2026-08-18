@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [ValidateRange(100, 1000000)][int]$MaxArticles = 10000,
-    [ValidatePattern('^\d{8}$')][string]$DumpDate = '20260801'
+    [ValidatePattern('^\d{8}$')][string]$DumpDate = '20260801',
+    [switch]$Force
 )
 
 . (Join-Path $PSScriptRoot 'common.ps1')
@@ -15,12 +16,20 @@ $database = Join-Path $root "indexes\wikipedia\enwiki-$DumpDate-pilot-$MaxArticl
 $runtime = Join-Path $root 'runtime\wikipedia-pilot'
 New-Item -ItemType Directory -Force -Path $processed, (Split-Path -Parent $database), $runtime | Out-Null
 
-& $python -m offline_rag.wikipedia_dump --archive $archive --output $processed --dump-date $DumpDate --max-articles $MaxArticles `
-    2>&1 | Tee-Object -FilePath (Join-Path $runtime "extract-$MaxArticles.log")
+$extractArguments = @(
+    '-m', 'offline_rag.wikipedia_dump',
+    '--archive', $archive,
+    '--output', $processed,
+    '--dump-date', $DumpDate,
+    '--max-articles', $MaxArticles
+)
+if ($Force) { $extractArguments += '--force' }
+& $python @extractArguments 2>&1 | Tee-Object -FilePath (Join-Path $runtime "extract-$MaxArticles.log")
 if ($LASTEXITCODE -ne 0) { throw 'Wikipedia pilot extraction failed.' }
 
-& $python -m offline_rag.bm25 build --input $processed --database $database `
-    2>&1 | Tee-Object -FilePath (Join-Path $runtime "index-$MaxArticles.log")
+$indexArguments = @('-m', 'offline_rag.bm25', 'build', '--input', $processed, '--database', $database)
+if ($Force) { $indexArguments += '--overwrite' }
+& $python @indexArguments 2>&1 | Tee-Object -FilePath (Join-Path $runtime "index-$MaxArticles.log")
 if ($LASTEXITCODE -ne 0) { throw 'Wikipedia pilot BM25 indexing failed.' }
 
 Write-Output "Pilot database: $database"
