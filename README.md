@@ -61,4 +61,11 @@ The CPU-only extraction and BM25 pilot does not load Ollama or use the GPU:
 .\scripts\evaluate-wikipedia.ps1
 ```
 
+For the complete CPU-only extraction and BM25 build:
+
+```powershell
+.\scripts\run-wikipedia-full.ps1
+.\scripts\get-wikipedia-full-status.ps1
+```
+
 See `docs/rag-phase-2-results.md` for the verified-corpus and retrieval results.

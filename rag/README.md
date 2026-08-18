@@ -19,3 +19,14 @@ From `D:\ai-workstation`:
 ```
 
 Generated documents live under `corpora/processed/wikipedia/`; search indexes live under `indexes/wikipedia/`. Both are excluded from Git and can be rebuilt from the verified raw dump.
+
+## Full Wikipedia build
+
+The full build extracts all main-namespace articles and then creates the complete BM25 database. It does not load an LLM or require the GPU.
+
+```powershell
+.\scripts\run-wikipedia-full.ps1
+.\scripts\get-wikipedia-full-status.ps1
+```
+
+The full corpus is written to `corpora/processed/wikipedia/enwiki-20260801/full/`; the completed index will be `indexes/wikipedia/enwiki-20260801-full.sqlite3`.
