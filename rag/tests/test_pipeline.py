@@ -51,6 +51,26 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(results[0]["title"], "Apollo Guidance Computer")
             self.assertIn("Wikipedia — Apollo Guidance Computer § Software", results[0]["citation"])
 
+    def test_extraction_can_resume_from_a_durable_checkpoint(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "fixture.xml.bz2"
+            archive.write_bytes(bz2.compress(FIXTURE.encode("utf-8")))
+            output = root / "processed"
+
+            initial = extract(archive, output, "20260801", max_articles=1, max_chars=3200)
+            resumed = extract(archive, output, "20260801", max_articles=None, max_chars=3200, resume=True)
+
+            documents = (output / "documents.jsonl").read_text(encoding="utf-8").splitlines()
+            chunks = (output / "chunks.jsonl").read_text(encoding="utf-8").splitlines()
+            checkpoint = json.loads((output / "checkpoint.json").read_text(encoding="utf-8"))
+            self.assertEqual(initial["documents"], 1)
+            self.assertEqual(resumed["resumed_from_documents"], 1)
+            self.assertEqual(resumed["documents"], 2)
+            self.assertEqual(len(documents), 2)
+            self.assertEqual(len(chunks), 2)
+            self.assertTrue(checkpoint["completed"])
+
 
 if __name__ == "__main__":
     unittest.main()

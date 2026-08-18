@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [ValidatePattern('^\d{8}$')][string]$DumpDate = '20260801'
+    [ValidatePattern('^\d{8}$')][string]$DumpDate = '20260801',
+    [switch]$Resume
 )
 
 . (Join-Path $PSScriptRoot 'common.ps1')
@@ -17,14 +18,23 @@ $extractLog = Join-Path $runtime 'extract.log'
 $indexLog = Join-Path $runtime 'index.log'
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) { throw "Wikipedia archive not found: $archive" }
-if (Test-Path -LiteralPath $processed) { throw "Full extraction output already exists: $processed" }
+if ($Resume -and -not (Test-Path -LiteralPath (Join-Path $processed 'checkpoint.json'))) {
+    throw "Resume checkpoint not found under: $processed"
+}
+if (-not $Resume -and (Test-Path -LiteralPath $processed)) { throw "Full extraction output already exists: $processed" }
 if (Test-Path -LiteralPath $database) { throw "Full BM25 database already exists: $database" }
 
 New-Item -ItemType Directory -Force -Path $processed, (Split-Path -Parent $database), $runtime | Out-Null
 
 try {
-    & $python -m offline_rag.wikipedia_dump --archive $archive --output $processed --dump-date $DumpDate `
-        2>&1 | Tee-Object -FilePath $extractLog
+    $extractArguments = @(
+        '-m', 'offline_rag.wikipedia_dump',
+        '--archive', $archive,
+        '--output', $processed,
+        '--dump-date', $DumpDate
+    )
+    if ($Resume) { $extractArguments += '--resume' }
+    & $python @extractArguments 2>&1 | Tee-Object -FilePath $extractLog
     if ($LASTEXITCODE -ne 0) { throw 'Full Wikipedia extraction failed.' }
 
     & $python -m offline_rag.bm25 build --input $processed --database $database `

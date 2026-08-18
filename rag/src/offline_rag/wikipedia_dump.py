@@ -4,6 +4,7 @@ import argparse
 import bz2
 import hashlib
 import json
+import os
 import re
 import sys
 import time
@@ -235,7 +236,59 @@ def iter_pages(archive: Path) -> Iterator[ET.Element]:
 
 
 def write_json_line(stream, value: object) -> None:
-    stream.write(json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n")
+    line = json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n"
+    stream.write(line.encode("utf-8"))
+
+
+def save_checkpoint(
+    checkpoint_path: Path,
+    archive: Path,
+    dump_date: str,
+    max_chars: int,
+    document_count: int,
+    redirect_count: int,
+    chunk_count: int,
+    documents,
+    chunks,
+    completed: bool,
+) -> None:
+    documents.flush()
+    chunks.flush()
+    os.fsync(documents.fileno())
+    os.fsync(chunks.fileno())
+    state = {
+        "schema_version": 1,
+        "archive": str(archive.resolve()),
+        "archive_size": archive.stat().st_size,
+        "dump_date": dump_date,
+        "max_chunk_characters": max_chars,
+        "documents": document_count,
+        "redirects": redirect_count,
+        "chunks": chunk_count,
+        "documents_offset": documents.tell(),
+        "chunks_offset": chunks.tell(),
+        "completed": completed,
+    }
+    temporary_path = checkpoint_path.with_suffix(".tmp")
+    temporary_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    temporary_path.replace(checkpoint_path)
+
+
+def load_checkpoint(checkpoint_path: Path, archive: Path, dump_date: str, max_chars: int) -> dict[str, object]:
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(f"Resume checkpoint not found: {checkpoint_path}")
+    state = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+    expected = {
+        "schema_version": 1,
+        "archive": str(archive.resolve()),
+        "archive_size": archive.stat().st_size,
+        "dump_date": dump_date,
+        "max_chunk_characters": max_chars,
+    }
+    for key, value in expected.items():
+        if state.get(key) != value:
+            raise ValueError(f"Checkpoint {key} mismatch: expected {value!r}, found {state.get(key)!r}")
+    return state
 
 
 def extract(
@@ -244,19 +297,45 @@ def extract(
     dump_date: str,
     max_articles: int | None,
     max_chars: int,
+    resume: bool = False,
+    checkpoint_interval: int = 1000,
 ) -> dict[str, object]:
+    if checkpoint_interval < 1:
+        raise ValueError("checkpoint_interval must be positive")
     output.mkdir(parents=True, exist_ok=True)
     documents_path = output / "documents.jsonl"
     chunks_path = output / "chunks.jsonl"
+    checkpoint_path = output / "checkpoint.json"
     started = time.monotonic()
     document_count = 0
     redirect_count = 0
     chunk_count = 0
+    resumed_from_documents = 0
+    mode = "wb"
 
-    with documents_path.open("w", encoding="utf-8", newline="\n") as documents, chunks_path.open(
-        "w", encoding="utf-8", newline="\n"
-    ) as chunks:
+    if resume:
+        state = load_checkpoint(checkpoint_path, archive=archive, dump_date=dump_date, max_chars=max_chars)
+        document_count = int(state["documents"])
+        redirect_count = int(state["redirects"])
+        chunk_count = int(state["chunks"])
+        resumed_from_documents = document_count
+        mode = "r+b"
+        if not documents_path.exists() or not chunks_path.exists():
+            raise FileNotFoundError("Resume output files are missing")
+
+    with documents_path.open(mode) as documents, chunks_path.open(mode) as chunks:
+        if resume:
+            documents.truncate(int(state["documents_offset"]))
+            chunks.truncate(int(state["chunks_offset"]))
+            documents.seek(0, os.SEEK_END)
+            chunks.seek(0, os.SEEK_END)
+
+        remaining_to_skip = resumed_from_documents
         for page in iter_pages(archive):
+            if remaining_to_skip:
+                if child_text(page, "ns") == "0" and child_text(page, "id"):
+                    remaining_to_skip -= 1
+                continue
             document, page_chunks = page_records(page, dump_date=dump_date, max_chars=max_chars)
             if document is None:
                 continue
@@ -267,10 +346,37 @@ def extract(
             for chunk in page_chunks:
                 write_json_line(chunks, asdict(chunk))
                 chunk_count += 1
-            if document_count % 1000 == 0:
+            if document_count % checkpoint_interval == 0:
+                save_checkpoint(
+                    checkpoint_path,
+                    archive,
+                    dump_date,
+                    max_chars,
+                    document_count,
+                    redirect_count,
+                    chunk_count,
+                    documents,
+                    chunks,
+                    completed=False,
+                )
                 print(f"extracted documents={document_count} chunks={chunk_count}", file=sys.stderr, flush=True)
             if max_articles is not None and document_count >= max_articles:
                 break
+
+        if remaining_to_skip:
+            raise ValueError(f"Archive ended before {resumed_from_documents} checkpointed documents were found")
+        save_checkpoint(
+            checkpoint_path,
+            archive,
+            dump_date,
+            max_chars,
+            document_count,
+            redirect_count,
+            chunk_count,
+            documents,
+            chunks,
+            completed=True,
+        )
 
     stats = {
         "schema_version": 1,
@@ -280,6 +386,7 @@ def extract(
         "redirects": redirect_count,
         "chunks": chunk_count,
         "max_chunk_characters": max_chars,
+        "resumed_from_documents": resumed_from_documents,
         "elapsed_seconds": round(time.monotonic() - started, 3),
     }
     (output / "extraction-stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
@@ -293,6 +400,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dump-date", required=True)
     parser.add_argument("--max-articles", type=int)
     parser.add_argument("--max-chars", type=int, default=3200)
+    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--checkpoint-interval", type=int, default=1000)
     return parser
 
 
@@ -304,6 +413,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         dump_date=args.dump_date,
         max_articles=args.max_articles,
         max_chars=args.max_chars,
+        resume=args.resume,
+        checkpoint_interval=args.checkpoint_interval,
     )
     print(json.dumps(stats, indent=2))
     return 0

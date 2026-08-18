@@ -30,3 +30,4 @@ The full build extracts all main-namespace articles and then creates the complet
 ```
 
 The full corpus is written to `corpora/processed/wikipedia/enwiki-20260801/full/`; the completed index will be `indexes/wikipedia/enwiki-20260801-full.sqlite3`.
+Extraction writes a durable checkpoint every 1,000 articles. After an interruption, continue with `.\scripts\run-wikipedia-full.ps1 -Resume`.

@@ -68,4 +68,6 @@ For the complete CPU-only extraction and BM25 build:
 .\scripts\get-wikipedia-full-status.ps1
 ```
 
+The extractor checkpoints every 1,000 articles. Use `.\scripts\run-wikipedia-full.ps1 -Resume` after a reboot or interruption.
+
 See `docs/rag-phase-2-results.md` for the verified-corpus and retrieval results.
