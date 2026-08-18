@@ -82,11 +82,18 @@ Requests are bounded, the service has no write endpoints, and it binds only to l
 
 ## Agent access through MCP
 
-The same read-only index is exposed as a local stdio MCP server with three tools:
+The same read-only index is exposed as a local stdio MCP server with four tools:
 
 - `search_wikipedia` returns distinct, cited Wikipedia documents;
-- `retrieve_wikipedia_document` returns an ordered page of chunks from a selected document;
+- `retrieve_wikipedia_context` expands one search hit with a small neighboring window;
+- `retrieve_wikipedia_document` returns a deliberately small ordered page from a selected document;
 - `wikipedia_index_status` reports the corpus version, build identity, and counts.
+
+Exact-title promotion returns the article's lead chunk instead of an arbitrary short section. Agents are instructed to use the evidence already present in search results and prefer neighboring-context retrieval, preventing whole-article reads from consuming the model context window.
+
+For strict AND queries of four or more terms that lack an exact-title hit, the agent/API layer performs bounded leave-one-term-out retrieval and reciprocal-rank fusion. If a candidate title is contained in the original query, it is resolved back to the canonical lead passage. This recovers from one hallucinated or overly specific term while preserving strict deterministic BM25 as the primary query. Oversized MCP context requests are safely clamped and reported instead of wasting context or forcing a correctable failed tool call.
+
+The human-facing CLI and HTTP API retain explicit `or` mode. It is intentionally omitted from the MCP tool schema: unrestricted OR over tens of millions of chunks can be dominated by a common term and exceed an agent timeout. Agents use strict AND, phrase, or exact search plus the bounded relaxation above.
 
 Configure both installed agent harnesses from the repository root:
 
@@ -95,5 +102,15 @@ Configure both installed agent harnesses from the repository root:
 ```
 
 The root `opencode.json` is the operational OpenCode configuration. Codex registration is written by its CLI to the current user's Codex configuration. Neither path changes the immutable benchmark profiles under `config/harnesses/`. The MCP server starts on demand, reads the published SQLite database in read-only mode, and does not load Ollama or use the GPU.
+
+The model-and-tool evaluation verifies more than process exit: it requires the model to call the expected MCP tools, retrieve stable document IDs, include expected facts, emit a Wikipedia citation, and make no failed tool calls. It selects the highest-priority general-agent model from `config/models.json` unless `-ModelId` is supplied:
+
+```powershell
+.\scripts\evaluate-wikipedia-agent.ps1
+.\scripts\evaluate-wikipedia-agent.ps1 -ModelId glm-4.7-flash -Unload
+.\scripts\evaluate-wikipedia-agent.ps1 -CaseId apollo-guidance-computer -Unload
+```
+
+The versioned prompts are in `rag/eval/wikipedia-agent-v1.json`; generated evidence is retained under the ignored `results/rag/agent-e2e/` directory.
 
 See `docs/rag-record-schema.md` for the common record contract and `docs/wikipedia-multistream-design.md` for the parallel extraction design and recovery model.

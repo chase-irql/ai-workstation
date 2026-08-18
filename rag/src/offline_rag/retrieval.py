@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from .bm25 import read_index_metadata
+from .bm25 import plan_query, read_index_metadata, search
 
 
 def _connect_read_only(database: Path) -> sqlite3.Connection:
@@ -52,6 +52,96 @@ def index_status(database: Path) -> dict[str, Any]:
         "chunk_count": metadata.get("chunk_count"),
         "tokenizer": metadata.get("tokenizer"),
         "query_configuration": metadata.get("query_configuration"),
+    }
+
+
+def search_documents(
+    database: Path,
+    query: str,
+    *,
+    limit: int = 8,
+    mode: str = "and",
+    candidate_limit: int = 160,
+) -> dict[str, Any]:
+    """Return distinct documents with bounded query relaxation when needed.
+
+    Strict AND remains the primary retrieval. If a query of four or more terms
+    has no exact-title hit, leave-one-term-out variants are fused using RRF.
+    A candidate whose title terms are contained in the original query is then
+    resolved through exact-title search so agents receive its lead passage.
+    This recovers from one guessed or overly specific term without degrading
+    short exact entity queries into unrestricted OR searches.
+    """
+
+    if not 1 <= limit <= 50:
+        raise ValueError("limit must be between 1 and 50")
+    if candidate_limit < limit:
+        raise ValueError("candidate_limit must be at least limit")
+    original_plan = plan_query(query, mode)
+    primary = search(database, query, limit=candidate_limit, mode=mode)
+    variants: list[tuple[str, list[dict[str, object]], float]] = [(query, primary, 1.0)]
+    relaxed = False
+    if (
+        mode == "and"
+        and len(original_plan.normalized_terms) >= 4
+        and not any(item.get("ranking_reason") == "exact_title" for item in primary)
+    ):
+        relaxed = True
+        terms = original_plan.normalized_terms
+        for dropped_index in range(min(len(terms), 6)):
+            variant = " ".join(term for index, term in enumerate(terms) if index != dropped_index)
+            variants.append((variant, search(database, variant, limit=candidate_limit, mode="and"), 0.8))
+
+    scores: dict[str, float] = {}
+    representatives: dict[str, dict[str, object]] = {}
+    matched_variants: dict[str, set[str]] = {}
+    for variant, candidates, weight in variants:
+        seen: set[str] = set()
+        document_rank = 0
+        for candidate in candidates:
+            document_id = str(candidate["document_id"])
+            if document_id in seen:
+                continue
+            seen.add(document_id)
+            document_rank += 1
+            scores[document_id] = scores.get(document_id, 0.0) + weight / (60.0 + document_rank)
+            matched_variants.setdefault(document_id, set()).add(variant)
+            representatives.setdefault(document_id, candidate)
+
+    original_terms = set(original_plan.normalized_terms)
+    for document_id, representative in list(representatives.items()):
+        title = str(representative["title"])
+        try:
+            title_terms = set(plan_query(title, "and").normalized_terms)
+        except ValueError:
+            continue
+        if len(title_terms) < 2 or not title_terms.issubset(original_terms):
+            continue
+        exact = search(database, title, limit=1, mode="and")
+        if exact and str(exact[0]["document_id"]) == document_id:
+            promoted = dict(exact[0])
+            promoted["ranking_reason"] = "relaxed_exact_title" if relaxed else "exact_title"
+            representatives[document_id] = promoted
+            scores[document_id] += 1.0
+
+    ordered_ids = sorted(scores, key=lambda item: (-scores[item], item))[:limit]
+    results: list[dict[str, object]] = []
+    for document_id in ordered_ids:
+        item = dict(representatives[document_id])
+        item["matched_query"] = item.get("query")
+        item["query"] = query
+        item["query_mode"] = mode
+        item["fusion_score"] = scores[document_id]
+        item["matched_variants"] = sorted(matched_variants[document_id])
+        results.append(item)
+    return {
+        "query": query,
+        "mode": mode,
+        "ranking_unit": "document",
+        "query_relaxed": relaxed,
+        "variants_searched": len(variants),
+        "candidate_chunks": sum(len(candidates) for _, candidates, _ in variants),
+        "results": results,
     }
 
 
@@ -186,3 +276,88 @@ def retrieve_document(
             "has_more": chunk_offset + len(chunks) < total_chunks,
         },
     }
+
+
+def retrieve_chunk_context(
+    database: Path,
+    chunk_id: str,
+    *,
+    before: int = 1,
+    after: int = 1,
+) -> dict[str, Any]:
+    """Retrieve a search hit and a small number of neighboring chunks.
+
+    This is the preferred agent-facing expansion operation: it keeps context
+    bounded while preserving the article sequence around an already relevant
+    search result.
+    """
+
+    if not chunk_id.strip():
+        raise ValueError("chunk_id must not be empty")
+    if not 0 <= before <= 5:
+        raise ValueError("before must be between 0 and 5")
+    if not 0 <= after <= 5:
+        raise ValueError("after must be between 0 and 5")
+
+    metadata = read_index_metadata(database)
+    schema_version = int(metadata.get("schema_version", 1))
+    connection = _connect_read_only(database)
+    try:
+        if schema_version >= 2:
+            anchor = connection.execute(
+                "SELECT document_id, ordinal FROM chunks WHERE chunk_instance_id = ?",
+                (chunk_id,),
+            ).fetchone()
+            ordinal = int(anchor["ordinal"]) if anchor is not None else 0
+        else:
+            anchor = connection.execute(
+                """
+                SELECT row_id, document_id, section_index, chunk_index
+                FROM chunks WHERE chunk_id = ?
+                """,
+                (chunk_id,),
+            ).fetchone()
+            ordinal = (
+                int(
+                    connection.execute(
+                        """
+                        SELECT count(*) FROM chunks
+                        WHERE document_id = ? AND (
+                            section_index < ? OR
+                            (section_index = ? AND chunk_index < ?) OR
+                            (section_index = ? AND chunk_index = ? AND row_id < ?)
+                        )
+                        """,
+                        (
+                            anchor["document_id"],
+                            anchor["section_index"],
+                            anchor["section_index"],
+                            anchor["chunk_index"],
+                            anchor["section_index"],
+                            anchor["chunk_index"],
+                            anchor["row_id"],
+                        ),
+                    ).fetchone()[0]
+                )
+                if anchor is not None
+                else 0
+            )
+    finally:
+        connection.close()
+    if anchor is None:
+        raise KeyError(chunk_id)
+
+    offset = max(0, ordinal - before)
+    page = retrieve_document(
+        database,
+        str(anchor["document_id"]),
+        chunk_offset=offset,
+        chunk_limit=before + after + 1,
+    )
+    page["context"] = {
+        "anchor_chunk_id": chunk_id,
+        "anchor_ordinal": ordinal,
+        "before": before,
+        "after": after,
+    }
+    return page

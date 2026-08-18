@@ -31,7 +31,12 @@ class MCPServerTests(unittest.TestCase):
             tools = asyncio.run(server.list_tools())
             self.assertEqual(
                 {tool.name for tool in tools},
-                {"search_wikipedia", "retrieve_wikipedia_document", "wikipedia_index_status"},
+                {
+                    "search_wikipedia",
+                    "retrieve_wikipedia_context",
+                    "retrieve_wikipedia_document",
+                    "wikipedia_index_status",
+                },
             )
 
             result = asyncio.run(
@@ -50,6 +55,25 @@ class MCPServerTests(unittest.TestCase):
                 )
             )
             self.assertEqual(document.structured_content["document"]["title"], "Apollo Guidance Computer")
+
+            context = asyncio.run(
+                server.call_tool(
+                    "retrieve_wikipedia_context",
+                    {"chunk_id": result.structured_content["results"][0]["chunk_id"], "after": 1},
+                )
+            )
+            self.assertEqual(
+                context.structured_content["context"]["anchor_chunk_id"],
+                result.structured_content["results"][0]["chunk_id"],
+            )
+            clamped = asyncio.run(
+                server.call_tool(
+                    "retrieve_wikipedia_context",
+                    {"chunk_id": result.structured_content["results"][0]["chunk_id"], "before": 50},
+                )
+            )
+            self.assertFalse(clamped.is_error)
+            self.assertTrue(clamped.structured_content["context"]["clamped"])
 
     def test_stdio_transport_round_trip(self):
         with tempfile.TemporaryDirectory() as directory:

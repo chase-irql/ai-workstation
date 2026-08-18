@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .bm25 import QUERY_MODES, search
-from .retrieval import index_status, retrieve_document
+from .bm25 import QUERY_MODES
+from .retrieval import index_status, retrieve_document, search_documents
 
 
 MAX_REQUEST_BYTES = 64 * 1024
@@ -101,32 +101,21 @@ def _search_request(database: Path, payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"mode must be one of: {', '.join(QUERY_MODES)}")
     limit = _positive_integer(payload.get("limit", 8), "limit", 50)
     started = time.perf_counter()
-    candidate_limit = min(500, max(limit, limit * 10))
-    candidates = search(database, query, limit=candidate_limit, mode=mode)
-    results: list[dict[str, object]] = []
-    seen_documents: set[str] = set()
-    for candidate in candidates:
-        document_id = str(candidate["document_id"])
-        if document_id in seen_documents:
-            continue
-        seen_documents.add(document_id)
-        results.append(candidate)
-        if len(results) == limit:
-            break
-    return {
-        "query": query,
-        "mode": mode,
-        "limit": limit,
-        "ranking_unit": "document",
-        "candidate_chunks": len(candidates),
-        "latency_ms": round((time.perf_counter() - started) * 1_000, 3),
-        "results": results,
-    }
+    response = search_documents(
+        database,
+        query,
+        limit=limit,
+        mode=mode,
+        candidate_limit=min(500, max(80, limit * 10)),
+    )
+    response["limit"] = limit
+    response["latency_ms"] = round((time.perf_counter() - started) * 1_000, 3)
+    return response
 
 
 def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
-        server_version = "OfflineWikipedia/0.3"
+        server_version = "OfflineWikipedia/0.4"
 
         def _send_bytes(self, status: int, body: bytes, content_type: str) -> None:
             self.send_response(status)

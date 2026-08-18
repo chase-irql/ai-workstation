@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from _fixtures import write_archive
 from offline_rag.bm25 import build_index, plan_query, read_index_metadata, search
+from offline_rag.retrieval import search_documents
 from offline_rag.verify import verify_database
 from offline_rag.wikipedia_dump import extract
 
@@ -132,6 +133,18 @@ class BM25Tests(unittest.TestCase):
             results = search(database, "What was the Apollo Guidance Computer?", limit=5)
             self.assertEqual(results[0]["document_id"], "enwiki:100")
             self.assertEqual(results[0]["ranking_reason"], "exact_title")
+            self.assertEqual(results[0]["ordinal"], 0)
+
+    def test_document_search_relaxes_one_bad_term_and_returns_lead(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            processed, database = self.prepare(root)
+            build_index(processed, database)
+            response = search_documents(database, "Apollo Guidance Computer IBM", limit=3)
+            self.assertTrue(response["query_relaxed"])
+            self.assertEqual(response["results"][0]["document_id"], "enwiki:100")
+            self.assertEqual(response["results"][0]["ordinal"], 0)
+            self.assertEqual(response["results"][0]["ranking_reason"], "relaxed_exact_title")
 
     def test_technical_terms_search_as_documented(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -86,6 +86,14 @@ Give Codex and OpenCode on-demand access to the same index through local MCP too
 
 This does not start an LLM. The MCP process is launched by an agent only when the tools are needed.
 
+Run the model-backed retrieval gate with the default general-agent model from `config/models.json`:
+
+```powershell
+.\scripts\evaluate-wikipedia-agent.ps1 -Unload
+```
+
+The gate verifies actual MCP calls, stable Wikipedia document IDs, expected answer facts, exact citations, and failed-tool count. `-Unload` releases the model from Ollama afterward.
+
 The multistream extractor uses deterministic compressed shards and block-level resume. Use `.\scripts\run-wikipedia-full.ps1 -Resume` after a reboot or interruption.
 
-See `docs/rag-phase-2-results.md` for the verified-corpus and retrieval results.
+See `docs/rag-phase-2-results.md` for the verified-corpus results and `docs/rag-agent-results.md` for the model-and-tool verification.

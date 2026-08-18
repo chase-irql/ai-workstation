@@ -1,5 +1,6 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$env:PYTHONUTF8 = '1'
 
 function Get-ProjectRoot {
     return (Split-Path -Parent $PSScriptRoot)
@@ -49,4 +50,3 @@ function Get-OllamaRunningModels {
         return $null
     }
 }
-

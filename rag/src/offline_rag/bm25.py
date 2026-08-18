@@ -621,7 +621,7 @@ def _search_v2(
             select_sql
             + """
             WHERE chunks_fts MATCH ? AND d.title = ? COLLATE NOCASE
-            ORDER BY raw_score, c.row_id
+            ORDER BY c.ordinal, c.row_id
             LIMIT 1
             """,
             (title_expression, requested_title),

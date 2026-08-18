@@ -4,15 +4,15 @@ import argparse
 import time
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from mcp.server import MCPServer
+from pydantic import Field
 
-from .bm25 import search
-from .retrieval import index_status, retrieve_document
+from .retrieval import index_status, retrieve_chunk_context, retrieve_document, search_documents
 
 
-QueryMode = Literal["and", "or", "phrase", "exact"]
+QueryMode = Literal["and", "phrase", "exact"]
 
 
 def _bounded(value: int, name: str, minimum: int, maximum: int) -> int:
@@ -29,24 +29,15 @@ def _document_results(database: Path, query: str, limit: int, mode: QueryMode) -
         raise ValueError("query must not exceed 2000 characters")
     limit = _bounded(limit, "limit", 1, 20)
     started = time.perf_counter()
-    candidates = search(database, query, limit=min(400, limit * 20), mode=mode)
-    results: list[dict[str, Any]] = []
-    seen_documents: set[str] = set()
-    for candidate in candidates:
-        document_id = str(candidate["document_id"])
-        if document_id in seen_documents:
-            continue
-        seen_documents.add(document_id)
-        results.append(candidate)
-        if len(results) == limit:
-            break
-    return {
-        "query": query,
-        "mode": mode,
-        "ranking_unit": "document",
-        "latency_ms": round((time.perf_counter() - started) * 1_000, 3),
-        "results": results,
-    }
+    response = search_documents(
+        database,
+        query,
+        limit=limit,
+        mode=mode,
+        candidate_limit=min(400, max(80, limit * 20)),
+    )
+    response["latency_ms"] = round((time.perf_counter() - started) * 1_000, 3)
+    return response
 
 
 def create_mcp_server(database: Path) -> MCPServer:
@@ -59,10 +50,12 @@ def create_mcp_server(database: Path) -> MCPServer:
         title="Offline Wikipedia",
         description="Read-only retrieval over the local English Wikipedia SQLite index.",
         instructions=(
-            "Use search_wikipedia to find source passages. Use retrieve_wikipedia_document "
-            "when more context from a cited document is needed. Preserve returned citations."
+            "Use search_wikipedia to find source passages; every result already contains usable "
+            "evidence and a citation. Prefer retrieve_wikipedia_context with a result's chunk_id "
+            "when neighboring text is needed. Use retrieve_wikipedia_document only for deliberate, "
+            "small paginated reads. Never fetch an entire article. Preserve returned citations."
         ),
-        version="0.3.0",
+        version="0.4.0",
     )
 
     @server.tool(structured_output=True)
@@ -75,18 +68,49 @@ def create_mcp_server(database: Path) -> MCPServer:
     def retrieve_wikipedia_document(
         document_id: str,
         chunk_offset: int = 0,
-        chunk_limit: int = 10,
+        chunk_limit: Annotated[
+            int,
+            Field(description="Requested page size; safely clamped to the range 1 through 12."),
+        ] = 4,
     ) -> dict[str, Any]:
-        """Retrieve ordered source chunks for a Wikipedia document ID from search results."""
+        """Retrieve a small ordered page; do not use this to fetch an entire article."""
 
-        _bounded(chunk_offset, "chunk_offset", 0, 1_000_000)
-        _bounded(chunk_limit, "chunk_limit", 1, 50)
-        return retrieve_document(
+        requested_offset = chunk_offset
+        requested_limit = chunk_limit
+        chunk_offset = max(0, min(int(chunk_offset), 1_000_000))
+        chunk_limit = max(1, min(int(chunk_limit), 12))
+        result = retrieve_document(
             database,
             document_id,
             chunk_offset=chunk_offset,
             chunk_limit=chunk_limit,
         )
+        result["request"] = {
+            "requested_offset": requested_offset,
+            "requested_limit": requested_limit,
+            "effective_offset": chunk_offset,
+            "effective_limit": chunk_limit,
+            "clamped": requested_offset != chunk_offset or requested_limit != chunk_limit,
+        }
+        return result
+
+    @server.tool(structured_output=True)
+    def retrieve_wikipedia_context(
+        chunk_id: str,
+        before: Annotated[int, Field(description="Requested preceding chunks; safely clamped to 0 through 3.")] = 1,
+        after: Annotated[int, Field(description="Requested following chunks; safely clamped to 0 through 3.")] = 1,
+    ) -> dict[str, Any]:
+        """Expand one search hit with only its nearby chunks; preferred for focused context."""
+
+        requested_before = before
+        requested_after = after
+        before = max(0, min(int(before), 3))
+        after = max(0, min(int(after), 3))
+        result = retrieve_chunk_context(database, chunk_id, before=before, after=after)
+        result["context"]["requested_before"] = requested_before
+        result["context"]["requested_after"] = requested_after
+        result["context"]["clamped"] = requested_before != before or requested_after != after
+        return result
 
     @server.tool(structured_output=True)
     def wikipedia_index_status() -> dict[str, Any]:

@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from _fixtures import write_archive
 from offline_rag.bm25 import build_index
-from offline_rag.retrieval import index_status, retrieve_document
+from offline_rag.retrieval import index_status, retrieve_chunk_context, retrieve_document
 from offline_rag.service import create_server
 from offline_rag.wikipedia_dump import extract
 
@@ -37,8 +37,13 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(result["document"]["title"], "Apollo Guidance Computer")
             self.assertEqual(result["pagination"]["returned"], 1)
             self.assertIn("Wikipedia — Apollo Guidance Computer", result["chunks"][0]["citation"])
+            context = retrieve_chunk_context(database, result["chunks"][0]["chunk_id"], before=0, after=1)
+            self.assertEqual(context["context"]["anchor_chunk_id"], result["chunks"][0]["chunk_id"])
+            self.assertLessEqual(context["pagination"]["returned"], 2)
             with self.assertRaises(KeyError):
                 retrieve_document(database, "enwiki:missing")
+            with self.assertRaises(KeyError):
+                retrieve_chunk_context(database, "missing-chunk")
 
     def test_http_health_search_document_and_validation(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -68,6 +73,19 @@ class ServiceTests(unittest.TestCase):
                 self.assertEqual(search_result["ranking_unit"], "document")
                 document_ids = [item["document_id"] for item in search_result["results"]]
                 self.assertEqual(len(document_ids), len(set(document_ids)))
+
+                relaxed_request = Request(
+                    f"{base}/v1/search",
+                    data=json.dumps(
+                        {"query": "Apollo Guidance Computer IBM", "limit": 3, "mode": "and"}
+                    ).encode(),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urlopen(relaxed_request, timeout=5) as response:
+                    relaxed = json.load(response)
+                self.assertTrue(relaxed["query_relaxed"])
+                self.assertEqual(relaxed["results"][0]["document_id"], "enwiki:100")
 
                 document_url = f"{base}/v1/documents/{quote('enwiki:100', safe='')}?limit=2"
                 with urlopen(document_url, timeout=5) as response:
