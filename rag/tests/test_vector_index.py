@@ -22,6 +22,7 @@ from offline_rag.vector_index import (
     iter_document_embedding_records,
     load_vector_manifest,
     semantic_search,
+    verify_vector_index,
 )
 from offline_rag.wikipedia_dump import extract
 
@@ -234,6 +235,21 @@ class VectorIndexTests(unittest.TestCase):
             metadata.write_bytes(metadata.read_bytes() + b"x")
             with self.assertRaisesRegex(ValueError, "size mismatch"):
                 load_vector_manifest(destination)
+
+    def test_independent_verification_checks_source_and_same_size_corruption(self):
+        with tempfile.TemporaryDirectory() as directory:
+            database, destination = self.prepare(Path(directory))
+            manifest = build_vector_index(database, destination, FakeEmbeddingProvider(), batch_size=2)
+            result = verify_vector_index(destination, database=database)
+            self.assertTrue(result["verified"])
+            self.assertTrue(result["checksums_verified"])
+            self.assertTrue(result["source_verified"])
+            index_path = destination / manifest["files"]["faiss"]["name"]
+            content = bytearray(index_path.read_bytes())
+            content[-1] ^= 1
+            index_path.write_bytes(content)
+            with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+                verify_vector_index(destination)
 
 
 if __name__ == "__main__":

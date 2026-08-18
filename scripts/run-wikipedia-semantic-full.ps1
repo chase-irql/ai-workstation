@@ -22,6 +22,9 @@ $pidPath = Join-Path $runtime 'build.pid'
 $sessionPath = Join-Path $runtime 'session.json'
 $stdoutPath = Join-Path $runtime 'build.stdout.log'
 $stderrPath = Join-Path $runtime 'build.stderr.log'
+$monitorPidPath = Join-Path $runtime 'monitor.pid'
+$monitorStdoutPath = Join-Path $runtime 'monitor.stdout.log'
+$monitorStderrPath = Join-Path $runtime 'monitor.stderr.log'
 $models = Join-Path $root 'config\models.json'
 $env:PYTHONPATH = Join-Path $root 'rag\src'
 
@@ -96,6 +99,13 @@ Move-Item -LiteralPath "$pidPath.tmp" -Destination $pidPath -Force
 } | ConvertTo-Json | Set-Content -LiteralPath "$sessionPath.tmp" -Encoding utf8
 Move-Item -LiteralPath "$sessionPath.tmp" -Destination $sessionPath -Force
 
+$monitorScript = Join-Path $PSScriptRoot 'monitor-wikipedia-semantic-full.ps1'
+$monitorArguments = @('-NoProfile', '-File', $monitorScript, '-BuildPid', "$($process.Id)", '-DumpDate', $DumpDate)
+$monitor = Start-Process -FilePath (Join-Path $PSHOME 'pwsh.exe') -ArgumentList $monitorArguments -WorkingDirectory $root `
+    -RedirectStandardOutput $monitorStdoutPath -RedirectStandardError $monitorStderrPath -WindowStyle Hidden -PassThru
+Set-Content -LiteralPath "$monitorPidPath.tmp" -Value $monitor.Id -Encoding ascii
+Move-Item -LiteralPath "$monitorPidPath.tmp" -Destination $monitorPidPath -Force
+
 Start-Sleep -Milliseconds 500
 if ($process.HasExited) {
     $details = Get-Content -LiteralPath $stderrPath -Tail 30 -ErrorAction SilentlyContinue
@@ -105,6 +115,7 @@ if ($process.HasExited) {
 [ordered]@{
     status = 'running'
     pid = $process.Id
+    monitor_pid = $monitor.Id
     database = $database
     vector_directory = $vectorDirectory
     status_command = '.\scripts\get-wikipedia-semantic-status.ps1'

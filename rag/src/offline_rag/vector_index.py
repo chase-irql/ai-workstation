@@ -384,6 +384,59 @@ def load_vector_manifest(directory: Path) -> dict[str, Any]:
     return value
 
 
+def verify_vector_index(
+    directory: Path,
+    *,
+    database: Path | None = None,
+    verify_checksums: bool = True,
+) -> dict[str, Any]:
+    """Independently verify a published vector generation and optional source binding."""
+
+    manifest = load_vector_manifest(directory)
+    files = manifest["files"]
+    if verify_checksums:
+        for key in ("faiss", "metadata"):
+            path = directory / str(files[key]["name"])
+            actual = _sha256(path)
+            if actual != files[key].get("sha256"):
+                raise ValueError(f"Vector generation checksum mismatch: {path}")
+    index_path = directory / str(files["faiss"]["name"])
+    metadata_path = directory / str(files["metadata"]["name"])
+    count = int(manifest["document_count"])
+    dimensions = int(manifest["dimensions"])
+    _validate_generation(index_path, metadata_path, count, dimensions)
+
+    source_verified = False
+    if database is not None:
+        if not database.is_file():
+            raise FileNotFoundError(database)
+        stat = database.stat()
+        if str(database.resolve()) != str(manifest.get("source_database")):
+            raise ValueError("Vector generation source database path mismatch")
+        if stat.st_size != int(manifest.get("source_database_bytes", -1)):
+            raise ValueError("Vector generation source database size mismatch")
+        source_metadata = read_index_metadata(database)
+        if source_metadata.get("build_id") != manifest.get("source_build_id"):
+            raise ValueError("Vector generation source build ID mismatch")
+        connection = _connect_read_only(database)
+        try:
+            searchable = int(connection.execute("SELECT count(DISTINCT document_id) FROM chunks").fetchone()[0])
+        finally:
+            connection.close()
+        if searchable != count:
+            raise ValueError(f"Source searchable-document count mismatch: expected {count}, found {searchable}")
+        source_verified = True
+    return {
+        "verified": True,
+        "directory": str(directory.resolve()),
+        "generation": manifest["generation"],
+        "documents": count,
+        "dimensions": dimensions,
+        "checksums_verified": verify_checksums,
+        "source_verified": source_verified,
+    }
+
+
 def _metadata_rows(records: Sequence[DocumentEmbeddingRecord], first_vector_id: int) -> list[tuple[Any, ...]]:
     return [
         (
@@ -902,6 +955,10 @@ def build_parser() -> argparse.ArgumentParser:
     evaluation.add_argument("--model-id")
     evaluation.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     evaluation.add_argument("--mode", choices=("semantic", "hybrid", "all"), default="all")
+    verify = subparsers.add_parser("verify")
+    verify.add_argument("--index", type=Path, required=True)
+    verify.add_argument("--database", type=Path)
+    verify.add_argument("--skip-checksums", action="store_true")
     return parser
 
 
@@ -909,6 +966,14 @@ def main(argv: Iterable[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     args = build_parser().parse_args(argv)
+    if args.command == "verify":
+        result = verify_vector_index(
+            args.index,
+            database=args.database,
+            verify_checksums=not args.skip_checksums,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
     config = load_embedding_model_config(args.models, args.model_id)
     provider = OllamaEmbeddingClient(config, base_url=args.ollama_url)
     if args.command == "build":

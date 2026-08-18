@@ -13,6 +13,8 @@ $checkpointPath = Join-Path $vectorDirectory '.build-state.json'
 $manifestPath = Join-Path $vectorDirectory 'manifest.json'
 $stdoutPath = Join-Path $runtime 'build.stdout.log'
 $stderrPath = Join-Path $runtime 'build.stderr.log'
+$monitorPidPath = Join-Path $runtime 'monitor.pid'
+$verificationStatusPath = Join-Path $runtime 'verification-status.json'
 
 $process = $null
 if (Test-Path -LiteralPath $pidPath -PathType Leaf) {
@@ -28,6 +30,14 @@ $manifest = if (Test-Path -LiteralPath $manifestPath -PathType Leaf) {
 } else { $null }
 $session = if (Test-Path -LiteralPath $sessionPath -PathType Leaf) {
     Get-Content -Raw -LiteralPath $sessionPath | ConvertFrom-Json
+} else { $null }
+$monitorProcess = $null
+if (Test-Path -LiteralPath $monitorPidPath -PathType Leaf) {
+    $monitorPid = [int](Get-Content -LiteralPath $monitorPidPath -Raw)
+    $monitorProcess = Get-Process -Id $monitorPid -ErrorAction SilentlyContinue
+}
+$verification = if (Test-Path -LiteralPath $verificationStatusPath -PathType Leaf) {
+    Get-Content -Raw -LiteralPath $verificationStatusPath | ConvertFrom-Json
 } else { $null }
 
 $completed = if ($checkpoint) { [long]$checkpoint.completed_documents } elseif ($manifest) { [long]$manifest.document_count } else { 0 }
@@ -57,6 +67,8 @@ $disk = Get-PSDrive -Name ([System.IO.Path]::GetPathRoot($root).TrimEnd(':\'))
     FreeGiB = [math]::Round($disk.Free / 1GB, 1)
     LastCheckpoint = if ($checkpoint) { $checkpoint.checkpointed_at } else { $null }
     Generation = if ($checkpoint) { $checkpoint.generation } elseif ($manifest) { $manifest.generation } else { $null }
+    MonitorProcessId = if ($monitorProcess) { $monitorProcess.Id } else { $null }
+    VerificationStatus = if ($verification) { $verification.status } elseif ($monitorProcess) { 'waiting' } else { 'not scheduled' }
 } | Format-List
 
 if (-not $process -and $checkpoint) {
