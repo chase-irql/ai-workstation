@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "mcp": {
+    "offline-wikipedia": {
+      "type": "local",
+      "command": [
+        "D:\\ai-workstation\\.venv\\Scripts\\python.exe",
+        "-m",
+        "offline_rag.mcp_server",
+        "--database",
+        "D:\\ai-workstation\\indexes\\wikipedia\\enwiki-20260801-full.sqlite3"
+      ],
+      "environment": {
+        "PYTHONPATH": "D:\\ai-workstation\\rag\\src"
+      },
+      "enabled": true,
+      "timeout": 30000
+    }
+  }
+}

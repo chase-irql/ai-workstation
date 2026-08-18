@@ -61,4 +61,39 @@ The default query mode is `and`:
 
 Legacy suites containing `expected_titles` remain supported. Version-2 suites require stable query IDs and graded relevance keyed by document ID. Results include document-level Success@1/5/10, Recall@5/10/50 when configured, MRR@10, nDCG@10, query-type groups, and latency percentiles. Index build identity and a suite hash are embedded for comparison. `rag/eval/wikipedia-full-v2.json` is the gating lexical/entity-lookup smoke suite for SQLite BM25; `rag/eval/wikipedia-semantic-challenge-v2.json` preserves paraphrase questions as a non-gating baseline for the future vector and reranking stages.
 
+## Local Wikipedia service
+
+The complete index can run as a persistent read-only browser and JSON service:
+
+```powershell
+.\scripts\start-wikipedia-service.ps1 -Background
+.\scripts\get-wikipedia-service-status.ps1
+.\scripts\stop-wikipedia-service.ps1
+```
+
+The default URL is `http://127.0.0.1:8765/`. API endpoints are:
+
+- `GET /health` or `GET /v1/status` for readiness and index metadata;
+- `GET /v1/search?q=apollo+program&mode=and&limit=8`;
+- `POST /v1/search` with `{"query":"Apollo program","mode":"and","limit":8}`;
+- `GET /v1/documents/enwiki%3A1461?offset=0&limit=20` for ordered source chunks.
+
+Requests are bounded, the service has no write endpoints, and it binds only to localhost by default. Binding to `0.0.0.0` makes it reachable from the LAN and should be done only on a trusted network; this initial service does not provide authentication or TLS.
+
+## Agent access through MCP
+
+The same read-only index is exposed as a local stdio MCP server with three tools:
+
+- `search_wikipedia` returns distinct, cited Wikipedia documents;
+- `retrieve_wikipedia_document` returns an ordered page of chunks from a selected document;
+- `wikipedia_index_status` reports the corpus version, build identity, and counts.
+
+Configure both installed agent harnesses from the repository root:
+
+```powershell
+.\scripts\configure-wikipedia-mcp.ps1
+```
+
+The root `opencode.json` is the operational OpenCode configuration. Codex registration is written by its CLI to the current user's Codex configuration. Neither path changes the immutable benchmark profiles under `config/harnesses/`. The MCP server starts on demand, reads the published SQLite database in read-only mode, and does not load Ollama or use the GPU.
+
 See `docs/rag-record-schema.md` for the common record contract and `docs/wikipedia-multistream-design.md` for the parallel extraction design and recovery model.

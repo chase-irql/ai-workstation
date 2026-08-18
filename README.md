@@ -68,6 +68,24 @@ For the complete CPU-only extraction and BM25 build:
 .\scripts\get-wikipedia-full-status.ps1
 ```
 
-The extractor checkpoints every 1,000 articles. Use `.\scripts\run-wikipedia-full.ps1 -Resume` after a reboot or interruption.
+The complete verified index can be searched from PowerShell or served through a local browser/API without loading a model or using the GPU:
+
+```powershell
+.\scripts\query-wikipedia.ps1 -Query 'What was the Apollo program?'
+.\scripts\start-wikipedia-service.ps1 -Background
+.\scripts\get-wikipedia-service-status.ps1
+```
+
+Open `http://127.0.0.1:8765/` after the service starts. Stop it with `.\scripts\stop-wikipedia-service.ps1`. The service is read-only and binds only to localhost by default.
+
+Give Codex and OpenCode on-demand access to the same index through local MCP tools:
+
+```powershell
+.\scripts\configure-wikipedia-mcp.ps1
+```
+
+This does not start an LLM. The MCP process is launched by an agent only when the tools are needed.
+
+The multistream extractor uses deterministic compressed shards and block-level resume. Use `.\scripts\run-wikipedia-full.ps1 -Resume` after a reboot or interruption.
 
 See `docs/rag-phase-2-results.md` for the verified-corpus and retrieval results.
