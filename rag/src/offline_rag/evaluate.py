@@ -7,7 +7,7 @@ import math
 import statistics
 import time
 from collections import defaultdict
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -195,7 +195,17 @@ def _aggregate(cases: Sequence[Mapping[str, Any]]) -> dict[str, float | int]:
     return values
 
 
-def evaluate(database: Path, suite_path: Path) -> dict[str, object]:
+DocumentRetriever = Callable[[str, int, str], Sequence[Mapping[str, Any]]]
+
+
+def evaluate_retriever(
+    suite_path: Path,
+    retriever: DocumentRetriever,
+    *,
+    retrieval_identity: Mapping[str, Any],
+) -> dict[str, object]:
+    """Evaluate any document retriever with the same versioned metric contract."""
+
     raw_suite = json.loads(suite_path.read_text(encoding="utf-8"))
     if not isinstance(raw_suite, dict):
         raise ValueError("Evaluation suite root must be an object")
@@ -203,7 +213,7 @@ def evaluate(database: Path, suite_path: Path) -> dict[str, object]:
     cases: list[dict[str, Any]] = []
     for case in suite["cases"]:
         started = time.perf_counter()
-        chunks = search(database, case["query"], suite["candidate_chunks"], case["query_mode"])
+        chunks = retriever(case["query"], suite["candidate_chunks"], case["query_mode"])
         latency_ms = (time.perf_counter() - started) * 1000
         documents = _deduplicate_documents(chunks)
         rank_values = [
@@ -235,20 +245,34 @@ def evaluate(database: Path, suite_path: Path) -> dict[str, object]:
     for case in cases:
         grouped[case["query_type"]].append(case)
     canonical_suite = json.dumps(raw_suite, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return {
+    result: dict[str, object] = {
         "schema_version": EVALUATION_SCHEMA_VERSION,
         "suite": suite["name"],
         "suite_schema_version": suite["schema_version"],
         "suite_sha256": hashlib.sha256(canonical_suite.encode("utf-8")).hexdigest(),
         "evaluated_at": datetime.now(timezone.utc).isoformat(),
-        "database": str(database.resolve()),
-        "index_metadata": read_index_metadata(database),
         "candidate_chunks": suite["candidate_chunks"],
         "ranking_unit": "document",
         "aggregate": _aggregate(cases),
         "by_query_type": {key: _aggregate(grouped[key]) for key in sorted(grouped)},
         "cases": cases,
     }
+    result.update(retrieval_identity)
+    return result
+
+
+def evaluate(database: Path, suite_path: Path) -> dict[str, object]:
+    """Evaluate the SQLite BM25 baseline while preserving its public API."""
+
+    return evaluate_retriever(
+        suite_path,
+        lambda query, limit, mode: search(database, query, limit, mode),
+        retrieval_identity={
+            "retriever": "sqlite_fts5_bm25",
+            "database": str(database.resolve()),
+            "index_metadata": read_index_metadata(database),
+        },
+    )
 
 
 def main() -> int:

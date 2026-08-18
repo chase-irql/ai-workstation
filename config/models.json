@@ -47,7 +47,19 @@
       "download_gb": 24,
       "priority": 4,
       "notes": "Deferred comparison because its official Q4 build is substantially larger."
+    },
+    {
+      "id": "qwen3-embedding-0.6b",
+      "ollama_model": "qwen3-embedding:0.6b",
+      "role": "embedding",
+      "architecture": "dense-0.6b",
+      "quantization": "Q8_0",
+      "download_gb": 0.64,
+      "priority": 1,
+      "embedding_dimensions": 256,
+      "maximum_embedding_dimensions": 1024,
+      "query_instruction": "Given a web search query, retrieve relevant passages that answer the query",
+      "notes": "Document-level semantic retrieval baseline. The 256-dimensional Matryoshka output materially reduces the full-index storage requirement."
     }
   ]
 }
-

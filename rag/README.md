@@ -6,9 +6,11 @@ This package provides the CPU-only foundation for the local knowledge system:
 - structure-aware, provenance-preserving chunks;
 - corpus-neutral records with a version-1 Wikipedia adapter;
 - atomic SQLite FTS5/BM25 indexing and search;
+- atomic document-level FAISS semantic indexes with SQLite provenance;
+- deterministic BM25/semantic reciprocal-rank fusion;
 - source-backed result records suitable for a later MCP tool.
 
-Vector embeddings and LLM generation are deliberately separate stages. The Wikipedia pilot can be parsed, indexed, and searched without Ollama or GPU use.
+The lexical baseline remains usable without Ollama or GPU use. Semantic indexing and queries are a separate optional stage and do not modify the published BM25 database.
 
 ## Pilot commands
 
@@ -114,3 +116,13 @@ The model-and-tool evaluation verifies more than process exit: it requires the m
 The versioned prompts are in `rag/eval/wikipedia-agent-v1.json`; generated evidence is retained under the ignored `results/rag/agent-e2e/` directory.
 
 See `docs/rag-record-schema.md` for the common record contract and `docs/wikipedia-multistream-design.md` for the parallel extraction design and recovery model.
+
+## Semantic retrieval pilot
+
+The semantic stage selects its embedding model from `config/models.json`, publishes generation-specific FAISS and provenance files behind an atomic manifest, and supports pure semantic or hybrid BM25/vector retrieval. Build and evaluate the 10,000-record pilot with:
+
+```powershell
+.\scripts\run-wikipedia-semantic-pilot.ps1 -Unload
+```
+
+The measured pilot raised Success@10 on the semantic challenge from 0.625 for BM25 to 1.0 for both semantic and hybrid search. See `docs/semantic-retrieval-pilot.md` for exact metrics, storage projections, limitations, and the full-corpus gate.
