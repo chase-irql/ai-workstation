@@ -4,7 +4,7 @@ The documentation pipeline is the first corpus-neutral path beside Wikipedia. It
 
 The same pipeline now handles the pinned official Docker and Kubernetes Markdown sites. Hugo presentation wrappers are removed without discarding their enclosed prose; human-visible glossary labels, links, feature-state markers, includes, and generated headings are converted to deterministic text. Literal shortcode examples inside fenced code blocks remain untouched. When safe archive extraction has encoded Windows-incompatible or case-sensitive member names, ingestion reverses that encoding before computing stable document IDs and source citations.
 
-Packaged documentation archives can set `ingestion.content_subdirectory` to a validated path inside the extraction root. This lets Rust's distribution retain publisher metadata and license files beside `share/doc/rust/html` without putting package-wrapper directories into document IDs or public citations. The path is rejected if it escapes the extraction root.
+Packaged documentation archives can set `ingestion.content_subdirectory` to a validated path inside the extraction root. This lets Rust's distribution retain publisher metadata and license files beside `share/doc/rust/html`, and TypeScript retain its complete website repository, without putting package-wrapper directories into document IDs or public citations. Portable Windows filename encoding is resolved segment by segment; ambiguous, missing, symlinked, absolute, or escaping paths are rejected.
 
 ## Current pilots
 

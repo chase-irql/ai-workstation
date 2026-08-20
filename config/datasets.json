@@ -1391,6 +1391,46 @@
       },
       "status": "evaluated",
       "notes": "Pinned from Rust's stable channel manifest to 1.97.1 and verified both the manifest's published SHA-256 03569b1886ceb5c05276b50c8431ab111de944cd6140fe1fa7d821dd8e0f29cf and the 23,866,672-byte rust-docs archive's publisher SHA-256 ddcbcbb04a8008dafb1f7c8c28070f597e208e824f5c3d42dbaf8d7ad9477be2. Structural extraction validated 65,516 files / 714,078,993 bytes. The complete raw distribution is retained, while retrieval excludes 52,000-plus architecture-intrinsic/redirect pages, the generated source browser, translated Rust By Example copies, legacy book editions, changelog/TOC and whole-book print duplicates. A safe explicit content-subdirectory option keeps package metadata out of stable IDs and canonical doc.rust-lang.org citations. The scoped corpus produced 7,570 documents, 57,178 chunks, and an 89,432,064-byte verified BM25 database. Rustdoc/mdBook navigation controls are filtered without discarding content. The 53-topic lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
+    },
+    {
+      "dataset_id": "typescript-docs-20260820",
+      "name": "TypeScript Documentation Snapshot 2026-08-20",
+      "description": "Official TypeScript handbook, language reference, JavaScript guidance, module reference, declaration-file guidance, tutorials, and project configuration documentation.",
+      "category": "programming-language-documentation",
+      "official_source_url": "https://www.typescriptlang.org/docs/",
+      "license": "CC-BY-4.0",
+      "attribution": "Microsoft Corporation and TypeScript documentation contributors",
+      "release": "2026-08-20 commit 90e92beb7b1da8c5408f2cf0fb83c55d380a2886",
+      "update_frequency": "monthly snapshot or after a material TypeScript release",
+      "scope": "current English documentation under packages/documentation/copy/en; handbook-v1, release notes, and Nightly Builds excluded from retrieval but retained raw",
+      "formats": ["Markdown", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/microsoft/TypeScript-Website/archive/90e92beb7b1da8c5408f2cf0fb83c55d380a2886.tar.gz",
+        "source_commit": "90e92beb7b1da8c5408f2cf0fb83c55d380a2886",
+        "source_commit_verified": true,
+        "source_url_template": "https://github.com/microsoft/TypeScript-Website/blob/90e92beb7b1da8c5408f2cf0fb83c55d380a2886/packages/documentation/copy/en/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "TypeScript-Website-90e92beb7b1da8c5408f2cf0fb83c55d380a2886/packages/documentation/copy/en",
+        "include_globs": ["*.md", "**/*.md"],
+        "exclude_globs": ["handbook-v1/**", "release-notes/**", "Nightly Builds.md"],
+        "smoke_query": "TypeScript narrowing discriminated unions"
+      },
+      "storage": {
+        "download_min_bytes": 10000000,
+        "download_max_bytes": 15000000,
+        "extracted_max_bytes": 25000000,
+        "indexed_max_bytes": 5000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/typescript-docs-20260820",
+        "processed": "corpora/processed/documentation/typescript-docs-20260820",
+        "index": "indexes/documentation/typescript-docs-20260820.sqlite3",
+        "semantic_index": "indexes/semantic/typescript-docs-20260820"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to GitHub-verified commit 90e92beb7b1da8c5408f2cf0fb83c55d380a2886. The 14,392,039-byte archive has local SHA-256 b84fd093c7cf3dd4f67dfbb87ab1b9c8e1c49c08dff372acdc1aaeea32401245; GitHub supplied no adjacent publisher digest, so archive structure and 1,026 extracted files / 19,430,545 bytes were validated and the commit identity was independently verified. Retrieval scopes the 77 current English handbook/reference documents and excludes legacy handbook-v1, historical release notes, and Nightly Builds while retaining them raw. The corpus produced 935 chunks and a 2,441,216-byte verified BM25 database. The 40-topic lexical gate covers language features, type manipulation, JavaScript/JSDoc, modules, declarations, project configuration, migration, and tutorials."
     }
   ]
 }

@@ -620,7 +620,10 @@ Protocol text.
     def test_explicit_content_subdirectory_scopes_identity_and_citations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            docs = root / "package" / "share" / "html"
+            (root / ".archive-name-encoding-v1.json").write_text(
+                '{"schema_version":1,"encoded_members":1}\n', encoding="utf-8"
+            )
+            docs = root / "%50ackage" / "share" / "html"
             docs.mkdir(parents=True)
             (root / "README.md").write_text("# Package metadata\n\nDo not ingest this wrapper.", encoding="utf-8")
             (docs / "guide.html").write_text(
@@ -633,14 +636,14 @@ Protocol text.
                 corpus="rust-docs",
                 source_version="1",
                 license_name="test",
-                content_subdirectory="package/share/html",
+                content_subdirectory="Package/share/html",
                 source_url_template="https://example.test/{relative_path}",
             )
             document = json.loads((output / "documents.jsonl").read_text(encoding="utf-8").splitlines()[0])
             self.assertEqual(document["attributes"]["relative_path"], "guide.html")
             self.assertEqual(document["source_url"], "https://example.test/guide.html")
             manifest = json.loads((output / "corpus-manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(manifest["configuration"]["content_subdirectory"], "package/share/html")
+            self.assertEqual(manifest["configuration"]["content_subdirectory"], "Package/share/html")
             with self.assertRaisesRegex(ValueError, "inside source_root"):
                 import_documentation(
                     root,

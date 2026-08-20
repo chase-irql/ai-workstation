@@ -1309,6 +1309,37 @@ def _content_root(root: Path) -> Path:
         current = child_directories[0]
 
 
+def _explicit_content_root(root: Path, subdirectory: str, decode_portable_names: bool) -> Path:
+    """Resolve a registry path safely, including extraction-time portable names."""
+
+    normalized = subdirectory.replace("\\", "/")
+    parts = normalized.split("/")
+    if not normalized or normalized.startswith("/") or re.match(r"^[A-Za-z]:", normalized):
+        raise ValueError("content_subdirectory must be a nonempty relative path")
+    if any(part in {"", ".", ".."} for part in parts):
+        raise ValueError("content_subdirectory must remain inside source_root")
+    current = root.resolve()
+    root_resolved = current
+    for part in parts:
+        if decode_portable_names:
+            matches = [
+                child
+                for child in current.iterdir()
+                if child.is_dir() and not child.is_symlink() and unquote(child.name) == part
+            ]
+            if len(matches) != 1:
+                raise NotADirectoryError(current / part)
+            current = matches[0]
+        else:
+            current = current / part
+    content_root = current.resolve()
+    if not content_root.is_relative_to(root_resolved):
+        raise ValueError("content_subdirectory must remain inside source_root")
+    if not content_root.is_dir():
+        raise NotADirectoryError(content_root)
+    return content_root
+
+
 def _read_source(path: Path) -> tuple[str, str]:
     data = path.read_bytes()
     digest = hashlib.sha256(data).hexdigest()
@@ -1418,12 +1449,7 @@ def import_documentation(
         raise FileExistsError(f"Output already exists: {output}; use --force to replace recognized importer output")
     portable_names_encoded = (source_root / PORTABLE_NAMES_MARKER).is_file()
     if content_subdirectory is not None:
-        root_resolved = source_root.resolve()
-        content_root = (source_root / content_subdirectory).resolve()
-        if not content_root.is_relative_to(root_resolved):
-            raise ValueError("content_subdirectory must remain inside source_root")
-        if not content_root.is_dir():
-            raise NotADirectoryError(content_root)
+        content_root = _explicit_content_root(source_root, content_subdirectory, portable_names_encoded)
     else:
         content_root = _content_root(source_root)
     all_files = _source_files(
