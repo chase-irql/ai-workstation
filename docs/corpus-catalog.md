@@ -33,6 +33,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `llvm-project-22.1.8-docs` | LLVM Project 22.1.8 coordinated source release | Apache-2.0 with LLVM Exceptions; per-file notices retained | 2,352 documents; 18,655 chunks | BM25 |
 | `go-1.26.7-docs` | Go 1.26.7 stable source release | BSD 3-Clause; per-file notices retained | 1,320 documents; 18,647 chunks | BM25 |
 | `podman-6.1-docs` | Podman 6.1.0 signed release tag | Apache-2.0 | 223 manuals/guides; 2,484 chunks | BM25 |
+| `binutils-2.47-docs` | GNU Binutils 2.47 official HTML manuals | GFDL 1.3; exact manual notices retained | 8 manuals; 1,807 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
@@ -143,6 +144,14 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Retrieval includes canonical command manuals, configuration references, tutorials, Quadlet, Kubernetes interoperability, remote operation, and administration. Reusable option/link fragments are excluded because their material is already expanded into the canonical manual pages.
 - Pandoc manual title blocks such as `% podman-run 1` are recognized, preventing generic `NAME` headings from degrading titles and citations. The generation contains 223 documents and 2,484 chunks in a 3,604,480-byte verified BM25 database.
 - Its 40-topic stable-ID lexical gate covers lifecycle, images, registries, networks, volumes, pods, systemd/Quadlet, Kubernetes, machines, rootless operation, secrets, checkpoints, remote APIs, Compose, manifests, and farm builds; every metric cutoff is `1.0`.
+
+### GNU Binutils documentation
+
+- Official publication: all eight single-page HTML manuals generated from GNU Binutils 2.47 sources and published by Sourceware on 2026-07-26.
+- A reusable bounded HTTP file-set acquisition downloads each manual independently with resume support, per-file and aggregate byte ceilings, atomic publication, and individual SHA-256 provenance. The 8 files total 6,914,167 bytes. Sourceware supplies no adjacent HTML digests, so the manifest explicitly reports zero publisher checksums verified.
+- The corpus covers GNU `as`, `ld`, the binary utilities (`objdump`, `readelf`, `nm`, `ar`, `objcopy`, `strip`, and related tools), BFD, CTF, SFrame, `gprof`, and `gprofng`. Duplicate split-page HTML and PDFs are excluded.
+- The upstream BFD manual's `Untitled Document` metadata is deterministically repaired to `BFD Library`. The 8 manuals produce 1,807 heading-aware chunks in a 6,664,192-byte verified FTS5 database.
+- Its 33-topic stable-ID lexical gate covers assembly, linker scripts and shared objects, ELF inspection and transformation, object-file abstractions, type/debug formats, profiling, and stack-trace metadata; every metric cutoff is `1.0`.
 
 ### Linux man-pages
 

@@ -90,6 +90,13 @@ func internalHelper() { panic("skip") }
         )
         self.assertEqual(parsed.title, "The Go Programming Language Specification")
 
+    def test_binutils_bfd_html_replaces_upstream_untitled_title(self):
+        parsed = parse_document(
+            Path("bfd.html"),
+            "<html><head><title>Untitled Document</title></head><body><h1>Top</h1><p>BFD targets.</p></body></html>",
+        )
+        self.assertEqual(parsed.title, "BFD Library")
+
     def test_html_preserves_title_hierarchy_code_and_tables(self):
         parsed = parse_html(
             """

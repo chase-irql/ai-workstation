@@ -1399,6 +1399,8 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
     suffix = path.suffix.casefold()
     if suffix in {".html", ".htm"} or path.name.casefold().endswith(SUPPORTED_COMPOUND_SUFFIXES):
         parsed = parse_html(text, fallback)
+        if path.name.casefold() == "bfd.html" and parsed.title.casefold() == "untitled document":
+            return ParsedDocument("BFD Library", parsed.blocks, parsed.format)
         go_titles = {
             "asm.html": "A Quick Guide to Go's Assembler",
             "go_mem.html": "The Go Memory Model",

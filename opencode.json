@@ -138,6 +138,8 @@
         "--index",
         "podman-6.1-docs=indexes\\documentation\\podman-6.1.sqlite3",
         "--index",
+        "binutils-2.47-docs=indexes\\documentation\\binutils-2.47.sqlite3",
+        "--index",
         "cpp-16.2-manual=indexes\\documentation\\cpp-16.2.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",

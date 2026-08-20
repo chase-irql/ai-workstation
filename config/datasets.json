@@ -1732,8 +1732,8 @@
         "index": "indexes/documentation/binutils-2.47.sqlite3",
         "semantic_index": "indexes/semantic/binutils-2.47-docs"
       },
-      "status": "planned",
-      "notes": "Sourceware identifies these files as the HTML conversion of the documentation included in GNU Binutils 2.47 and dates the publication 2026-07-26. Sourceware does not publish adjacent checksums for generated HTML; acquisition will pin a local SHA-256 for every independently downloaded manual without claiming publisher-checksum verification."
+      "status": "evaluated",
+      "notes": "Sourceware identifies these files as the HTML conversion of the documentation included in GNU Binutils 2.47 and dates the publication 2026-07-26. The bounded HTTP file-set acquisition validated and individually SHA-256-pinned all 8 manuals (6,914,167 bytes total); Sourceware provides no adjacent digests, so no publisher-checksum claim is made. The common-record generation contains 8 independently citable manuals and 1,807 chunks in a 6,664,192-byte verified BM25 database. The upstream BFD page's generic 'Untitled Document' metadata is deterministically corrected to 'BFD Library'. Its 33-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",
