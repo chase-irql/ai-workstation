@@ -1939,6 +1939,46 @@
       "notes": "Pinned to immutable official commit 3be4b60ff501f29a445f0cacf003e5f5cc16244d. The 279,761,314-byte archive has local SHA-256 59b329660c5c06e12c86301d5a631ba5fd2a04c9eb122c68d384cf42406233af; safe extraction produced 1,731 files / 340,181,560 bytes with no links. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and both collection manifests confirm CC BY-NC-SA 4.0. The two 149-module curricular sequences share 122 module IDs: 298 occurrences become 176 stable documents while both book orders remain in provenance. The verified index contains 4,499 chunks in 12,296,192 bytes. The 46-topic stable-ID lexical gate passes Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 at 1.0; equivalent duplicated bonding pages are explicitly judged relevant rather than arbitrarily favoring one ordering."
     },
     {
+      "dataset_id": "openstax-biology",
+      "name": "OpenStax Biology 2e, Biology for AP Courses, and Concepts of Biology",
+      "description": "Complete OpenStax biology sequences covering chemistry of life, cells, genetics, evolution, biological diversity, plant and animal structure and function, ecology, and AP-oriented and introductory curricular paths.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/biology-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-biology-bundle main commit 63f8b6f8d129dd1582989bb755011e9a6d523471, 2026-07-22",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Biology 2e, Biology for AP Courses, and Concepts of Biology collection manifests and referenced CNXML modules from the immutable official snapshot; media retained raw but excluded from text indexing",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-biology-bundle/archive/63f8b6f8d129dd1582989bb755011e9a6d523471.tar.gz",
+        "source_commit": "63f8b6f8d129dd1582989bb755011e9a6d523471",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-biology-bundle/blob/63f8b6f8d129dd1582989bb755011e9a6d523471/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-biology-bundle-63f8b6f8d129dd1582989bb755011e9a6d523471",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "DNA replication transcription translation"
+      },
+      "storage": {
+        "download_min_bytes": 300000000,
+        "download_max_bytes": 1100000000,
+        "extracted_max_bytes": 4000000000,
+        "indexed_max_bytes": 1000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/textbooks/openstax-biology",
+        "processed": "corpora/processed/textbooks/openstax-biology",
+        "index": "indexes/textbooks/openstax-biology.sqlite3",
+        "semantic_index": "indexes/semantic/openstax-biology"
+      },
+      "status": "planned",
+      "notes": "Pinned to current official commit 63f8b6f8d129dd1582989bb755011e9a6d523471 before acquisition. GitHub reports the commit unsigned and provides no adjacent archive digest, so publisher verification will not be claimed. The repository license is CC BY-NC-SA 4.0; all three collection manifests must be validated after extraction. Shared modules across the comprehensive, AP, and introductory sequences will be stored once while every curriculum occurrence remains in provenance."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

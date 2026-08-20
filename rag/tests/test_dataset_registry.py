@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 59)
+        self.assertEqual(len(datasets), 60)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -46,6 +46,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("openstax-calculus", dataset_ids)
         self.assertIn("openstax-university-physics", dataset_ids)
         self.assertIn("openstax-chemistry", dataset_ids)
+        self.assertIn("openstax-biology", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",
@@ -83,8 +84,8 @@ class DatasetRegistryTests(unittest.TestCase):
             }.issubset(dataset_ids)
         )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 10_500_000_000)
-        self.assertLess(summary["indexed_max_bytes"], 120_500_000_000)
+        self.assertLess(summary["download_max_bytes"], 11_500_000_000)
+        self.assertLess(summary["indexed_max_bytes"], 121_500_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
