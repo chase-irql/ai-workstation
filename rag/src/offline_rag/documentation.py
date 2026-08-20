@@ -104,7 +104,7 @@ class ParsedDocument:
 
 class _StructuredHTMLParser(HTMLParser):
     block_tags = {"p", "pre", "li", "dt", "dd", "blockquote", "figcaption", "td", "th"}
-    ignored_tags = {"script", "style", "noscript", "svg", "nav", "header", "footer", "aside"}
+    ignored_tags = {"script", "style", "noscript", "svg", "nav", "header", "footer", "aside", "dialog"}
     ignored_classes = {
         "related",
         "sphinxsidebar",
@@ -114,12 +114,21 @@ class _StructuredHTMLParser(HTMLParser):
         "toctree-wrapper",
         "contents",
         "breadcrumbs",
+        "anchor",
         "nosearch",
         "up",
         "toplang",
         "bottomlang",
     }
-    ignored_ids = {"page-header", "page-footer", "path", "quickview"}
+    ignored_ids = {
+        "copy-path",
+        "mdbook-help-container",
+        "mdbook-menu-bar",
+        "page-header",
+        "page-footer",
+        "path",
+        "quickview",
+    }
     void_tags = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
     def __init__(self) -> None:
@@ -1379,6 +1388,7 @@ def import_documentation(
     base_url: str | None = None,
     source_url_template: str | None = None,
     source_timestamp: str | None = None,
+    content_subdirectory: str | None = None,
     include_globs: Sequence[str] = (),
     exclude_globs: Sequence[str] = (),
     max_chars: int = 3200,
@@ -1407,7 +1417,15 @@ def import_documentation(
     if output.exists() and not force:
         raise FileExistsError(f"Output already exists: {output}; use --force to replace recognized importer output")
     portable_names_encoded = (source_root / PORTABLE_NAMES_MARKER).is_file()
-    content_root = _content_root(source_root)
+    if content_subdirectory is not None:
+        root_resolved = source_root.resolve()
+        content_root = (source_root / content_subdirectory).resolve()
+        if not content_root.is_relative_to(root_resolved):
+            raise ValueError("content_subdirectory must remain inside source_root")
+        if not content_root.is_dir():
+            raise NotADirectoryError(content_root)
+    else:
+        content_root = _content_root(source_root)
     all_files = _source_files(
         content_root,
         None,
@@ -1562,6 +1580,7 @@ def import_documentation(
                 "max_chars": max_chars,
                 "min_chars": min_chars,
                 "max_files": max_files,
+                "content_subdirectory": content_subdirectory,
                 "include_globs": list(include_globs),
                 "exclude_globs": list(exclude_globs),
             },
@@ -1604,6 +1623,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-url")
     parser.add_argument("--source-url-template")
     parser.add_argument("--source-timestamp")
+    parser.add_argument("--content-subdirectory")
     parser.add_argument("--include-glob", action="append", default=[])
     parser.add_argument("--exclude-glob", action="append", default=[])
     parser.add_argument("--max-chars", type=int, default=3200)
@@ -1624,6 +1644,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         base_url=args.base_url,
         source_url_template=args.source_url_template,
         source_timestamp=args.source_timestamp,
+        content_subdirectory=args.content_subdirectory,
         include_globs=args.include_glob,
         exclude_globs=args.exclude_glob,
         max_chars=args.max_chars,

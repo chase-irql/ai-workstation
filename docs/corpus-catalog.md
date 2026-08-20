@@ -25,6 +25,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `apache-httpd-2.4-docs` | Apache HTTP Server 2.4.68 English manual | Apache-2.0 | 232 documents; 3,055 chunks | BM25 |
 | `docker-docs-20260820` | Official Docker docs commit `510f85c…`, 2026-08-20 | Apache-2.0 | 1,174 documents; 11,190 chunks | BM25 |
 | `kubernetes-docs-20260820` | Official Kubernetes website commit `5184b9b…`, 2026-08-20 | CC-BY-4.0 | 1,605 documents; 14,164 chunks | BM25 |
+| `rust-1.97-docs` | Rust 1.97.1 stable documentation distribution | MIT OR Apache-2.0; component notices retained | 7,570 documents; 57,178 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |

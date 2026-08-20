@@ -1333,6 +1333,64 @@
       },
       "status": "evaluated",
       "notes": "Pinned to GitHub-verified immutable commit 5184b9b24b288709ed36b4003f53dc1530eda2f3 in the official Kubernetes website repository. Acquired the 334,649,805-byte commit archive, recorded local SHA-256 0d3ad8084ff076547993670e0c1a14a3d2965d96b3c992307da28481a9d27752, and structurally validated 13,179 files / 502,091,769 extracted bytes. The complete English documentation tree produced 1,605 searchable documents and 14,164 chunks, with 67 navigation/front-matter-only files skipped. The importer resolves human-visible Hugo glossary, link, feature-state, include, and heading semantics while preserving fenced literal examples, and reverses NTFS-safe archive-name encoding before stable-ID and citation generation. The 37,912,576-byte BM25 database passed row-count, foreign-key, integrity, citation, and smoke-query validation; its 50-topic lexical gate achieved Success@1/5/10, MRR@10, and Recall@5/10/50 of 1.0 with nDCG@10 0.999117. GitHub does not publish an adjacent digest for commit archives, so the archive SHA-256 is explicitly local."
+    },
+    {
+      "dataset_id": "rust-1.97-docs",
+      "name": "Rust 1.97.1 Documentation",
+      "description": "Official Rust language books, reference, standard library API, compiler, Cargo, rustdoc, embedded, edition, and error-code documentation.",
+      "category": "programming-language-documentation",
+      "official_source_url": "https://doc.rust-lang.org/",
+      "license": "MIT OR Apache-2.0; included component notices retained",
+      "attribution": "The Rust Project Developers and contributors",
+      "release": "Rust 1.97.1 stable (2026-07-16 distribution)",
+      "update_frequency": "each stable Rust release",
+      "scope": "complete official rust-docs HTML distribution retained raw; current English books and generated API/reference documentation indexed, excluding source-browser pages, legacy book editions, translations, aggregate print pages, and architecture-intrinsic redirect trees",
+      "formats": ["HTML", "tar.xz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://static.rust-lang.org/dist/2026-07-16/rust-docs-1.97.1-x86_64-pc-windows-msvc.tar.xz",
+        "publisher_checksum_algorithm": "sha256",
+        "publisher_checksum": "ddcbcbb04a8008dafb1f7c8c28070f597e208e824f5c3d42dbaf8d7ad9477be2",
+        "publisher_checksum_source": "https://static.rust-lang.org/dist/channel-rust-stable.toml",
+        "source_manifest_checksum": "03569b1886ceb5c05276b50c8431ab111de944cd6140fe1fa7d821dd8e0f29cf",
+        "source_url_template": "https://doc.rust-lang.org/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "rust-docs-1.97.1-x86_64-pc-windows-msvc/rust-docs/share/doc/rust/html",
+        "include_globs": ["*.html", "**/*.html"],
+        "exclude_globs": [
+          "**/search.html",
+          "**/all.html",
+          "**/print.html",
+          "**/toc.html",
+          "src/**",
+          "core/arch/**",
+          "core/core_arch/**",
+          "book/2018-edition/**",
+          "book/first-edition/**",
+          "book/second-edition/**",
+          "cargo/CHANGELOG.html",
+          "rust-by-example/es/**",
+          "rust-by-example/ja/**",
+          "rust-by-example/ko/**",
+          "rust-by-example/zh/**"
+        ],
+        "smoke_query": "Rust ownership borrowing lifetimes"
+      },
+      "storage": {
+        "download_min_bytes": 23000000,
+        "download_max_bytes": 24000000,
+        "extracted_max_bytes": 750000000,
+        "indexed_max_bytes": 100000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/rust-1.97",
+        "processed": "corpora/processed/documentation/rust-1.97",
+        "index": "indexes/documentation/rust-1.97.sqlite3",
+        "semantic_index": "indexes/semantic/rust-1.97-docs"
+      },
+      "status": "evaluated",
+      "notes": "Pinned from Rust's stable channel manifest to 1.97.1 and verified both the manifest's published SHA-256 03569b1886ceb5c05276b50c8431ab111de944cd6140fe1fa7d821dd8e0f29cf and the 23,866,672-byte rust-docs archive's publisher SHA-256 ddcbcbb04a8008dafb1f7c8c28070f597e208e824f5c3d42dbaf8d7ad9477be2. Structural extraction validated 65,516 files / 714,078,993 bytes. The complete raw distribution is retained, while retrieval excludes 52,000-plus architecture-intrinsic/redirect pages, the generated source browser, translated Rust By Example copies, legacy book editions, changelog/TOC and whole-book print duplicates. A safe explicit content-subdirectory option keeps package metadata out of stable IDs and canonical doc.rust-lang.org citations. The scoped corpus produced 7,570 documents, 57,178 chunks, and an 89,432,064-byte verified BM25 database. Rustdoc/mdBook navigation controls are filtered without discarding content. The 53-topic lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     }
   ]
 }

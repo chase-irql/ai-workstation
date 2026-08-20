@@ -88,6 +88,22 @@ class DocumentationParserTests(unittest.TestCase):
         self.assertTrue(any("reverse proxy" in block.text for block in parsed.blocks))
         self.assertFalse(any("navigation" in block.text or "languages" in block.text for block in parsed.blocks))
 
+    def test_rustdoc_html_removes_copy_and_anchor_controls(self):
+        parsed = parse_html(
+            '''<html><head><title>Pin in std::pin - Rust</title></head><body>
+            <dialog><h2>Keyboard shortcuts</h2><p>Press S to search.</p></dialog>
+            <h1>Struct <span>Pin</span><button id="copy-path">Copy item path</button></h1>
+            <p>A pointer which pins its pointee in place.</p>
+            <h2 class="section-header">Implementations<a class="anchor">§</a></h2>
+            <p>Pinning prevents moves.</p>
+            </body></html>''',
+            "fallback",
+        )
+        self.assertEqual(parsed.blocks[0].heading_path, ("Struct Pin",))
+        self.assertEqual(parsed.blocks[-1].heading_path, ("Struct Pin", "Implementations"))
+        self.assertFalse(any("Copy item path" in block.text for block in parsed.blocks))
+        self.assertFalse(any("Keyboard shortcuts" in block.text for block in parsed.blocks))
+
     def test_markdown_rst_and_man_structure(self):
         markdown = parse_markdown(
             """# Build Guide
@@ -599,6 +615,40 @@ Protocol text.
                     source_version="1.0",
                     license_name="test",
                     source_url_template="https://example.test/no-placeholder",
+                )
+
+    def test_explicit_content_subdirectory_scopes_identity_and_citations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            docs = root / "package" / "share" / "html"
+            docs.mkdir(parents=True)
+            (root / "README.md").write_text("# Package metadata\n\nDo not ingest this wrapper.", encoding="utf-8")
+            (docs / "guide.html").write_text(
+                "<title>Borrowing</title><h1>References</h1><p>A borrow has a lifetime.</p>", encoding="utf-8"
+            )
+            output = root / "processed"
+            import_documentation(
+                root,
+                output,
+                corpus="rust-docs",
+                source_version="1",
+                license_name="test",
+                content_subdirectory="package/share/html",
+                source_url_template="https://example.test/{relative_path}",
+            )
+            document = json.loads((output / "documents.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            self.assertEqual(document["attributes"]["relative_path"], "guide.html")
+            self.assertEqual(document["source_url"], "https://example.test/guide.html")
+            manifest = json.loads((output / "corpus-manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["configuration"]["content_subdirectory"], "package/share/html")
+            with self.assertRaisesRegex(ValueError, "inside source_root"):
+                import_documentation(
+                    root,
+                    root / "invalid",
+                    corpus="rust-docs",
+                    source_version="1",
+                    license_name="test",
+                    content_subdirectory="../escape",
                 )
 
     def test_portable_archive_names_decode_before_identity_and_provenance(self):
