@@ -639,7 +639,8 @@ def _search_v2(
         select_sql
         + """
         WHERE chunks_fts MATCH ?
-        ORDER BY raw_score, c.row_id
+        ORDER BY CASE WHEN instr(c.attributes_json, '"front_matter":true') > 0 THEN 1 ELSE 0 END,
+                 raw_score, c.row_id
         LIMIT ?
         """,
         (plan.fts_expression, limit + len(promoted_rows)),
@@ -655,6 +656,7 @@ def _search_v2(
         item["revision_timestamp"] = attributes.get("revision_timestamp") or item["source_timestamp"]
         item["section_index"] = attributes.get("section_index")
         item["chunk_index"] = attributes.get("chunk_index")
+        item["front_matter"] = bool(attributes.get("front_matter", False))
         item["score"] = item["raw_score"]
         item["query"] = plan.original_query
         item["query_mode"] = plan.mode

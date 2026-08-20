@@ -15,11 +15,12 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 33)
+        self.assertEqual(len(datasets), 34)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
         self.assertIn("bash-5.3-manual", dataset_ids)
+        self.assertIn("faa-amt-general-2023", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",

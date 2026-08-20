@@ -230,6 +230,59 @@ class BM25Tests(unittest.TestCase):
             self.assertEqual(result["corpus"], "manuals")
             self.assertIn("Troubleshooting > Error codes", result["citation"])
 
+    def test_pdf_front_matter_matches_are_ranked_after_body_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            processed = root / "manual"
+            processed.mkdir()
+            document = {
+                "schema_version": 1,
+                "document_id": "manual:1",
+                "corpus": "manuals",
+                "title": "Drawing Manual",
+                "source_url": "https://example.test/manual.pdf",
+                "source_version": "1",
+                "source_timestamp": None,
+                "license": "test",
+                "content_hash": None,
+                "attributes": {},
+            }
+            texts = [
+                ("contents", ["Page vii"], {"front_matter": True}),
+                ("body", ["Line conventions", "Page 4-18"], {}),
+            ]
+            chunks = []
+            for ordinal, (name, heading, attributes) in enumerate(texts):
+                text = "Hidden lines identify invisible edges in aircraft drawings."
+                chunks.append(
+                    {
+                        "schema_version": 1,
+                        "chunk_instance_id": name,
+                        "content_id": f"sha256:{name}",
+                        "document_id": "manual:1",
+                        "parent_chunk_id": None,
+                        "ordinal": ordinal,
+                        "heading_path": heading,
+                        "text": text,
+                        "character_count": len(text),
+                        "token_count": None,
+                        "previous_chunk_id": None,
+                        "next_chunk_id": None,
+                        "attributes": attributes,
+                    }
+                )
+            (processed / "documents.jsonl").write_text(json.dumps(document) + "\n", encoding="utf-8")
+            (processed / "chunks.jsonl").write_text(
+                "".join(json.dumps(chunk) + "\n" for chunk in chunks), encoding="utf-8"
+            )
+            database = root / "manual.sqlite3"
+            build_index(processed, database)
+            results = search(database, "hidden lines aircraft drawings", limit=2)
+            self.assertEqual(results[0]["chunk_id"], "body")
+            self.assertFalse(results[0]["front_matter"])
+            self.assertEqual(results[1]["chunk_id"], "contents")
+            self.assertTrue(results[1]["front_matter"])
+
 
 if __name__ == "__main__":
     unittest.main()

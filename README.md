@@ -35,6 +35,7 @@ These corpora are implemented and verified in the current development installati
 | RFC Editor | 2026-08-19 snapshot | 9,822 RFCs, 348,831 chunks | BM25 + chunk-level hybrid |
 | IANA protocol registries | 2026-08-19 snapshot | 4,256 registries, 114,590 chunks | Structured BM25 |
 | SQLite documentation | SQLite 3.53.4 | 765 documents, 4,384 chunks | BM25 + chunk-level hybrid |
+| FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |
 | GNU Awk user's guide | Gawk 5.4, 2026-02-22 generation | 502 documents, 1,332 chunks | BM25 |
@@ -245,6 +246,8 @@ planned -> downloaded -> validated -> extracted -> parsed -> indexed -> evaluate
 | `rag/tests/` | Synthetic fixtures and automated tests |
 | `rag/eval/` | Versioned retrieval evaluation suites |
 | `config/datasets.json` | Dataset registry, versions, licenses, storage bounds, and paths |
+| `rag/src/offline_rag/pdf_manuals.py` | Page-aware, OCR-gated PDF/manual importer |
+| `scripts/run-pdf-manual-pipeline.ps1` | Registry-driven PDF import and atomic BM25 build |
 | `config/models.json` | Replaceable local model and embedding-model registry |
 | `scripts/` | Windows-native operational commands |
 | `docs/` | Architecture, measurements, update procedures, and design decisions |
@@ -256,7 +259,7 @@ planned -> downloaded -> validated -> extracted -> parsed -> indexed -> evaluate
 
 ## Adding another corpus
 
-New corpora should not be flattened through a generic PDF loader. Each source type should preserve the structure that makes it useful: headings, code blocks, tables, document versions, question/answer relationships, RFC status, manual model numbers, page references, or other corpus-specific metadata.
+New corpora should not be flattened through a generic PDF loader. Each source type should preserve the structure that makes it useful: headings, code blocks, tables, document versions, question/answer relationships, RFC status, manual model numbers, page references, or other corpus-specific metadata. The first [PDF/manual adapter](docs/pdf-manual-ingestion.md) now preserves page and outline citations, checks text-layer coverage, and refuses low-coverage scans until an explicit OCR stage is available.
 
 The expected sequence is:
 

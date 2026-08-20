@@ -63,6 +63,8 @@ The next GNU batch adds Sed, Tar, Findutils, and Diffutils: another 738 document
 
 The third batch adds glibc 2.44, Gzip 1.14, Wget 1.25.0, and GRUB 2.14: 1,437 documents and 3,623 chunks from 1,730,159 compressed source bytes. These fill four practical offline gaps—C/POSIX APIs, compression validation, resilient acquisition/mirroring, and bootloader recovery—while retaining canonical per-node citations and exact upstream license notices.
 
+The first Wave 4/manual pilot is also complete. FAA-H-8083-30B (2023) exercises the page-aware PDF path on a real 92,539,602-byte engineering handbook: 676 of 677 pages have searchable text, one cover is image-only, and 1,837 page-bounded chunks feed a verified 9,388,032-byte BM25 database. The importer retains outline/page citations and rotated labels, demotes front-matter matches, and fails atomically when a scan requires OCR. This makes it safe to expand into selected FAA, DOE, NASA, NIST, USACE, and equipment-specific manuals without pretending an image-only archive is searchable.
+
 ### Wave 3: official programming and systems documentation
 
 Acquire pinned official releases with publisher checksums where available:

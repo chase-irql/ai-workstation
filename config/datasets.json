@@ -891,6 +891,37 @@
       },
       "status": "evaluated",
       "notes": "Acquired the official 11,820,412-byte SQLite 3.53.4 documentation archive and verified publisher SHA3-256 7ccf86a52e7dd1fb9b31e63edcebe3b553f18f89cd26eef59c7f191a5111836e. Parsed 837 HTML files into 765 documents and 4,384 chunks, skipping 72 navigation/index-only pages after structure filtering. The 20-query lexical gate achieved Success@1 0.95, Success@5 1.0, MRR@10 0.975, Recall@50 1.0, and nDCG@10 0.966274. A source-verified Qwen3-Embedding 0.6B generation covers every chunk at 256 dimensions. On 12 paraphrase cases, warm hybrid retrieval achieved Success@10 0.916667 and Recall@50 1.0; routed deterministic reranking raised Success@5 from 0.833333 to 0.916667 while preserving the exact-query gate."
+    },
+    {
+      "dataset_id": "faa-amt-general-2023",
+      "name": "FAA Aviation Maintenance Technician Handbook — General",
+      "description": "Official FAA foundational handbook covering mathematics, physics, electricity, materials, tools, inspection, maintenance practices, and human factors for aviation technicians.",
+      "category": "government-engineering-handbook",
+      "official_source_url": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation",
+      "license": "U.S. Government work; third-party material remains subject to notices in the handbook",
+      "attribution": "Federal Aviation Administration, FAA-H-8083-30B",
+      "release": "FAA-H-8083-30B-2023",
+      "update_frequency": "when the FAA publishes a revised handbook or errata",
+      "scope": "complete 2023 Aviation Maintenance Technician Handbook — General PDF",
+      "formats": ["PDF"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/amtg_handbook.pdf"
+      },
+      "storage": {
+        "download_min_bytes": 92000000,
+        "download_max_bytes": 94000000,
+        "extracted_max_bytes": 94000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/manuals/faa-amt-general-2023",
+        "processed": "corpora/processed/manuals/faa-amt-general-2023",
+        "index": "indexes/manuals/faa-amt-general-2023.sqlite3",
+        "semantic_index": "indexes/semantic/faa-amt-general-2023"
+      },
+      "status": "evaluated",
+      "notes": "Acquired the official 92,539,602-byte FAA-H-8083-30B (2023) PDF and pinned local SHA-256 0a39c01bbc454e77a49813cf27e2ef291756fa7111d9308bc290cd0eb71616fd; the FAA page exposes no adjacent publisher digest. Structurally parsed all 677 pages: 676 contain searchable text and one image-only cover page. Page- and outline-aware import produced 1,837 chunks and a verified 9,388,032-byte BM25 database. Rotated table and diagram labels are retained with degraded layout spacing rather than dropped. The 14-topic single-document coverage gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0; it validates topic coverage, while page citations were separately inspected. Front-matter matches are deterministically demoted behind body evidence."
     }
   ]
 }

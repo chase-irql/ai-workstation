@@ -99,6 +99,8 @@
         "iana-protocol-registries=indexes\\structured\\iana.sqlite3",
         "--index",
         "sqlite-docs=indexes\\documentation\\sqlite.sqlite3",
+        "--index",
+        "faa-amt-general-2023=indexes\\manuals\\faa-amt-general-2023.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
         "--corpus-vector",

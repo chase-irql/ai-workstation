@@ -15,6 +15,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `rfc-editor-text` | RFC Editor snapshot 2026-08-19 | IETF Trust Legal Provisions | 9,822 RFCs; 348,831 chunks | BM25 + chunk-level semantic/hybrid |
 | `iana-protocol-registries` | IANA assignments snapshot 2026-08-19 | CC0 1.0 Universal | 4,256 registries; 110,423 table records; 114,590 chunks | Structured BM25 |
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
+| `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
 | `gawk-5.4-manual` | GNU Awk 5.4 split-HTML manual, generated 2026-02-22 | GFDL 1.3 or later with stated invariant and cover texts | 502 documents; 1,332 chunks | BM25 |
@@ -111,6 +112,15 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Publisher SHA3-256: `7ccf86a52e7dd1fb9b31e63edcebe3b553f18f89cd26eef59c7f191a5111836e`.
 - Local archive SHA-256: `a1d0f5de57485d062796ed7e67daff0758b50d00001a0f233a2c15aaf40bbdc8`.
 - The HTML importer preserves headings, code, lists, API identifiers, SQL terms, and stable `sqlite.org` citations while excluding navigation and search furniture.
+
+### FAA Aviation Maintenance Technician Handbook — General
+
+- Official PDF: `https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/amtg_handbook.pdf`.
+- The 92,539,602-byte artifact is pinned by local SHA-256 `0a39c01bbc454e77a49813cf27e2ef291756fa7111d9308bc290cd0eb71616fd`; the FAA publication page does not provide an adjacent digest.
+- The PDF has 677 pages. The text-layer gate found 676 searchable pages and one image-only cover, producing 1,837 chunks without crossing page boundaries.
+- PDF title/author metadata, outline hierarchy, page labels, source digest, release, license, and canonical URL are retained. Rotated table and diagram text is included even where spacing is degraded.
+- The 14-topic lexical suite passes every cutoff. Because the pilot contains one document, this is a coverage gate rather than a claim about inter-document ranking; sampled citations correctly resolve topics including Ohm's law (page 12-17), eddy-current inspection (page 10-20), corrosion (page 8-10), and torque-wrench calibration (page 11-6).
+- Table-of-contents/front-matter chunks remain searchable but rank behind matching body evidence. OCR remains an explicit future preprocessing step for low-text scans.
 
 ### DevOps Stack Exchange
 

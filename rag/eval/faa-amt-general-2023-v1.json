@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "name": "FAA AMT General 2023 lexical coverage gate",
+  "description": "Stable-document-ID coverage gate for exact procedures and concepts in the single-volume FAA-H-8083-30B pilot. Page-level citation assertions are covered by importer tests and manual inspection; this suite measures corpus coverage, not inter-document discrimination.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "bernoulli-001", "query": "Bernoulli principle venturi", "query_type": "physics", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "ohm-law-001", "query": "Ohm law current voltage resistance", "query_type": "electricity", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "eddy-current-001", "query": "eddy current surface cracks", "query_type": "inspection", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "cotter-pin-001", "query": "cotter pin safetying", "query_type": "hardware", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "human-factors-001", "query": "human factors dirty dozen", "query_type": "human_factors", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "torque-calibration-001", "query": "torque wrench calibration schedule", "query_type": "tools", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "galvanic-corrosion-001", "query": "galvanic corrosion dissimilar metals", "query_type": "materials", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "fire-extinguisher-001", "query": "class B fire extinguisher flammable liquids", "query_type": "safety", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "micrometer-001", "query": "micrometer precision measuring tool", "query_type": "tools", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "drawing-lines-001", "query": "hidden lines visible object edges", "query_type": "drawings", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "penetrant-001", "query": "penetrant inspection surface cracks", "query_type": "inspection", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "binary-001", "query": "binary decimal numbers conversion", "query_type": "mathematics", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "weighing-001", "query": "weight balance aircraft weighing", "query_type": "weight_balance", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}},
+    {"id": "fluid-lines-001", "query": "fluid lines flare fitting", "query_type": "fluid_lines", "relevance": {"faa-amt-general-2023:73f162d0708aa9ca58e857ae": 3}}
+  ]
+}

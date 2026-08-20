@@ -1,0 +1,170 @@
+from __future__ import annotations
+
+import base64
+import io
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from offline_rag.bm25 import build_index, search
+from offline_rag.pdf_manuals import import_pdf_manuals
+from offline_rag.verify import verify_database
+
+
+ONE_PIXEL_PNG = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+)
+
+
+def _write_text_manual(path: Path) -> None:
+    pdf = canvas.Canvas(str(path))
+    pdf.setTitle("Pump Controller Service Manual")
+    pdf.setAuthor("Example Manufacturer")
+    pdf.bookmarkPage("troubleshooting")
+    pdf.addOutlineEntry("Troubleshooting", "troubleshooting", level=0)
+    pdf.drawString(72, 740, "Error E23 means that the intake filter is blocked.")
+    pdf.drawString(72, 720, "Disconnect power and clean the intake filter before restart.")
+    pdf.showPage()
+    pdf.bookmarkPage("calibration")
+    pdf.addOutlineEntry("Calibration", "calibration", level=0)
+    text = pdf.beginText(72, 740)
+    text.textLine("Calibration procedure")
+    for index in range(35):
+        text.textLine(f"Step {index + 1}: adjust sensor gain and verify the reference voltage.")
+    pdf.drawText(text)
+    pdf.showPage()
+    pdf.showPage()
+    pdf.save()
+
+
+def _write_mixed_scan(path: Path) -> None:
+    pdf = canvas.Canvas(str(path))
+    pdf.setTitle("Partially Scanned Manual")
+    pdf.drawImage(ImageReader(io.BytesIO(ONE_PIXEL_PNG)), 72, 600, width=200, height=100)
+    pdf.showPage()
+    pdf.drawString(72, 740, "This page has a searchable text layer.")
+    pdf.showPage()
+    pdf.save()
+
+
+class PdfManualImportTests(unittest.TestCase):
+    def test_page_aware_common_records_bm25_and_citations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            manual = source / "pump-controller.pdf"
+            _write_text_manual(manual)
+            output = root / "processed"
+            result = import_pdf_manuals(
+                source,
+                output,
+                corpus="pump-manuals",
+                source_version="rev-2026-08",
+                license_name="test fixture license",
+                source_url_template="https://example.test/manuals/{relative_path}",
+                source_timestamp="2026-08-20T00:00:00Z",
+                max_chars=512,
+                min_chars=60,
+            )
+            self.assertEqual(result["documents"], 1)
+            self.assertEqual(result["pages"], 3)
+            self.assertEqual(result["text_pages"], 2)
+            self.assertEqual(result["blank_pages"], 1)
+
+            manifest = json.loads((output / "corpus-manifest.json").read_text(encoding="utf-8"))
+            stats = json.loads((output / "extraction-stats.json").read_text(encoding="utf-8"))
+            document = json.loads((output / "documents.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            chunks = [json.loads(line) for line in (output / "chunks.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(manifest["importer"], "pdf-manuals-v1")
+            self.assertFalse(manifest["configuration"]["ocr"])
+            self.assertTrue(stats["completed"])
+            self.assertEqual(stats["stop_reason"], "source_complete")
+            self.assertEqual(document["title"], "Pump Controller Service Manual")
+            self.assertEqual(document["attributes"]["pdf_author"], "Example Manufacturer")
+            self.assertEqual(document["attributes"]["page_count"], 3)
+            self.assertEqual(document["source_url"], "https://example.test/manuals/pump-controller.pdf")
+            self.assertTrue(all(chunk["attributes"]["page_number"] in {1, 2} for chunk in chunks))
+            self.assertTrue(any("Page 1" in chunk["heading_path"] for chunk in chunks))
+            self.assertTrue(any("Troubleshooting" in chunk["heading_path"] for chunk in chunks))
+            self.assertTrue(all(len(chunk["text"]) <= 512 for chunk in chunks))
+            self.assertEqual(chunks[0]["next_chunk_id"], chunks[1]["chunk_instance_id"])
+
+            database = root / "manuals.sqlite3"
+            build_index(output, database)
+            verification = verify_database(database, output, smoke_queries=("E23 intake filter",))
+            self.assertTrue(verification["verified"])
+            found = search(database, "E23 intake filter", limit=3)[0]
+            self.assertEqual(found["document_id"], document["document_id"])
+            self.assertIn("Troubleshooting > Page 1", found["citation"])
+            self.assertIn("pump-controller.pdf", found["source_url"])
+
+    def test_low_searchable_ratio_requires_ocr_without_publishing_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manual = root / "mixed.pdf"
+            _write_mixed_scan(manual)
+            output = root / "processed"
+            with self.assertRaisesRegex(ValueError, "OCR required"):
+                import_pdf_manuals(
+                    manual,
+                    output,
+                    corpus="scan-test",
+                    source_version="1",
+                    license_name="test",
+                    min_searchable_ratio=0.75,
+                )
+            self.assertFalse(output.exists())
+            self.assertFalse(any(root.glob(".processed.building-*")))
+
+    def test_existing_and_unrecognized_output_are_protected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manual = root / "manual.pdf"
+            _write_text_manual(manual)
+            output = root / "processed"
+            options = {"corpus": "manual-test", "source_version": "1", "license_name": "test"}
+            import_pdf_manuals(manual, output, **options)
+            before = (output / "corpus-manifest.json").read_bytes()
+            with self.assertRaises(FileExistsError):
+                import_pdf_manuals(manual, output, **options)
+            self.assertEqual((output / "corpus-manifest.json").read_bytes(), before)
+            (output / "personal.txt").write_text("preserve", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "unrecognized"):
+                import_pdf_manuals(manual, output, force=True, **options)
+            self.assertEqual((output / "personal.txt").read_text(encoding="utf-8"), "preserve")
+
+    def test_invalid_arguments_fail_before_writing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manual = root / "manual.pdf"
+            _write_text_manual(manual)
+            with self.assertRaisesRegex(ValueError, "between zero and one"):
+                import_pdf_manuals(
+                    manual,
+                    root / "output",
+                    corpus="manual-test",
+                    source_version="1",
+                    license_name="test",
+                    min_searchable_ratio=1.1,
+                )
+            with self.assertRaisesRegex(ValueError, "relative_path"):
+                import_pdf_manuals(
+                    manual,
+                    root / "output",
+                    corpus="manual-test",
+                    source_version="1",
+                    license_name="test",
+                    source_url_template="https://example.test/manual.pdf",
+                )
+
+
+if __name__ == "__main__":
+    unittest.main()
