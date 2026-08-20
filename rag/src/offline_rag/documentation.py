@@ -262,6 +262,7 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
     code: list[str] = []
     fence: str | None = None
     fence_language: str | None = None
+    html_comment = False
     title = ""
     index = 0
     if lines and lines[0].strip() == "---":
@@ -288,6 +289,16 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
                 fence_language = None
             else:
                 code.append(line)
+            index += 1
+            continue
+        if html_comment:
+            if "-->" in line:
+                html_comment = False
+            index += 1
+            continue
+        if stripped.startswith("<!--"):
+            _flush_paragraph(blocks, headings, paragraph)
+            html_comment = "-->" not in stripped
             index += 1
             continue
         if fence_match:

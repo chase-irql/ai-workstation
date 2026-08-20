@@ -71,6 +71,8 @@ PostgreSQL 18.6 adds the complete generated HTML reference: 1,148 documents and 
 
 systemd 261.2 adds 542 manuals and guides / 9,614 chunks in a 17,846,272-byte verified BM25 database. This batch introduced a reusable, network-disabled DocBook parser with safe local XInclude resolution and fixed Markdown YAML-front-matter handling. The 23-topic lexical gate passes every cutoff, so its compact exact-reference corpus remains BM25-first until a separate paraphrase suite demonstrates enough benefit to justify embeddings.
 
+Node.js 24.19.0 LTS adds 126 current API/guidance documents and 5,732 chunks in a 12,177,408-byte verified BM25 database. The archive is publisher-checksum verified. Historical release changelogs and non-content HTML metadata are intentionally excluded after pilot ranking showed obsolete or generated material could pollute current API evidence; the resulting 26-topic gate passes all Success, MRR, and Recall cutoffs.
+
 The first Wave 4/manual pilot is also complete. FAA-H-8083-30B (2023) exercises the page-aware PDF path on a real 92,539,602-byte engineering handbook: 676 of 677 pages have searchable text, one cover is image-only, and 1,837 page-bounded chunks feed a verified 9,388,032-byte BM25 database. The importer retains outline/page citations and rotated labels, demotes front-matter matches, and fails atomically when a scan requires OCR. This makes it safe to expand into selected FAA, DOE, NASA, NIST, USACE, and equipment-specific manuals without pretending an image-only archive is searchable.
 
 ### Wave 3: official programming and systems documentation

@@ -135,12 +135,18 @@ SPDX-License-Identifier: LGPL-2.1-or-later
 
 # System and Service Credentials
 
+<!-- YAML
+added: v1.0.0
+-->
+<!-- source_link=lib/example.js -->
+
 Load credentials without environment variables.
 """,
             "fallback",
         )
         self.assertEqual(frontmatter.title, "Credentials")
         self.assertFalse(any("SPDX" in block.text for block in frontmatter.blocks))
+        self.assertFalse(any("source_link" in block.text or "added:" in block.text for block in frontmatter.blocks))
         self.assertEqual(frontmatter.blocks[0].heading_path, ("System and Service Credentials",))
 
         asciidoc = parse_asciidoc(

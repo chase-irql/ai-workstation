@@ -21,6 +21,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `ninja-1.13-docs` | Ninja 1.13.2 manual at commit `3441b633…` | Apache-2.0 | 1 manual; 58 chunks | BM25 |
 | `postgresql-18-docs` | PostgreSQL 18.6 generated HTML documentation | PostgreSQL License | 1,148 documents; 6,931 chunks | BM25 |
 | `systemd-261-docs` | systemd 261.2 DocBook manuals and Markdown guides | LGPL-2.1-or-later; per-file notices retained | 542 documents; 9,614 chunks | BM25 |
+| `nodejs-24-docs` | Node.js 24.19.0 LTS Krypton API and guides | MIT and included third-party licenses | 126 documents; 5,732 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -169,6 +170,12 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - The complete archive passed member, path, and size validation: 7,193 regular files and 100,857,467 extracted bytes. The retrieval scope is all 455 published `man/*.xml` refentries plus 90 `docs/*.md` candidates; empty guides are skipped and shared DocBook fragments are incorporated through their XIncludes rather than indexed as misleading standalone pages.
 - The shared documentation adapter now supports DocBook XML. It disables network DTD resolution, converts build-time entities deterministically, resolves only same-directory include fragments by stable XML ID, preserves section hierarchy, option definitions, lists, tables, code examples, admonitions, and man-page cross-references, and extracts Markdown YAML front matter without polluting titles or searchable text.
 - The final generation contains 542 documents and 9,614 chunks in a verified 17,846,272-byte BM25 database. A 23-topic gate covering service restart limits, journal storage, timers, network configuration, DNSSEC, automounts, credentials, resource controls, socket activation, boot analysis, coredumps, containers, tmpfiles, watchdogs, portable services, sandboxing, online readiness, cryptenrollment, and boot control passes every cutoff at `1.0`.
+
+### Node.js 24.19.0 LTS documentation
+
+- The release was resolved from Node.js's official distribution index as the latest v24 LTS Krypton build at acquisition time. The 55,505,276-byte source archive matches publisher SHA-256 `f6d95e10a0431ee1067fc6aabe9f762908b4716dd35324e1ddb4b1466b76659f` from the adjacent official `SHASUMS256.txt`.
+- All 32,303 source-release files and 578,863,312 extracted bytes passed archive validation. Retrieval includes the complete API, guide, and contributor Markdown set while excluding historical release changelogs that caused obsolete behavior to outrank the current API.
+- The published generation contains 126 documents and 5,732 chunks in a verified 12,177,408-byte BM25 database. The Markdown parser removes Node's non-content HTML metadata comments while preserving comments inside code fences. Its 26-topic lexical gate spans workers, filesystem promises, streams, ESM/CommonJS/packages, buffers, cryptography, child processes, clusters, async context, events, HTTP/2/TLS/DNS, testing, permissions, diagnostics, V8, VM modules, Brotli, and WASI; all Success, MRR, and Recall cutoffs are `1.0`, with nDCG@10 `0.993615`.
 
 ### DevOps Stack Exchange
 

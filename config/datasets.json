@@ -1167,6 +1167,47 @@
       },
       "status": "evaluated",
       "notes": "Pinned to immutable commit 4925d9f07fc697efccd98a93046ff535b8832445 behind systemd's signed v261.2 annotated tag. Acquired the 18,468,555-byte GitHub commit archive, recorded local SHA-256 018b0aa52a3a5d792233a3a599dd8d7dfb6302442bde88da37b0ccf847ecb54d, and structurally validated 7,193 files / 100,857,467 extracted bytes. The DocBook/Markdown import excludes standalone helper fragments after resolving their local XIncludes, yielding 542 documents and 9,614 chunks in a verified 17,846,272-byte BM25 database. Its 23-topic stable-ID lexical gate achieved every metric cutoff at 1.0. The commit archive has no adjacent publisher digest, so the recorded digest is explicitly local rather than publisher-verified."
+    },
+    {
+      "dataset_id": "nodejs-24-docs",
+      "name": "Node.js 24.19.0 LTS Documentation",
+      "description": "Official Node.js LTS API, command-line, diagnostics, permissions, modules, packages, testing, networking, streams, workers, and contributor documentation.",
+      "category": "programming-language-documentation",
+      "official_source_url": "https://nodejs.org/docs/latest-v24.x/api/",
+      "license": "MIT and included third-party licenses",
+      "attribution": "Node.js contributors",
+      "release": "24.19.0 LTS Krypton",
+      "update_frequency": "each Node.js 24 LTS release",
+      "scope": "complete API, guides, and contributor Markdown documentation from the official Node.js 24.19.0 source release; historical release changelogs excluded from retrieval",
+      "formats": ["Markdown", "tar.xz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://nodejs.org/dist/v24.19.0/node-v24.19.0.tar.xz",
+        "publisher_checksum_algorithm": "sha256",
+        "publisher_checksum": "f6d95e10a0431ee1067fc6aabe9f762908b4716dd35324e1ddb4b1466b76659f",
+        "publisher_checksum_source": "https://nodejs.org/dist/v24.19.0/SHASUMS256.txt",
+        "source_tag": "v24.19.0",
+        "source_url_template": "https://github.com/nodejs/node/blob/v24.19.0/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["doc/*.md", "doc/**/*.md"],
+        "exclude_globs": ["doc/changelogs/*", "doc/changelogs/**/*"],
+        "smoke_query": "worker threads shared memory MessagePort"
+      },
+      "storage": {
+        "download_min_bytes": 40000000,
+        "download_max_bytes": 100000000,
+        "extracted_max_bytes": 1000000000,
+        "indexed_max_bytes": 2000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/nodejs-24",
+        "processed": "corpora/processed/documentation/nodejs-24",
+        "index": "indexes/documentation/nodejs-24.sqlite3",
+        "semantic_index": "indexes/semantic/nodejs-24-docs"
+      },
+      "status": "evaluated",
+      "notes": "Pinned from Node.js's official distribution index to v24.19.0 LTS Krypton. Acquired the 55,505,276-byte source archive and verified publisher SHA-256 f6d95e10a0431ee1067fc6aabe9f762908b4716dd35324e1ddb4b1466b76659f from the adjacent SHASUMS256.txt. All 32,303 archive files / 578,863,312 extracted bytes passed structural validation. The scoped API, guide, and contributor Markdown set excludes noisy historical release changelogs and non-content HTML metadata, producing 126 documents, 5,732 chunks, and a verified 12,177,408-byte BM25 database. Its 26-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50 of 1.0 and nDCG@10 of 0.993615."
     }
   ]
 }
