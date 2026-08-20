@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU Tar manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"restore-001","query":"incremental backup restore","query_type":"backup","relevance":{"tar-manual-20260611:bddc6c9eee190f825ad7229d":3}},
+  {"id":"pax-001","query":"pax extended header","query_type":"formats","relevance":{"tar-manual-20260611:49edcb43a775e248298dd007":3}},
+  {"id":"exclude-001","query":"exclude files patterns","query_type":"selection","relevance":{"tar-manual-20260611:969f58e11e6d85b7ac35de8f":3}},
+  {"id":"verify-001","query":"verify archive","query_type":"integrity","relevance":{"tar-manual-20260611:c695397c8d4e1e65666a0593":3}},
+  {"id":"sparse-001","query":"sparse file handling","query_type":"files","relevance":{"tar-manual-20260611:0dd38d2d0b6efc3b6114ebfc":3}},
+  {"id":"checkpoint-001","query":"checkpoint action","query_type":"progress","relevance":{"tar-manual-20260611:08415c56ad2680461c75c26d":3}}
+]}

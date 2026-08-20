@@ -59,6 +59,10 @@ Network Engineering and Database Administrators have verified 256-dimensional se
 
 Wave 3 has begun with the official split-HTML Bash 5.3, Coreutils 9.11, Gawk 5.4, Grep 3.12, and Make 4.4.1 manuals. Together they add 1,091 canonical documents and 2,883 chunks for less than 1.8 MB of source archives and about 9.4 MB of BM25 databases—an example of the high knowledge-per-byte material this plan prioritizes.
 
+The next GNU batch adds Sed, Tar, Findutils, and Diffutils: another 738 documents and 1,490 chunks for 648,031 compressed source bytes. Every corpus has a verified database and a perfect six-topic lexical regression gate. Small official manuals are intentionally embedded only after larger conceptual corpora, because BM25 already answers their exact command and option lookups well.
+
+The third batch adds glibc 2.44, Gzip 1.14, Wget 1.25.0, and GRUB 2.14: 1,437 documents and 3,623 chunks from 1,730,159 compressed source bytes. These fill four practical offline gaps—C/POSIX APIs, compression validation, resilient acquisition/mirroring, and bootloader recovery—while retaining canonical per-node citations and exact upstream license notices.
+
 ### Wave 3: official programming and systems documentation
 
 Acquire pinned official releases with publisher checksums where available:

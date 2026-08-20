@@ -40,6 +40,14 @@ These corpora are implemented and verified in the current development installati
 | GNU Awk user's guide | Gawk 5.4, 2026-02-22 generation | 502 documents, 1,332 chunks | BM25 |
 | GNU Grep manual | Grep 3.12, 2025-04-11 generation | 31 documents, 82 chunks | BM25 |
 | GNU Make manual | Make 4.4.1, 2023-02-26 generation | 173 documents, 444 chunks | BM25 |
+| GNU Sed manual | 2026-04-22 generation | 67 documents, 174 chunks | BM25 |
+| GNU Tar manual | Tar 1.35.90, 2026-06-11 generation | 411 documents, 733 chunks | BM25 |
+| GNU Findutils manual | Findutils 4.11.0, 2026-07-14 generation | 147 documents, 337 chunks | BM25 |
+| GNU Diffutils manual | Diffutils 3.12, 2025-04-09 generation | 113 documents, 246 chunks | BM25 |
+| GNU C Library manual | glibc 2.44, 2026-07-27 generation | 776 documents, 2,164 chunks | BM25 |
+| GNU Gzip manual | Gzip 1.14, 2025-04-10 generation | 10 documents, 30 chunks | BM25 |
+| GNU Wget manual | Wget 1.25.0, 2024-11-11 generation | 51 documents, 149 chunks | BM25 |
+| GNU GRUB manual | GRUB 2.14, 2026-01-14 generation | 600 documents, 1,280 chunks | BM25 |
 | DevOps Stack Exchange | 2026-06-30 community dump | 11,877 retained posts, 13,531 chunks | BM25 + experimental chunk-level hybrid |
 | Information Security Stack Exchange | 2026-06-30 community dump | 171,041 retained posts, 188,770 chunks | BM25 + chunk-level hybrid |
 | Network Engineering Stack Exchange | 2026-06-30 community dump | 39,592 retained posts, 44,174 chunks | BM25; semantic generation published |

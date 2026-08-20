@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU Sed manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"substitute-001","query":"s command replacement flags","query_type":"commands","relevance":{"sed-manual-20260422:50ab7cb0b6a50d2f25491f4f":3}},
+  {"id":"regex-001","query":"regular expressions","query_type":"regex","relevance":{"sed-manual-20260422:e5e46d9af252432251bc9ef4":3}},
+  {"id":"space-001","query":"hold space pattern","query_type":"execution","relevance":{"sed-manual-20260422:e0dc59813f505ef81fcfb721":3}},
+  {"id":"branch-001","query":"branch label","query_type":"programming","relevance":{"sed-manual-20260422:35ad232c806ec82341b29df3":3}},
+  {"id":"inplace-001","query":"backup suffix in-place","query_type":"files","relevance":{"sed-manual-20260422:578fcb58340d6e31c7522045":3}},
+  {"id":"status-001","query":"exit status","query_type":"behavior","relevance":{"sed-manual-20260422:24f0d0216e8f9ccc5fdbba17":3}}
+]}

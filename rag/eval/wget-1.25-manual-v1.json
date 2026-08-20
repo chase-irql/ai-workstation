@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU Wget 1.25 manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"recursive-001","query":"recursive retrieval","query_type":"mirroring","relevance":{"wget-1.25-manual:ae50386b753f32eb0c2d31e0":3}},
+  {"id":"retry-001","query":"retry timeout","query_type":"networking","relevance":{"wget-1.25-manual:3c054a19c5f8a7147ce604e8":3}},
+  {"id":"auth-001","query":"HTTP options password","query_type":"authentication","relevance":{"wget-1.25-manual:0da7ed27447bd2eceda83132":3}},
+  {"id":"proxy-001","query":"proxy environment","query_type":"networking","relevance":{"wget-1.25-manual:07561394e046183819bd7fa7":3}},
+  {"id":"mirror-001","query":"mirror timestamping","query_type":"mirroring","relevance":{"wget-1.25-manual:6d7eb4cc386cf80f185000ad":3}},
+  {"id":"tls-001","query":"certificate verification","query_type":"security","relevance":{"wget-1.25-manual:af3dd17c4afdacb23725d978":3}}
+]}

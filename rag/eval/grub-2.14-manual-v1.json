@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU GRUB 2.14 manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"rescue-001","query":"rescue shell","query_type":"recovery","relevance":{"grub-2.14-manual:37e5b18715c3e61b2d3196f4":3}},
+  {"id":"install-001","query":"grub-install BIOS","query_type":"installation","relevance":{"grub-2.14-manual:bd64902daf98991682fd8335":3}},
+  {"id":"chain-001","query":"chain loading operating system","query_type":"booting","relevance":{"grub-2.14-manual:da7ca575623b96e329b15a94":3}},
+  {"id":"menu-001","query":"menuentry configuration","query_type":"configuration","relevance":{"grub-2.14-manual:54668bef4060bf32b472a811":3}},
+  {"id":"crypto-001","query":"encrypted disk cryptodisk","query_type":"security","relevance":{"grub-2.14-manual:357a4829615d604a23463bfc":3}},
+  {"id":"mkconfig-001","query":"grub-mkconfig","query_type":"configuration","relevance":{"grub-2.14-manual:47f4ab0c99a65ab555db0f40":3}}
+]}

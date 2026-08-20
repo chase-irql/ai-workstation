@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU C Library 2.44 manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"malloc-001","query":"malloc calloc realloc free","query_type":"memory","relevance":{"glibc-2.44-manual:d17c7ac6a311ed012612360f":3}},
+  {"id":"mutex-001","query":"pthread mutex lock","query_type":"threads","relevance":{"glibc-2.44-manual:fa06bdc536ecb3e1a9f1c384":3}},
+  {"id":"socket-001","query":"socket address family","query_type":"networking","relevance":{"glibc-2.44-manual:7fc8d6cb13593a88fd629ec1":3}},
+  {"id":"signal-001","query":"signal handling","query_type":"processes","relevance":{"glibc-2.44-manual:dade0ccf7a2772f7affaae21":3}},
+  {"id":"locale-001","query":"locale categories","query_type":"internationalization","relevance":{"glibc-2.44-manual:c7497b943f818994dec4e47f":3}},
+  {"id":"linker-001","query":"dynamic linker","query_type":"loading","relevance":{"glibc-2.44-manual:9205d920589f661f94b0e1a5":3}}
+]}

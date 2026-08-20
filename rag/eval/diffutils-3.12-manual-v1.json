@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU Diffutils 3.12 manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"unified-001","query":"unified output format","query_type":"formats","relevance":{"diffutils-3.12-manual:3211cdc33d5db561a5a6be2a":3}},
+  {"id":"threeway-001","query":"three way merge","query_type":"merge","relevance":{"diffutils-3.12-manual:b2385264fcbfa776fe1d1a28":3}},
+  {"id":"space-001","query":"blank tab spacing","query_type":"comparison","relevance":{"diffutils-3.12-manual:19a8ee90fb8275fde1ec2236":3}},
+  {"id":"directory-001","query":"compare directories","query_type":"directories","relevance":{"diffutils-3.12-manual:9755b599f2b16223b346f60b":3}},
+  {"id":"reversed-001","query":"patch reversed","query_type":"patch","relevance":{"diffutils-3.12-manual:36eda66bf8b1db035b47ec30":3}},
+  {"id":"invoke-001","query":"invoking diff status trouble","query_type":"behavior","relevance":{"diffutils-3.12-manual:6430220b925d07f7c67abb32":3}}
+]}

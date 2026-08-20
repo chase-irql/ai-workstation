@@ -20,6 +20,14 @@ This catalog is the human-readable inventory of every corpus currently published
 | `gawk-5.4-manual` | GNU Awk 5.4 split-HTML manual, generated 2026-02-22 | GFDL 1.3 or later with stated invariant and cover texts | 502 documents; 1,332 chunks | BM25 |
 | `grep-3.12-manual` | GNU Grep 3.12 split-HTML manual, generated 2025-04-11 | GFDL; exact notices retained | 31 documents; 82 chunks | BM25 |
 | `make-4.4.1-manual` | GNU Make 4.4.1 split-HTML manual, generated 2023-02-26 | GFDL; exact notices retained | 173 documents; 444 chunks | BM25 |
+| `sed-manual-20260422` | GNU Sed split-HTML manual, generated 2026-04-22 | GFDL; exact notices retained | 67 documents; 174 chunks | BM25 |
+| `tar-manual-20260611` | GNU Tar 1.35.90 split-HTML manual, generated 2026-06-11 | GFDL; exact notices retained | 411 documents; 733 chunks | BM25 |
+| `findutils-manual-20260714` | GNU Findutils 4.11.0 split-HTML manual, generated 2026-07-14 | GFDL; exact notices retained | 147 documents; 337 chunks | BM25 |
+| `diffutils-3.12-manual` | GNU Diffutils 3.12 split-HTML manual, generated 2025-04-09 | GFDL 1.3 or later with no invariant or cover texts | 113 documents; 246 chunks | BM25 |
+| `glibc-2.44-manual` | GNU C Library 2.44 split-HTML manual, generated 2026-07-27 | GFDL 1.3 or later with stated invariant and cover texts | 776 documents; 2,164 chunks | BM25 |
+| `gzip-1.14-manual` | GNU Gzip 1.14 split-HTML manual, generated 2025-04-10 | GFDL 1.3 or later with no invariant or cover texts | 10 documents; 30 chunks | BM25 |
+| `wget-1.25-manual` | GNU Wget 1.25.0 split-HTML manual, generated 2024-11-11 | GFDL; exact notices retained | 51 documents; 149 chunks | BM25 |
+| `grub-2.14-manual` | GNU GRUB 2.14 split-HTML manual, generated 2026-01-14 | GFDL 1.2 or later with no invariant sections | 600 documents; 1,280 chunks | BM25 |
 | `devops-stackexchange` | DevOps Stack Exchange 2026-06-30 community dump | CC BY-SA 3.0 or 4.0 per retained post | 11,877 retained posts; 13,531 chunks | BM25 + experimental 1,024-dim semantic/hybrid |
 | `security-stackexchange` | Information Security Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 171,041 retained posts; 188,770 chunks | BM25 + 256-dim semantic/hybrid |
 | `networkengineering-stackexchange` | Network Engineering Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 39,592 retained posts; 44,174 chunks | BM25 + 256-dim semantic/hybrid |
@@ -76,6 +84,8 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - GNU does not provide adjacent cryptographic digests for these generated documentation archives. Each acquisition manifest pins a local SHA-256 and records the exact download URL, generation label, tar member inventory, extracted byte count, and validation result.
 - The four archives produced 959 documents and 2,497 chunks. Each six-topic stable-ID lexical gate passes every ranking cutoff.
 - Gawk includes two pairs of upstream paths distinguished only by case. The importer preserves both with deterministic collision IDs while leaving all ordinary path-derived IDs unchanged.
+- Sed, Tar, Findutils, and Diffutils use the same validated publication path. Their 738 documents and 1,490 chunks cover stream editing, archives and recovery, safe file traversal, command batching, comparisons, patches, and merging.
+- glibc 2.44, Gzip 1.14, Wget 1.25.0, and GRUB 2.14 add 1,437 documents and 3,623 chunks covering C/POSIX interfaces, compression integrity, resilient downloads, and boot recovery. The glibc archive is pinned directly from the official Sourceware publication rather than the insecure redirect on the legacy GNU URL.
 
 ### Linux man-pages
 

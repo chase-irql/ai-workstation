@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU Gzip 1.14 manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"level-001","query":"compression level","query_type":"compression","relevance":{"gzip-1.14-manual:fb87eef1a5edc169850d1a24":3}},
+  {"id":"stdout-001","query":"decompress standard output","query_type":"io","relevance":{"gzip-1.14-manual:cb6ea363cd295b74c0a20a5e":3}},
+  {"id":"test-001","query":"gzip test integrity","query_type":"integrity","relevance":{"gzip-1.14-manual:ef6f702dace5da4c55413783":3}},
+  {"id":"names-001","query":"gzip file names","query_type":"files","relevance":{"gzip-1.14-manual:d1f505d442e167e562c8d384":3}},
+  {"id":"environment-001","query":"environment variable GZIP","query_type":"configuration","relevance":{"gzip-1.14-manual:fb87eef1a5edc169850d1a24":3}},
+  {"id":"recursive-001","query":"recursive directories","query_type":"files","relevance":{"gzip-1.14-manual:ef6f702dace5da4c55413783":3}}
+]}

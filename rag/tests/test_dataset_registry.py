@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 25)
+        self.assertEqual(len(datasets), 33)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -26,6 +26,14 @@ class DatasetRegistryTests(unittest.TestCase):
                 "gawk-5.4-manual",
                 "grep-3.12-manual",
                 "make-4.4.1-manual",
+                "sed-manual-20260422",
+                "tar-manual-20260611",
+                "findutils-manual-20260714",
+                "diffutils-3.12-manual",
+                "glibc-2.44-manual",
+                "gzip-1.14-manual",
+                "wget-1.25-manual",
+                "grub-2.14-manual",
             }.issubset(dataset_ids)
         )
         self.assertTrue(

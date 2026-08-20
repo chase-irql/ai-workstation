@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"GNU Findutils manual lexical gate","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+  {"id":"safe-001","query":"safe file handling xargs","query_type":"safety","relevance":{"findutils-manual-20260714:02d48a02575b1977956710ab":3}},
+  {"id":"symlink-001","query":"find symbolic links","query_type":"traversal","relevance":{"findutils-manual-20260714:0fd0ff46daad1944eb53bb43":3}},
+  {"id":"delete-001","query":"delete action security","query_type":"safety","relevance":{"findutils-manual-20260714:e2c0d7eccec59b45b46d30f7":3}},
+  {"id":"locate-001","query":"locate database","query_type":"database","relevance":{"findutils-manual-20260714:53c31a366d59d6b52c584ed8":3}},
+  {"id":"parallel-001","query":"xargs parallel processes","query_type":"execution","relevance":{"findutils-manual-20260714:a7d1b28f47bb1c9c7441f529":3}},
+  {"id":"precedence-001","query":"find expression precedence","query_type":"expressions","relevance":{"findutils-manual-20260714:091a7c0a0674f176a27dec2a":3}}
+]}
