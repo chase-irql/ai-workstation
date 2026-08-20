@@ -36,6 +36,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `binutils-2.47-docs` | GNU Binutils 2.47 official HTML manuals | GFDL 1.3; exact manual notices retained | 8 manuals; 1,807 chunks | BM25 |
 | `dotnet-docs-20260820` | Official `dotnet/docs` commit `e2fe6aca…`, 2026-08-19 | CC-BY-4.0; repository/per-file notices retained | 13,225 pages; 77,212 chunks | BM25 |
 | `nginx-docs-20260820` | Official `nginx/nginx.org` commit `df444293…`, 2026-08-20 | NGINX 2-clause BSD-like license | 149 documents; 1,669 chunks | BM25 |
+| `openstax-calculus` | OpenStax Calculus Volumes 1–3 commit `8dbc2ce…`, 2026-07-15 | CC BY-NC-SA 4.0; per-book attribution retained | 133 unique modules / 163 book occurrences; 11,807 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |

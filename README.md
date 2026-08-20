@@ -56,6 +56,7 @@ These corpora are implemented and verified in the current development installati
 | GNU Binutils documentation | Binutils 2.47 official HTML manuals | 8 manuals, 1,807 chunks | BM25 |
 | .NET documentation | Official `dotnet/docs` snapshot at `e2fe6aca…` | 13,225 pages, 77,212 chunks | BM25 |
 | NGINX documentation | Official `nginx/nginx.org` snapshot at `df444293…` | 149 documents, 1,669 chunks | BM25 |
+| OpenStax Calculus Volumes 1–3 | Official source snapshot at `8dbc2ce…` | 133 modules, 11,807 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
@@ -86,7 +87,7 @@ These corpora are implemented and verified in the current development installati
 | Super User Stack Exchange | 2026-06-30 community dump | 1,030,135 retained posts, 1,110,380 chunks | BM25 |
 | Ask Ubuntu Stack Exchange | 2026-06-30 community dump | 789,887 retained posts, 901,300 chunks | BM25 |
 
-The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md) and [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md).
+The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md), [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md), and [openstax-ingestion.md](docs/openstax-ingestion.md).
 
 ## Architecture
 

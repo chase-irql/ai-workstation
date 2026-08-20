@@ -103,6 +103,8 @@ The official .NET documentation snapshot at commit `e2fe6aca…` adds 13,225 can
 
 The official NGINX website/documentation snapshot at commit `df444293…` adds 149 canonical English articles and module references with 1,669 chunks in a 4,296,704-byte verified BM25 database. Its dedicated XML parser preserves directive syntax, defaults, contexts, introduction versions, section hierarchy, examples, tables, admonitions, and otherwise-empty cross-reference targets. The 5,320,648-byte archive is locally SHA-256-pinned and safely extracted as 524 files / 20,566,988 bytes; GitHub provides neither an archive digest nor a verified signature for this commit, so publisher verification is not overstated. The incomplete generated API head fragment is excluded in favor of its complete canonical page, and a 40-topic stable-ID gate passes every cutoff.
 
+OpenStax Calculus Volumes 1–3 are the first complete textbook sequence. The immutable official source snapshot contains 163 ordered module occurrences, with 30 modules reused across adjacent books; the common-record corpus stores 133 unique documents and retains every occurrence in provenance. Its 11,807 chunks preserve volume and chapter hierarchy, examples, exercises, worked solutions, equations rendered deterministically from MathML, tables, figures, license metadata, and immutable module citations. The 134,792,906-byte archive is locally SHA-256-pinned and safely extracted as 2,084 files / 217,389,281 bytes, and the verified BM25 database is 17,432,576 bytes. A 41-topic stable-ID gate covering the complete three-volume sequence passes every lexical cutoff. See [OpenStax ingestion](openstax-ingestion.md) for the reproducible update workflow and known limitations.
+
 Java remains a manual-acquisition item: Oracle's complete JDK 25 offline documentation bundle requires interactive acceptance of its documentation license and an authenticated download. The automation will not accept those terms on the user's behalf or substitute an unbounded scrape. OpenJDK source documentation remains a future open alternative, but generated API specifications require a purpose-built source/Javadoc path before they can provide equivalent retrieval coverage.
 
 The first Wave 4/manual pilot is also complete. FAA-H-8083-30B (2023) exercises the page-aware PDF path on a real 92,539,602-byte engineering handbook: 676 of 677 pages have searchable text, one cover is image-only, and 1,837 page-bounded chunks feed a verified 9,388,032-byte BM25 database. The importer retains outline/page citations and rotated labels, demotes front-matter matches, and fails atomically when a scan requires OCR. This makes it safe to expand into selected FAA, DOE, NASA, NIST, USACE, and equipment-specific manuals without pretending an image-only archive is searchable.
@@ -119,7 +121,7 @@ Documentation records preserve project, release, manual/page, heading hierarchy,
 
 ### Wave 4: textbooks, repair, and practical knowledge
 
-- OpenStax complete collection, then curated Open Textbook Library and LibreTexts learning sequences.
+- Expand the proven OpenStax CNXML path from Calculus into University Physics, Chemistry, Biology, and other complete foundational sequences; then curate Open Textbook Library and LibreTexts material that fills subject gaps.
 - English Wikibooks.
 - iFixit and personally owned equipment manuals.
 - Hesperian guides, appropriate-technology collections, and selected WHO, FAO, USDA, FEMA, DOE, NASA, USACE, NIST, and FAA handbooks.

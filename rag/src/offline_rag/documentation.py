@@ -851,8 +851,8 @@ def _prepare_docbook_xml(text: str) -> str:
     )
 
 
-def _prepare_nginx_xml(text: str) -> str:
-    """Resolve HTML named entities used by nginx.org without loading its network DTD."""
+def prepare_xml_entities(text: str) -> str:
+    """Resolve HTML named entities in XML without loading an external DTD."""
 
     def replace(match: re.Match[str]) -> str:
         name = match.group(1)
@@ -862,6 +862,10 @@ def _prepare_nginx_xml(text: str) -> str:
         return value if value is not None else name
 
     return DOCBOOK_ENTITY_RE.sub(replace, text)
+
+
+# Compatibility name retained for callers from the original NGINX importer.
+_prepare_nginx_xml = prepare_xml_entities
 
 
 def _nginx_inline(element: ET.Element) -> str:
@@ -883,7 +887,7 @@ def parse_nginx_xml(text: str, fallback_title: str) -> ParsedDocument:
     """Parse nginx.org's article/module XML into directive-aware evidence blocks."""
 
     try:
-        root = ET.fromstring(_prepare_nginx_xml(text))
+        root = ET.fromstring(prepare_xml_entities(text))
     except ET.ParseError as error:
         raise ValueError(f"invalid NGINX documentation XML: {error}") from error
     root_name = _xml_local_name(root.tag)

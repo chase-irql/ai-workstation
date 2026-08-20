@@ -1819,6 +1819,46 @@
       "notes": "Pinned to the official nginx/nginx.org source repository at immutable commit df444293ce3b9761809b16313e78ea7322ce97fe. GitHub supplies no commit-archive digest and the selected commit is unsigned, so the 5,320,648-byte archive is locally pinned as SHA-256 01ea62a2a34c5445e7ce24d423114c632a46903add747eec6babbd027fe30694 without claiming publisher verification. Safe extraction validated 524 files / 20,566,988 bytes, skipped one link, and reversibly encoded 72 Windows-incompatible names. The incomplete generated ngx_http_api_module_head.xml fragment is excluded in favor of its canonical complete page. A dedicated NGINX XML parser preserves module/article titles, directive syntax/default/context/version metadata, heading hierarchy, code, tables, admonitions, and empty-link targets. The 149 canonical documents produced 1,669 chunks in a 4,296,704-byte verified BM25 database; its 40-topic stable-ID lexical gate achieved every metric cutoff at 1.0."
     },
     {
+      "dataset_id": "openstax-calculus",
+      "name": "OpenStax Calculus Volumes 1–3",
+      "description": "Complete OpenStax Calculus sequence covering functions, limits, derivatives, integrals, differential equations, sequences and series, parametric and polar coordinates, vectors, multivariable calculus, and vector calculus with examples and exercises.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/calculus-volume-1",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-calculus-bundle main commit 8dbc2ce19e804924b2517b89ac72ee45be949d15, 2026-07-15",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "all three English Calculus collection manifests and referenced CNXML modules from the immutable official source snapshot; media retained raw for diagrams but excluded from text indexing",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-calculus-bundle/archive/8dbc2ce19e804924b2517b89ac72ee45be949d15.tar.gz",
+        "source_commit": "8dbc2ce19e804924b2517b89ac72ee45be949d15",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-calculus-bundle/blob/8dbc2ce19e804924b2517b89ac72ee45be949d15/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-calculus-bundle-8dbc2ce19e804924b2517b89ac72ee45be949d15",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "fundamental theorem of calculus"
+      },
+      "storage": {
+        "download_min_bytes": 50000000,
+        "download_max_bytes": 300000000,
+        "extracted_max_bytes": 1500000000,
+        "indexed_max_bytes": 1000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/textbooks/openstax-calculus",
+        "processed": "corpora/processed/textbooks/openstax-calculus",
+        "index": "indexes/textbooks/openstax-calculus.sqlite3",
+        "semantic_index": "indexes/semantic/openstax-calculus"
+      },
+      "status": "evaluated",
+      "notes": "Official source is pinned to immutable commit 8dbc2ce19e804924b2517b89ac72ee45be949d15. The 134,792,906-byte archive has local SHA-256 c3f589d2b20f8837f6faf8c872ea5f0702e8761097c47ab2d45889145da0b6c5; safe extraction produced 2,084 files / 217,389,281 bytes with no links. GitHub publishes no adjacent archive digest and the commit is unsigned, so publisher verification is not claimed. The importer preserves volume/chapter/module order, headings, examples, exercises, solutions, deterministic MathML text, captions, stable module IDs, per-book license metadata, and immutable source URLs. Thirty modules shared by adjacent volumes are stored once while all 163 book occurrences remain in provenance. The verified index contains 133 documents / 11,807 chunks in 17,432,576 bytes. The 41-topic stable-ID lexical gate passes Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 at 1.0."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
