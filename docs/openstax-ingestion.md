@@ -2,13 +2,15 @@
 
 The OpenStax adapter imports official CollXML collection manifests and referenced CNXML modules into the corpus-neutral record schema. It does not scrape rendered web pages, execute source content, or flatten an entire book into anonymous text.
 
-## Current corpus
+## Current corpora
 
 `openstax-calculus` contains Calculus Volumes 1–3 from official repository commit `8dbc2ce19e804924b2517b89ac72ee45be949d15` (2026-07-15). The snapshot is licensed CC BY-NC-SA 4.0. Repository and collection notices remain with the raw archive, and every indexed document carries its book license and immutable source URL.
 
 The downloaded archive is 134,792,906 bytes with locally measured SHA-256 `c3f589d2b20f8837f6faf8c872ea5f0702e8761097c47ab2d45889145da0b6c5`. GitHub did not publish an adjacent digest and the commit is unsigned, so this is local integrity evidence rather than publisher authentication.
 
 Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection manifests reference 163 module occurrences. Thirty shared modules occur in adjacent volumes, so the importer publishes 133 unique documents while retaining every book, chapter, and ordinal occurrence in `book_occurrences`.
+
+`openstax-university-physics` contains University Physics Volumes 1–3 from official repository commit `d0ed34a5851119a42e3d972dfc0ff49e4663977c` (2026-06-11). Its 180,736,830-byte archive has locally measured SHA-256 `42c5e22b21fe50ea9897910cc7370b6c57f21a0ef99af32a29b1cc7647598c7d` and safely expands to 2,311 files totaling 250,916,936 bytes. The repository and all three collection manifests state CC BY-NC-SA 4.0. Sixteen shared modules reduce 338 ordered occurrences to 322 unique indexed documents.
 
 ## Structure retained
 
@@ -58,5 +60,7 @@ Never overwrite the old raw snapshot during acquisition. Download and validate a
 ## Current result and limitations
 
 The current index has 133 documents, 11,807 chunks, 11,807 FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 17,432,576 bytes. The 41-case lexical suite has Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 of 1.0.
+
+The University Physics index has 322 documents, 8,870 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 21,135,360 bytes. The 46-case lexical suite likewise has every reported rank metric at 1.0.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.

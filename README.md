@@ -57,6 +57,7 @@ These corpora are implemented and verified in the current development installati
 | .NET documentation | Official `dotnet/docs` snapshot at `e2fe6aca…` | 13,225 pages, 77,212 chunks | BM25 |
 | NGINX documentation | Official `nginx/nginx.org` snapshot at `df444293…` | 149 documents, 1,669 chunks | BM25 |
 | OpenStax Calculus Volumes 1–3 | Official source snapshot at `8dbc2ce…` | 133 modules, 11,807 chunks | BM25 |
+| OpenStax University Physics Volumes 1–3 | Official source snapshot at `d0ed34a…` | 322 modules, 8,870 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |

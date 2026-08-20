@@ -1895,8 +1895,8 @@
         "index": "indexes/textbooks/openstax-university-physics.sqlite3",
         "semantic_index": "indexes/semantic/openstax-university-physics"
       },
-      "status": "planned",
-      "notes": "Pinned to the current official repository head before acquisition. GitHub reports the selected commit as unsigned and provides no adjacent archive digest, so the workflow must record local integrity without claiming publisher verification. The repository license is CC BY-NC-SA 4.0; collection-level metadata must be revalidated during import. The proven CollXML/CNXML importer will preserve all three volumes and deduplicate any shared modules while retaining every book occurrence."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit d0ed34a5851119a42e3d972dfc0ff49e4663977c. The 180,736,830-byte archive has local SHA-256 42c5e22b21fe50ea9897910cc7370b6c57f21a0ef99af32a29b1cc7647598c7d; safe extraction produced 2,311 files / 250,916,936 bytes with no links. GitHub provides no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all three collection manifests confirm CC BY-NC-SA 4.0. The importer preserves hierarchy, examples, exercises, solutions, MathML text, tables, figure captions and standalone media alternative text. Sixteen shared modules are stored once while all 338 book occurrences remain in provenance. The verified index contains 322 documents / 8,870 chunks in 21,135,360 bytes. The 46-topic stable-ID lexical gate passes Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

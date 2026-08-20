@@ -230,6 +230,9 @@ def parse_cnxml(text: str, fallback_title: str) -> tuple[str, tuple[ContentBlock
             if value:
                 blocks.append(ContentBlock(headings, value, "figure_caption", attributes(element)))
             return
+        if name in {"media", "image"}:
+            append(element, headings, "figure_alt")
+            return
         if name == "table":
             for row in element.iter():
                 if _local_name(row.tag) not in {"row", "tr"}:

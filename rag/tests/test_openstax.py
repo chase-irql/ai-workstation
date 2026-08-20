@@ -46,6 +46,15 @@ class OpenStaxTests(unittest.TestCase):
         self.assertTrue(any(block.heading_path[-1:] == ("Solution",) and "answer" in block.text for block in blocks))
         self.assertTrue(any(block.kind == "figure_caption" and "squeezed" in block.text for block in blocks))
 
+    def test_top_level_media_alt_text_is_searchable(self):
+        module = """<document xmlns='http://cnx.rice.edu/cnxml'><title>Appendix</title><content>
+        <media id='periodic' alt='Periodic table with atomic numbers and element symbols'>
+        <image src='periodic.jpg'/></media></content></document>"""
+        _, blocks, _ = parse_cnxml(module, "fallback")
+        self.assertEqual(len(blocks), 1)
+        self.assertEqual(blocks[0].kind, "figure_alt")
+        self.assertIn("atomic numbers", blocks[0].text)
+
     def test_import_is_atomic_structured_and_protects_existing_output(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
