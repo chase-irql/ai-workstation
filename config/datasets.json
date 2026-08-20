@@ -2071,12 +2071,12 @@
         "content_subdirectory": "osbooks-college-algebra-bundle-789b54099106b071d1d32bfcee454fed72eb4768",
         "collections_glob": "collections/*.collection.xml",
         "module_path_template": "modules/{module_id}/index.cnxml",
-        "smoke_query": "trigonometric identities unit circle"
+        "smoke_query": "unit circle sine cosine functions"
       },
       "storage": {"download_min_bytes": 75000000, "download_max_bytes": 400000000, "extracted_max_bytes": 1500000000, "indexed_max_bytes": 500000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-college-algebra", "processed": "corpora/processed/textbooks/openstax-college-algebra", "index": "indexes/textbooks/openstax-college-algebra.sqlite3", "semantic_index": "indexes/semantic/openstax-college-algebra"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Repository and all four collection licenses must be validated after extraction."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 789b54099106b071d1d32bfcee454fed72eb4768. The 167,165,865-byte archive has local SHA-256 c449330830d48ec223a0a7557dcc07f4ae27187e4e626bec791396853b830b2d and safely expands to 3,202 files / 263,911,946 bytes with no links; 2,908 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all four collection manifests confirm CC BY-NC-SA 4.0. The 319 ordered module occurrences deduplicate by stable module ID into 138 documents and 17,596 chunks in a verified 25,153,536-byte index. The 59-topic cross-book gate has Success@1/5/10, Recall@5/10/50, and MRR@10 of 1.0; nDCG@10 is 0.994477 because equally judged alternate-curriculum pages can rank behind another directly relevant page."
     },
     {
       "dataset_id": "openstax-introductory-statistics",

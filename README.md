@@ -62,6 +62,7 @@ These corpora are implemented and verified in the current development installati
 | OpenStax Biology 2e + AP + Concepts | Official source snapshot at `63f8b6f…` | 574 modules, 10,795 chunks | BM25 |
 | OpenStax Anatomy and Physiology 2e | Official source snapshot at `716383a…` | 198 modules, 4,590 chunks | BM25 |
 | OpenStax Prealgebra, Elementary Algebra, and Intermediate Algebra 2e | Official source snapshot at `38cae454…` | 240 modules, 33,138 chunks | BM25 |
+| OpenStax College Algebra, Algebra and Trigonometry, and Precalculus 2e | Official source snapshot at `789b5409…` | 138 modules, 17,596 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |

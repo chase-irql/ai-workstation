@@ -20,6 +20,8 @@ Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection 
 
 `openstax-foundational-algebra` contains Prealgebra 2e, Elementary Algebra 2e, and Intermediate Algebra 2e from official repository commit `38cae454e644abf9f0a623e876994553881597c9` (2026-06-29). Its 527,599,772-byte archive has locally measured SHA-256 `46666e6001e2948ad18888a98420bb5a5b2ed21bbd99426b202963e29ab6669d` and safely expands to 13,738 files totaling 956,565,492 bytes with no links. The extractor portably encoded 13,447 Windows-hostile source paths while preserving reversible names. All three collection manifests state CC BY-NC-SA 4.0. Their 240 ordered module occurrences have distinct stable IDs.
 
+`openstax-college-algebra` contains Algebra and Trigonometry 2e, College Algebra 2e, College Algebra Corequisite Support 2e, and Precalculus 2e from official repository commit `789b54099106b071d1d32bfcee454fed72eb4768` (2026-06-12). Its 167,165,865-byte archive has locally measured SHA-256 `c449330830d48ec223a0a7557dcc07f4ae27187e4e626bec791396853b830b2d` and safely expands to 3,202 files totaling 263,911,946 bytes with no links. All four collection manifests state CC BY-NC-SA 4.0. The 319 ordered occurrences reuse modules heavily, yielding 138 stable documents while retaining all book and chapter placements in provenance.
+
 ## Structure retained
 
 The adapter preserves:
@@ -78,5 +80,7 @@ The Biology index has 574 documents, 10,795 chunks and FTS rows, valid foreign k
 The Anatomy and Physiology index has 198 documents, 4,590 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 12,288,000 bytes. The 42-case lexical suite has every reported rank metric at 1.0.
 
 The foundational-algebra index has 240 documents, 33,138 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 42,508,288 bytes. The 52-case lexical suite has every reported rank metric at 1.0.
+
+The college-algebra index has 138 documents, 17,596 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 25,153,536 bytes. The 59-case lexical suite has Success@1/5/10, Recall@5/10/50, and MRR@10 of 1.0 and nDCG@10 of 0.994477. The small nDCG gap records honest alternate-curriculum relevance rather than forcing an arbitrary single-book judgment.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.
