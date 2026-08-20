@@ -2105,8 +2105,8 @@
       },
       "storage": {"download_min_bytes": 30000000, "download_max_bytes": 250000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 400000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-introductory-statistics", "processed": "corpora/processed/textbooks/openstax-introductory-statistics", "index": "indexes/textbooks/openstax-introductory-statistics.sqlite3", "semantic_index": "indexes/semantic/openstax-introductory-statistics"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Both collection licenses and overlapping module identities must be validated after extraction."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 1f6a35825395bb4aa2834cf1eca37512655f920c. The 69,074,097-byte archive has local SHA-256 3ecc98e6641bef622c48e5f031fda94f0cc3381201c46265f66ff016ef4d324d and safely expands to 1,546 files / 100,079,098 bytes with no links; 691 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and both collection manifests confirm CC BY-NC-SA 4.0. The 77 business-statistics and 102 general-statistics modules yield 179 stable documents and 6,011 chunks in a verified 11,792,384-byte index. The 51-topic descriptive-statistics-through-ANOVA stable-ID gate passes every configured metric at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",
