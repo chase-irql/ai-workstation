@@ -1647,6 +1647,49 @@
       "notes": "Pinned to the current stable Go 1.26.7 source archive listed by go.dev on 2026-08-20. The 34,150,794-byte archive passed the publisher SHA-256 and byte count from go.dev's download API. Safe extraction validated 15,013 files / 145,137,149 bytes with no links and reversibly encoded 848 Windows-incompatible members. A dedicated deterministic lexer/parser retains package comments, exported generic and non-generic functions, methods, types and their public fields, grouped constants/variables, and declaration signatures without executing downloaded toolchain binaries or indexing function bodies. Tests, testdata, vendored and internal packages are excluded. Of 2,059 scoped source files, 1,320 substantive documents produced 18,647 chunks and a 29,020,160-byte verified BM25 database; 739 implementation-only files were correctly skipped. Its 45-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
+      "dataset_id": "podman-6.1-docs",
+      "name": "Podman 6.1 Documentation",
+      "description": "Official Podman command, option, configuration, networking, storage, security, Kubernetes interoperability, Quadlet, machine, system service, and troubleshooting documentation.",
+      "category": "container-platform-documentation",
+      "official_source_url": "https://docs.podman.io/en/v6.1.0/",
+      "license": "Apache License 2.0",
+      "attribution": "Podman and Containers contributors",
+      "release": "v6.1.0 commit cade97a52ebdf9dbf9e81de8009015776837a074",
+      "update_frequency": "each Podman stable release",
+      "scope": "official documentation source tree from the signed v6.1.0 release tag; source code, tests, generated binaries, and website build output excluded from text retrieval but retained raw",
+      "formats": ["Markdown", "reStructuredText", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/podman-container-tools/podman/archive/refs/tags/v6.1.0.tar.gz",
+        "source_tag": "v6.1.0",
+        "source_commit": "cade97a52ebdf9dbf9e81de8009015776837a074",
+        "source_commit_verified": true,
+        "tag_object": "3070f607ac34891ead088fc3589f767af3574ca6",
+        "tag_signature_present": true,
+        "source_url_template": "https://github.com/podman-container-tools/podman/blob/v6.1.0/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "podman-6.1.0",
+        "include_globs": ["docs/*.md", "docs/**/*.md", "docs/*.rst", "docs/**/*.rst"],
+        "exclude_globs": ["docs/cncf/**"],
+        "smoke_query": "podman auto-update systemd labels"
+      },
+      "storage": {
+        "download_min_bytes": 10000000,
+        "download_max_bytes": 200000000,
+        "extracted_max_bytes": 1000000000,
+        "indexed_max_bytes": 100000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/podman-6.1",
+        "processed": "corpora/processed/documentation/podman-6.1",
+        "index": "indexes/documentation/podman-6.1.sqlite3",
+        "semantic_index": "indexes/semantic/podman-6.1-docs"
+      },
+      "status": "planned",
+      "notes": "Pinned to Podman's official signed v6.1.0 annotated tag and its resolved immutable commit. GitHub does not publish an adjacent digest for tag archives, so acquisition will record a local SHA-256 and validate archive structure and extracted member counts without claiming publisher-checksum verification."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
