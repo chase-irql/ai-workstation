@@ -25,6 +25,12 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
+### Active engineering-handbook extension: DOE Fundamentals
+
+The next bounded pilot is the complete official DOE Fundamentals sequence, not a random manual scrape. DOE's archive exposes 22 PDFs (42,482,570 bytes total) spanning classical physics; electrical science; thermodynamics, heat transfer, and fluid flow; instrumentation and control; mathematics; chemistry; engineering drawings; material science; mechanical science; and nuclear physics/reactor theory. Every asset was resolved from its official DOE record and responds as `application/pdf`. The registry caps the full raw set at 46 MB and the index at 500 MB, well inside the storage reserve.
+
+These Revision 0 handbooks are archived/canceled training material, not current DOE policy or a substitute for current safety standards. Each carries Distribution Statement A (approved for public release; distribution unlimited), and all document notices will be retained. The page-aware PDF importer must validate every file's text-layer ratio before any records are published; local per-file SHA-256 values will be pinned because DOE supplies no adjacent publisher digests.
+
 ### Active textbook extension: microbiology
 
 The complete official OpenStax Microbiology source at immutable main commit `63385025…` (2026-07-08) is acquired and evaluated. It fills the gap between general biology and clinical reference with structured coverage of microbial cell biology, genetics, diversity, epidemiology, immunology, antimicrobial drugs, and infectious diseases. Its locally pinned 329,184,733-byte archive safely expands to 1,047 files / 362,279,562 bytes; repository and collection notices confirm CC BY-NC-SA 4.0. All 159 modules yield 4,115 chunks in a verified 11,165,696-byte database, and a 57-topic stable-ID gate passes every configured metric. GitHub reports the source commit unsigned and supplies no adjacent archive digest, so only local integrity is claimed. The corpus remains explicitly educational rather than current clinical guidance.

@@ -15,12 +15,13 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 68)
+        self.assertEqual(len(datasets), 69)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
         self.assertIn("bash-5.3-manual", dataset_ids)
         self.assertIn("faa-amt-general-2023", dataset_ids)
+        self.assertIn("doe-fundamentals-handbooks", dataset_ids)
         self.assertIn("cmake-4.4-docs", dataset_ids)
         self.assertIn("openssl-4.0-docs", dataset_ids)
         self.assertIn("openssh-10.5p1-docs", dataset_ids)
@@ -93,7 +94,7 @@ class DatasetRegistryTests(unittest.TestCase):
         )
         summary = storage_summary(datasets)
         self.assertLess(summary["download_max_bytes"], 15_500_000_000)
-        self.assertLess(summary["indexed_max_bytes"], 125_000_000_000)
+        self.assertLess(summary["indexed_max_bytes"], 125_500_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

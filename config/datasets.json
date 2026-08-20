@@ -712,7 +712,7 @@
         "download_min_bytes": 15000000,
         "download_max_bytes": 25000000,
         "extracted_max_bytes": 150000000,
-        "indexed_max_bytes": 500000000
+        "indexed_max_bytes": 300000000
       },
       "paths": {
         "raw": "corpora/raw/documentation/python-3.14",
@@ -922,6 +922,65 @@
       },
       "status": "evaluated",
       "notes": "Acquired the official 92,539,602-byte FAA-H-8083-30B (2023) PDF and pinned local SHA-256 0a39c01bbc454e77a49813cf27e2ef291756fa7111d9308bc290cd0eb71616fd; the FAA page exposes no adjacent publisher digest. Structurally parsed all 677 pages: 676 contain searchable text and one image-only cover page. Page- and outline-aware import produced 1,837 chunks and a verified 9,388,032-byte BM25 database. Rotated table and diagram labels are retained with degraded layout spacing rather than dropped. The 14-topic single-document coverage gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0; it validates topic coverage, while page citations were separately inspected. Front-matter matches are deterministically demoted behind body evidence."
+    },
+    {
+      "dataset_id": "doe-fundamentals-handbooks",
+      "name": "DOE Fundamentals Handbooks",
+      "description": "Official DOE training handbooks covering classical physics, electrical science, thermodynamics and fluid flow, instrumentation and control, mathematics, chemistry, engineering drawings, material science, mechanical science, nuclear physics, and reactor theory.",
+      "category": "government-engineering-handbook",
+      "official_source_url": "https://www.energy.gov/ehss/technical-standards-archives",
+      "license": "Distribution Statement A: approved for public release; distribution unlimited; retain all document notices",
+      "attribution": "U.S. Department of Energy and credited handbook contributors",
+      "release": "DOE-HDBK-1010-92 through DOE-HDBK-1019-93, Revision 0 archived set",
+      "update_frequency": "manual review when DOE republishes or supersedes an archived handbook",
+      "scope": "complete 22-volume DOE Fundamentals sequence; official archive copies only; examination banks excluded",
+      "formats": ["PDF"],
+      "acquisition": {
+        "method": "http-file-set",
+        "location": "https://www.energy.gov/ehss/technical-standards-archives",
+        "source_url_template": "https://www.energy.gov/sites/default/files/2026-04/{relative_path}",
+        "assets": [
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1010-92.pdf", "filename": "DOE-HDBK-1010-92.pdf", "min_bytes": 1000000, "max_bytes": 1300000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1011-92_VOL1.pdf", "filename": "DOE-HDBK-1011-92_VOL1.pdf", "min_bytes": 2200000, "max_bytes": 2500000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1011-92_VOL2.pdf", "filename": "DOE-HDBK-1011-92_VOL2.pdf", "min_bytes": 1700000, "max_bytes": 1900000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1011-92_VOL3.pdf", "filename": "DOE-HDBK-1011-92_VOL3.pdf", "min_bytes": 1150000, "max_bytes": 1350000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1011-92_VOL4.pdf", "filename": "DOE-HDBK-1011-92_VOL4.pdf", "min_bytes": 2600000, "max_bytes": 2900000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1012-92_VOL1.pdf", "filename": "DOE-HDBK-1012-92_VOL1.pdf", "min_bytes": 1800000, "max_bytes": 2050000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1012-92_VOL2.pdf", "filename": "DOE-HDBK-1012-92_VOL2.pdf", "min_bytes": 750000, "max_bytes": 900000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1012-92_VOL3.pdf", "filename": "DOE-HDBK-1012-92_VOL3.pdf", "min_bytes": 900000, "max_bytes": 1100000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1013-92-VOL1.pdf", "filename": "DOE-HDBK-1013-92-VOL1.pdf", "min_bytes": 1300000, "max_bytes": 1500000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1013-92-VOL2.pdf", "filename": "DOE-HDBK-1013-92-VOL2.pdf", "min_bytes": 2150000, "max_bytes": 2400000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1014-92_VOL1.pdf", "filename": "DOE-HDBK-1014-92_VOL1.pdf", "min_bytes": 850000, "max_bytes": 1050000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1014-92_VOL2.pdf", "filename": "DOE-HDBK-1014-92_VOL2.pdf", "min_bytes": 850000, "max_bytes": 1050000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1015-93_VOL1.pdf", "filename": "DOE-HDBK-1015-93_VOL1.pdf", "min_bytes": 2400000, "max_bytes": 2750000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1015-93_VOL2.pdf", "filename": "DOE-HDBK-1015-93_VOL2.pdf", "min_bytes": 1700000, "max_bytes": 1950000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1016-93_VOL1.pdf", "filename": "DOE-HDBK-1016-93_VOL1.pdf", "min_bytes": 4500000, "max_bytes": 5100000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1016-93_VOL2.pdf", "filename": "DOE-HDBK-1016-93_VOL2.pdf", "min_bytes": 2450000, "max_bytes": 2800000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1017-93_VOL1.pdf", "filename": "DOE-HDBK-1017-93_VOL1.pdf", "min_bytes": 1350000, "max_bytes": 1550000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1017-93_VOL2.pdf", "filename": "DOE-HDBK-1017-93_VOL2.pdf", "min_bytes": 900000, "max_bytes": 1050000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1018-93_VOL1.pdf", "filename": "DOE-HDBK-1018-93_VOL1.pdf", "min_bytes": 2950000, "max_bytes": 3400000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1018-93_VOL2.pdf", "filename": "DOE-HDBK-1018-93_VOL2.pdf", "min_bytes": 2900000, "max_bytes": 3300000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1019-93_VOL1.pdf", "filename": "DOE-HDBK-1019-93_VOL1.pdf", "min_bytes": 2050000, "max_bytes": 2350000},
+          {"url": "https://www.energy.gov/sites/default/files/2026-04/DOE-HDBK-1019-93_VOL2.pdf", "filename": "DOE-HDBK-1019-93_VOL2.pdf", "min_bytes": 1150000, "max_bytes": 1350000}
+        ]
+      },
+      "ingestion": {
+        "smoke_query": "Ohm law DC circuit voltage current resistance"
+      },
+      "storage": {
+        "download_min_bytes": 40000000,
+        "download_max_bytes": 46000000,
+        "extracted_max_bytes": 46000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/manuals/doe-fundamentals-handbooks",
+        "processed": "corpora/processed/manuals/doe-fundamentals-handbooks",
+        "index": "indexes/manuals/doe-fundamentals-handbooks.sqlite3",
+        "semantic_index": "indexes/semantic/doe-fundamentals-handbooks"
+      },
+      "status": "planned",
+      "notes": "Official DOE archive pages and PDF HEAD checks on 2026-08-20 identify 22 application/pdf assets totaling 42,482,570 bytes. Each handbook carries Distribution Statement A. The sequence is archived and canceled, so it is retained as durable fundamentals training rather than represented as current DOE policy or a current safety standard. The PDFs have visible text layers in DOE's official viewer; full local searchable-page validation remains the first ingestion gate. DOE exposes no adjacent publisher checksums, so acquisition will record per-file local SHA-256 values without claiming publisher verification."
     },
     {
       "dataset_id": "cmake-4.4-docs",
