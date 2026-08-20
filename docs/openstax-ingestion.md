@@ -12,6 +12,8 @@ Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection 
 
 `openstax-university-physics` contains University Physics Volumes 1–3 from official repository commit `d0ed34a5851119a42e3d972dfc0ff49e4663977c` (2026-06-11). Its 180,736,830-byte archive has locally measured SHA-256 `42c5e22b21fe50ea9897910cc7370b6c57f21a0ef99af32a29b1cc7647598c7d` and safely expands to 2,311 files totaling 250,916,936 bytes. The repository and all three collection manifests state CC BY-NC-SA 4.0. Sixteen shared modules reduce 338 ordered occurrences to 322 unique indexed documents.
 
+`openstax-chemistry` contains Chemistry 2e and Chemistry: Atoms First 2e from official repository commit `3be4b60ff501f29a445f0cacf003e5f5cc16244d` (2026-07-08). Its 279,761,314-byte archive has locally measured SHA-256 `59b329660c5c06e12c86301d5a631ba5fd2a04c9eb122c68d384cf42406233af` and safely expands to 1,731 files totaling 340,181,560 bytes. Both 149-module collections state CC BY-NC-SA 4.0. Their 122 shared module IDs reduce 298 ordered occurrences to 176 unique documents while preserving both curricular sequences.
+
 ## Structure retained
 
 The adapter preserves:
@@ -62,5 +64,7 @@ Never overwrite the old raw snapshot during acquisition. Download and validate a
 The current index has 133 documents, 11,807 chunks, 11,807 FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 17,432,576 bytes. The 41-case lexical suite has Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 of 1.0.
 
 The University Physics index has 322 documents, 8,870 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 21,135,360 bytes. The 46-case lexical suite likewise has every reported rank metric at 1.0.
+
+The Chemistry index has 176 documents, 4,499 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 12,296,192 bytes. The 46-case lexical suite has every reported rank metric at 1.0.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.

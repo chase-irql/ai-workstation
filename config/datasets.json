@@ -1935,8 +1935,8 @@
         "index": "indexes/textbooks/openstax-chemistry.sqlite3",
         "semantic_index": "indexes/semantic/openstax-chemistry"
       },
-      "status": "planned",
-      "notes": "Pinned to current official commit 3be4b60ff501f29a445f0cacf003e5f5cc16244d before acquisition. GitHub reports it unsigned and provides no adjacent archive digest, so publisher verification will not be claimed. Repository license is CC BY-NC-SA 4.0 and both collection manifests must be revalidated after extraction. The importer will deduplicate the extensive shared module set between the conventional and atoms-first sequences while retaining both curriculum occurrences."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 3be4b60ff501f29a445f0cacf003e5f5cc16244d. The 279,761,314-byte archive has local SHA-256 59b329660c5c06e12c86301d5a631ba5fd2a04c9eb122c68d384cf42406233af; safe extraction produced 1,731 files / 340,181,560 bytes with no links. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and both collection manifests confirm CC BY-NC-SA 4.0. The two 149-module curricular sequences share 122 module IDs: 298 occurrences become 176 stable documents while both book orders remain in provenance. The verified index contains 4,499 chunks in 12,296,192 bytes. The 46-topic stable-ID lexical gate passes Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 at 1.0; equivalent duplicated bonding pages are explicitly judged relevant rather than arbitrarily favoring one ordering."
     },
     {
       "dataset_id": "cpp-16.2-manual",
