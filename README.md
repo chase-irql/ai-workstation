@@ -37,6 +37,18 @@ These corpora are implemented and verified in the current development installati
 | SQLite documentation | SQLite 3.53.4 | 765 documents, 4,384 chunks | BM25 + chunk-level hybrid |
 | DevOps Stack Exchange | 2026-06-30 community dump | 11,877 retained posts, 13,531 chunks | BM25 + experimental chunk-level hybrid |
 | Information Security Stack Exchange | 2026-06-30 community dump | 171,041 retained posts, 188,770 chunks | BM25 + chunk-level hybrid |
+| Network Engineering Stack Exchange | 2026-06-30 community dump | 39,592 retained posts, 44,174 chunks | BM25; semantic generation published |
+| Database Administrators Stack Exchange | 2026-06-30 community dump | 220,788 retained posts, 262,323 chunks | BM25; semantic generation published |
+| Electrical Engineering Stack Exchange | 2026-06-30 community dump | 509,806 retained posts, 545,211 chunks | BM25; semantic generation in progress |
+| Unix & Linux Stack Exchange | 2026-06-30 community dump | 528,891 retained posts, 602,485 chunks | BM25; semantic generation queued |
+| Server Fault Stack Exchange | 2026-06-30 community dump | 704,713 retained posts, 775,708 chunks | BM25; semantic generation queued |
+| Software Engineering Stack Exchange | 2026-06-30 community dump | 214,014 retained posts, 239,207 chunks | BM25 |
+| Computer Science Stack Exchange | 2026-06-30 community dump | 101,644 retained posts, 109,770 chunks | BM25 |
+| Arduino Stack Exchange | 2026-06-30 community dump | 52,338 retained posts, 62,506 chunks | BM25 |
+| Raspberry Pi Stack Exchange | 2026-06-30 community dump | 75,998 retained posts, 85,362 chunks | BM25 |
+| Signal Processing Stack Exchange | 2026-06-30 community dump | 60,376 retained posts, 66,988 chunks | BM25 |
+| Super User Stack Exchange | 2026-06-30 community dump | 1,030,135 retained posts, 1,110,380 chunks | BM25 |
+| Ask Ubuntu Stack Exchange | 2026-06-30 community dump | 789,887 retained posts, 901,300 chunks | BM25 |
 
 The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md) and [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md).
 
@@ -268,7 +280,7 @@ Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and re
 
 This is working software under active development, not a turnkey archive download. It is currently optimized for one Windows workstation and has not yet been packaged as a cross-platform installer. The retrieval components are intentionally independent of Ollama, Codex, OpenCode, and any hosted model provider so those integrations can change without invalidating the knowledge library.
 
-The Stack Exchange XML adapter is now implemented and validated on the DevOps site. The next likely corpus adapters are manuals/PDFs or textbooks; JATS scientific literature and other high-value sources likewise require structure-preserving importers rather than a generic document loader.
+The bounded-memory Stack Exchange XML adapter is now validated across 14 sites totaling 4,511,100 retained posts and 5,007,715 chunks. The next major adapter should target manuals/PDFs or textbooks; JATS scientific literature and other high-value sources likewise require structure-preserving importers rather than a generic document loader.
 
 ## License
 

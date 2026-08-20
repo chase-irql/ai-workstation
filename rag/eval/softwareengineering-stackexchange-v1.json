@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Software Engineering Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering architecture, design, testing, APIs, data patterns, delivery, requirements, review, and maintenance.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "di-001", "query": "dependency injection design", "query_type": "design", "relevance": {"softwareengineering-stackexchange:post:216472": 3}},
+    {"id": "srp-001", "query": "SOLID single responsibility", "query_type": "design", "relevance": {"softwareengineering-stackexchange:post:395392": 3}},
+    {"id": "microservices-001", "query": "microservices distributed transaction", "query_type": "architecture", "relevance": {"softwareengineering-stackexchange:post:354927": 3}},
+    {"id": "mocking-001", "query": "unit testing mock dependency", "query_type": "testing", "relevance": {"softwareengineering-stackexchange:post:235150": 3}},
+    {"id": "ddd-001", "query": "domain driven design aggregate", "query_type": "design", "relevance": {"softwareengineering-stackexchange:post:324905": 3}},
+    {"id": "api-versioning-001", "query": "REST API versioning", "query_type": "api", "relevance": {"softwareengineering-stackexchange:post:367253": 3}},
+    {"id": "cqrs-001", "query": "event sourcing CQRS", "query_type": "architecture", "relevance": {"softwareengineering-stackexchange:post:158431": 3}},
+    {"id": "repository-001", "query": "database repository pattern", "query_type": "data_access", "relevance": {"softwareengineering-stackexchange:post:289969": 3}},
+    {"id": "continuous-001", "query": "continuous integration deployment", "query_type": "delivery", "relevance": {"softwareengineering-stackexchange:post:358096": 3}},
+    {"id": "traceability-001", "query": "requirements traceability matrix", "query_type": "requirements", "relevance": {"softwareengineering-stackexchange:post:364039": 3}},
+    {"id": "review-001", "query": "code review process", "query_type": "quality", "relevance": {"softwareengineering-stackexchange:post:162813": 3}},
+    {"id": "debt-001", "query": "technical debt refactoring", "query_type": "maintenance", "relevance": {"softwareengineering-stackexchange:post:381823": 3}}
+  ]
+}

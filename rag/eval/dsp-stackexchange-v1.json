@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Signal Processing Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering sampling, transforms, filters, estimation, noise, spectra, wavelets, resampling, and correlation.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "fft-leakage-001", "query": "FFT window spectral leakage", "query_type": "spectral", "relevance": {"dsp-stackexchange:post:60085": 3}},
+    {"id": "nyquist-001", "query": "Nyquist sampling aliasing", "query_type": "sampling", "relevance": {"dsp-stackexchange:post:79140": 3}},
+    {"id": "fir-001", "query": "FIR filter design", "query_type": "filters", "relevance": {"dsp-stackexchange:post:18622": 3}},
+    {"id": "iir-001", "query": "IIR filter stability", "query_type": "filters", "relevance": {"dsp-stackexchange:post:76145": 3}},
+    {"id": "kalman-001", "query": "Kalman filter noise", "query_type": "estimation", "relevance": {"dsp-stackexchange:post:53563": 3}},
+    {"id": "convolution-001", "query": "Fourier transform convolution", "query_type": "transforms", "relevance": {"dsp-stackexchange:post:37519": 3}},
+    {"id": "phase-delay-001", "query": "digital filter phase delay", "query_type": "filters", "relevance": {"dsp-stackexchange:post:73968": 3}},
+    {"id": "snr-001", "query": "signal to noise ratio", "query_type": "noise", "relevance": {"dsp-stackexchange:post:24372": 3}},
+    {"id": "welch-001", "query": "Welch power spectral density", "query_type": "spectral", "relevance": {"dsp-stackexchange:post:30768": 3}},
+    {"id": "wavelet-001", "query": "wavelet transform denoising", "query_type": "transforms", "relevance": {"dsp-stackexchange:post:68409": 3}},
+    {"id": "resampling-001", "query": "resampling interpolation decimation", "query_type": "sampling", "relevance": {"dsp-stackexchange:post:73690": 3}},
+    {"id": "correlation-001", "query": "cross correlation time delay", "query_type": "estimation", "relevance": {"dsp-stackexchange:post:59220": 3}}
+  ]
+}

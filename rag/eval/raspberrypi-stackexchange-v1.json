@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Raspberry Pi Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering GPIO, networking, storage, camera, buses, power, services, filesystems, displays, and thermal behavior.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "gpio-boot-001", "query": "Raspberry Pi GPIO boot", "query_type": "gpio", "relevance": {"raspberrypi-stackexchange:post:117019": 3}},
+    {"id": "wifi-001", "query": "Raspberry Pi WiFi connection", "query_type": "networking", "relevance": {"raspberrypi-stackexchange:post:36160": 3}},
+    {"id": "sd-corruption-001", "query": "Raspberry Pi SD card corruption", "query_type": "storage", "relevance": {"raspberrypi-stackexchange:post:144422": 3}},
+    {"id": "camera-001", "query": "Raspberry Pi camera module", "query_type": "camera", "relevance": {"raspberrypi-stackexchange:post:15126": 3}},
+    {"id": "i2c-001", "query": "Raspberry Pi I2C sensor", "query_type": "buses", "relevance": {"raspberrypi-stackexchange:post:150731": 3}},
+    {"id": "undervoltage-001", "query": "Raspberry Pi power supply undervoltage", "query_type": "power", "relevance": {"raspberrypi-stackexchange:post:48329": 3}},
+    {"id": "ssh-001", "query": "Raspberry Pi SSH connection", "query_type": "networking", "relevance": {"raspberrypi-stackexchange:post:64389": 3}},
+    {"id": "systemd-001", "query": "Raspberry Pi systemd service", "query_type": "services", "relevance": {"raspberrypi-stackexchange:post:59984": 3}},
+    {"id": "readonly-001", "query": "Raspberry Pi read only filesystem", "query_type": "filesystems", "relevance": {"raspberrypi-stackexchange:post:92173": 3}},
+    {"id": "pullup-001", "query": "Raspberry Pi GPIO pull up", "query_type": "gpio", "relevance": {"raspberrypi-stackexchange:post:66332": 3}},
+    {"id": "spi-display-001", "query": "Raspberry Pi SPI display", "query_type": "display", "relevance": {"raspberrypi-stackexchange:post:36465": 3}},
+    {"id": "thermal-001", "query": "Raspberry Pi temperature throttling", "query_type": "thermal", "relevance": {"raspberrypi-stackexchange:post:79562": 3}}
+  ]
+}

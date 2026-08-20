@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Super User June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering operating-system recovery, storage, networking, security, diagnostics, boot, peripherals, media, and applications.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "windows-recovery-001", "query": "Windows boot recovery", "query_type": "recovery", "relevance": {"superuser-stackexchange:post:1301356": 3}},
+    {"id": "ntfs-001", "query": "NTFS chkdsk", "query_type": "storage", "relevance": {"superuser-stackexchange:post:1707031": 3}},
+    {"id": "wifi-001", "query": "WiFi DNS", "query_type": "networking", "relevance": {"superuser-stackexchange:post:1123456": 3}},
+    {"id": "powershell-001", "query": "PowerShell execution policy", "query_type": "administration", "relevance": {"superuser-stackexchange:post:1234906": 3}},
+    {"id": "bitlocker-001", "query": "BitLocker recovery", "query_type": "security", "relevance": {"superuser-stackexchange:post:1014306": 3}},
+    {"id": "smart-001", "query": "SSD SMART", "query_type": "storage", "relevance": {"superuser-stackexchange:post:1074008": 3}},
+    {"id": "bluescreen-001", "query": "blue screen driver", "query_type": "diagnostics", "relevance": {"superuser-stackexchange:post:268334": 3}},
+    {"id": "grub-001", "query": "GRUB repair", "query_type": "boot", "relevance": {"superuser-stackexchange:post:1642346": 3}},
+    {"id": "printer-001", "query": "network printer", "query_type": "peripherals", "relevance": {"superuser-stackexchange:post:756510": 3}},
+    {"id": "vlc-001", "query": "VLC hardware acceleration", "query_type": "media", "relevance": {"superuser-stackexchange:post:128478": 3}},
+    {"id": "pst-001", "query": "PST repair", "query_type": "applications", "relevance": {"superuser-stackexchange:post:1004768": 3}},
+    {"id": "usb-001", "query": "USB not recognized", "query_type": "peripherals", "relevance": {"superuser-stackexchange:post:592312": 3}}
+  ]
+}

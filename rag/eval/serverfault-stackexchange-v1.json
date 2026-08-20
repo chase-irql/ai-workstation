@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "name": "Server Fault June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering DNS, directory services, web, storage, virtualization, Windows, Linux, mail, authentication, containers, and firewalls.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "dns-config-001", "query": "DNS server configuration", "query_type": "network_services", "relevance": {"serverfault-stackexchange:post:888256": 3}},
+    {"id": "ad-replication-001", "query": "Active Directory replication failure", "query_type": "directory_services", "relevance": {"serverfault-stackexchange:post:835144": 3}},
+    {"id": "nginx-timeout-001", "query": "Nginx reverse proxy timeout", "query_type": "web", "relevance": {"serverfault-stackexchange:post:1152536": 3}},
+    {"id": "apache-ssl-001", "query": "Apache SSL certificate", "query_type": "web", "relevance": {"serverfault-stackexchange:post:857824": 3}},
+    {"id": "linux-disk-001", "query": "Linux disk space full", "query_type": "linux", "relevance": {"serverfault-stackexchange:post:1162364": 3}},
+    {"id": "raid-drive-001", "query": "RAID controller failed drive", "query_type": "storage", "relevance": {"serverfault-stackexchange:post:565519": 3}},
+    {"id": "vmware-snapshot-001", "query": "VMware snapshot consolidation", "query_type": "virtualization", "relevance": {"serverfault-stackexchange:post:847100": 3}},
+    {"id": "hyperv-switch-001", "query": "Hyper-V virtual switch", "query_type": "virtualization", "relevance": {"serverfault-stackexchange:post:787229": 3}},
+    {"id": "group-policy-001", "query": "Windows Server group policy", "query_type": "windows", "relevance": {"serverfault-stackexchange:post:1172435": 3}},
+    {"id": "ssh-timeout-001", "query": "SSH connection timeout", "query_type": "networking", "relevance": {"serverfault-stackexchange:post:945845": 3}},
+    {"id": "mail-auth-001", "query": "email SPF DKIM DMARC", "query_type": "mail", "relevance": {"serverfault-stackexchange:post:1059635": 3}},
+    {"id": "postfix-queue-001", "query": "Postfix mail queue", "query_type": "mail", "relevance": {"serverfault-stackexchange:post:1131210": 3}},
+    {"id": "mysql-restore-001", "query": "MySQL backup restore", "query_type": "database", "relevance": {"serverfault-stackexchange:post:479136": 3}},
+    {"id": "load-balancer-001", "query": "network load balancer health check", "query_type": "resilience", "relevance": {"serverfault-stackexchange:post:868181": 3}},
+    {"id": "iscsi-001", "query": "iSCSI storage performance", "query_type": "storage", "relevance": {"serverfault-stackexchange:post:806496": 3}},
+    {"id": "kerberos-clock-001", "query": "Kerberos authentication clock skew", "query_type": "authentication", "relevance": {"serverfault-stackexchange:post:515232": 3}},
+    {"id": "docker-network-001", "query": "Docker container networking", "query_type": "containers", "relevance": {"serverfault-stackexchange:post:1147280": 3}},
+    {"id": "firewall-forward-001", "query": "firewall port forwarding", "query_type": "security", "relevance": {"serverfault-stackexchange:post:1168348": 3}}
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Computer Science Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering algorithms, complexity, computation, data structures, graphs, compilers, and operating systems.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "dijkstra-001", "query": "Dijkstra shortest path", "query_type": "graphs", "relevance": {"cs-stackexchange:post:121373": 3}},
+    {"id": "binary-search-001", "query": "binary search complexity", "query_type": "algorithms", "relevance": {"cs-stackexchange:post:120248": 3}},
+    {"id": "dynamic-programming-001", "query": "dynamic programming memoization", "query_type": "algorithms", "relevance": {"cs-stackexchange:post:99513": 3}},
+    {"id": "automata-001", "query": "finite automata regular language", "query_type": "automata", "relevance": {"cs-stackexchange:post:51315": 3}},
+    {"id": "decidability-001", "query": "Turing machine decidability", "query_type": "computability", "relevance": {"cs-stackexchange:post:163373": 3}},
+    {"id": "np-reduction-001", "query": "NP complete reduction", "query_type": "complexity", "relevance": {"cs-stackexchange:post:86554": 3}},
+    {"id": "hash-collision-001", "query": "hash table collision", "query_type": "data_structures", "relevance": {"cs-stackexchange:post:10273": 3}},
+    {"id": "tree-traversal-001", "query": "binary tree traversal", "query_type": "data_structures", "relevance": {"cs-stackexchange:post:86971": 3}},
+    {"id": "bfs-001", "query": "graph breadth first search", "query_type": "graphs", "relevance": {"cs-stackexchange:post:108487": 3}},
+    {"id": "lexer-001", "query": "compiler lexical analysis", "query_type": "compilers", "relevance": {"cs-stackexchange:post:13909": 3}},
+    {"id": "deadlock-001", "query": "operating system deadlock", "query_type": "operating_systems", "relevance": {"cs-stackexchange:post:64017": 3}},
+    {"id": "btree-001", "query": "why is B-tree search O(log n)", "query_type": "data_structures", "relevance": {"cs-stackexchange:post:59453": 3}}
+  ]
+}

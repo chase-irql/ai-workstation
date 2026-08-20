@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "Server Fault June 2026 semantic paraphrase gate",
+  "description": "Natural-language infrastructure troubleshooting questions that avoid source-title wording.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "ad-replication-paraphrase-001", "query": "domain controllers cannot synchronize directory changes because access is denied", "query_type": "directory_paraphrase", "relevance": {"serverfault-stackexchange:post:835144": 3}},
+    {"id": "nginx-timeout-paraphrase-001", "query": "large uploads fail while passing through the front end web gateway to an upstream application", "query_type": "web_paraphrase", "relevance": {"serverfault-stackexchange:post:1152536": 3}},
+    {"id": "disk-full-paraphrase-001", "query": "find what is consuming capacity when a Linux server storage volume is almost exhausted", "query_type": "linux_paraphrase", "relevance": {"serverfault-stackexchange:post:1162364": 3}},
+    {"id": "raid-paraphrase-001", "query": "determine which physical disk should be replaced after a hardware array reports failure", "query_type": "storage_paraphrase", "relevance": {"serverfault-stackexchange:post:565519": 3}},
+    {"id": "vmware-paraphrase-001", "query": "merge stale virtual machine delta disks after removing an old point in time image", "query_type": "virtualization_paraphrase", "relevance": {"serverfault-stackexchange:post:847100": 3}},
+    {"id": "ssh-timeout-paraphrase-001", "query": "limit how long a secure shell client waits while attempting to establish a session", "query_type": "networking_paraphrase", "relevance": {"serverfault-stackexchange:post:945845": 3}},
+    {"id": "mail-auth-paraphrase-001", "query": "messages still land in junk folders after publishing sender policy signatures and reporting records", "query_type": "mail_paraphrase", "relevance": {"serverfault-stackexchange:post:1059635": 3}},
+    {"id": "load-balancer-paraphrase-001", "query": "stop sending traffic to a cloud backend instance immediately after its probe begins failing", "query_type": "resilience_paraphrase", "relevance": {"serverfault-stackexchange:post:868181": 3}},
+    {"id": "iscsi-paraphrase-001", "query": "poor throughput between a virtualization host and block storage carried over Ethernet", "query_type": "storage_paraphrase", "relevance": {"serverfault-stackexchange:post:806496": 3}},
+    {"id": "firewall-paraphrase-001", "query": "redirect incoming TCP traffic to another local or internal destination using host firewall rules", "query_type": "security_paraphrase", "relevance": {"serverfault-stackexchange:post:1168348": 3}}
+  ]
+}

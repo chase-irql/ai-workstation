@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "name": "Database Administrators Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering PostgreSQL, SQL Server, MySQL, Oracle, NoSQL, recovery, transactions, and performance.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "postgres-index-001", "query": "PostgreSQL index performance", "query_type": "postgresql", "relevance": {"dba-stackexchange:post:344545": 3}},
+    {"id": "postgres-vacuum-001", "query": "PostgreSQL VACUUM autovacuum", "query_type": "postgresql", "relevance": {"dba-stackexchange:post:347610": 3}},
+    {"id": "postgres-replication-001", "query": "PostgreSQL replication lag", "query_type": "postgresql", "relevance": {"dba-stackexchange:post:10742": 3}},
+    {"id": "sqlserver-deadlock-001", "query": "SQL Server deadlock", "query_type": "sql_server", "relevance": {"dba-stackexchange:post:145074": 3}},
+    {"id": "sqlserver-plan-001", "query": "SQL Server execution plan", "query_type": "sql_server", "relevance": {"dba-stackexchange:post:220050": 3}},
+    {"id": "mysql-slow-query-001", "query": "MySQL slow query index", "query_type": "mysql", "relevance": {"dba-stackexchange:post:174656": 3}},
+    {"id": "mysql-replication-001", "query": "MySQL replication failure", "query_type": "mysql", "relevance": {"dba-stackexchange:post:258017": 3}},
+    {"id": "pitr-001", "query": "database backup point in time recovery", "query_type": "recovery", "relevance": {"dba-stackexchange:post:306104": 3}},
+    {"id": "phantom-read-001", "query": "transaction isolation phantom read", "query_type": "transactions", "relevance": {"dba-stackexchange:post:320195": 3}},
+    {"id": "selectivity-001", "query": "B-tree index selectivity", "query_type": "performance", "relevance": {"dba-stackexchange:post:278135": 3}},
+    {"id": "normalization-fk-001", "query": "database normalization foreign key", "query_type": "design", "relevance": {"dba-stackexchange:post:208256": 3}},
+    {"id": "oracle-tablespace-001", "query": "Oracle tablespace full", "query_type": "oracle", "relevance": {"dba-stackexchange:post:111209": 3}},
+    {"id": "mongodb-replica-001", "query": "MongoDB replica set", "query_type": "nosql", "relevance": {"dba-stackexchange:post:95159": 3}},
+    {"id": "redis-persistence-001", "query": "Redis persistence AOF RDB", "query_type": "nosql", "relevance": {"dba-stackexchange:post:328890": 3}},
+    {"id": "connection-pool-001", "query": "database connection pool", "query_type": "operations", "relevance": {"dba-stackexchange:post:125285": 3}},
+    {"id": "optimizer-stats-001", "query": "query optimizer statistics", "query_type": "performance", "relevance": {"dba-stackexchange:post:346744": 3}},
+    {"id": "partition-performance-001", "query": "partitioned table performance", "query_type": "performance", "relevance": {"dba-stackexchange:post:339175": 3}},
+    {"id": "unique-duplicate-001", "query": "unique constraint duplicate rows", "query_type": "constraints", "relevance": {"dba-stackexchange:post:161903": 3}}
+  ]
+}

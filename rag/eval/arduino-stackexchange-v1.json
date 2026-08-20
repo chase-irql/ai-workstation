@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Arduino Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering buses, timing, inputs, motors, storage, watchdogs, bootloaders, memory, and output protection.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "i2c-sensor-001", "query": "Arduino I2C sensor", "query_type": "buses", "relevance": {"arduino-stackexchange:post:43525": 3}},
+    {"id": "serial-001", "query": "Arduino serial communication", "query_type": "buses", "relevance": {"arduino-stackexchange:post:1358": 3}},
+    {"id": "debounce-001", "query": "button debounce interrupt", "query_type": "inputs", "relevance": {"arduino-stackexchange:post:96235": 3}},
+    {"id": "millis-001", "query": "Arduino millis delay", "query_type": "timing", "relevance": {"arduino-stackexchange:post:97350": 3}},
+    {"id": "analog-noise-001", "query": "Arduino analog input noise", "query_type": "analog", "relevance": {"arduino-stackexchange:post:69727": 3}},
+    {"id": "pwm-motor-001", "query": "Arduino PWM motor control", "query_type": "motors", "relevance": {"arduino-stackexchange:post:97329": 3}},
+    {"id": "spi-001", "query": "Arduino SPI communication", "query_type": "buses", "relevance": {"arduino-stackexchange:post:42886": 3}},
+    {"id": "eeprom-001", "query": "Arduino EEPROM write", "query_type": "storage", "relevance": {"arduino-stackexchange:post:25080": 3}},
+    {"id": "watchdog-001", "query": "Arduino watchdog timer", "query_type": "reliability", "relevance": {"arduino-stackexchange:post:10230": 3}},
+    {"id": "bootloader-001", "query": "burn bootloader upload error", "query_type": "toolchain", "relevance": {"arduino-stackexchange:post:79909": 3}},
+    {"id": "memory-001", "query": "Arduino memory overflow", "query_type": "memory", "relevance": {"arduino-stackexchange:post:89845": 3}},
+    {"id": "relay-001", "query": "relay coil flyback diode", "query_type": "outputs", "relevance": {"arduino-stackexchange:post:83414": 3}}
+  ]
+}

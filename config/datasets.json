@@ -73,6 +73,366 @@
       "notes": "Pinned June 2026 coordinated community release; publisher SHA-256 verified. The 271,298,857-byte archive expanded to 1,313,984,676 bytes. Parsed 70,265 questions, 32,426 accepted answers, and 68,350 other positively scored answers into 171,041 post documents and 188,770 chunks. The 18-topic lexical and final routed exact-query gates achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0. A verified 256-dimensional Qwen3-Embedding generation covers every chunk in 287,344,685 bytes of vector and metadata files. On 14 pooled paraphrase judgments, strict-AND BM25 found no relevant evidence while hybrid retrieval achieved Success@1 0.357143, Success@5 0.857143, Success@10 0.928571, Recall@50 0.704762, and MRR@10 0.53869. Reranking preserved Success@10 but slightly lowered Success@5, so automatic routing keeps terse technical phrases on strict BM25 while broader questions use hybrid retrieval."
     },
     {
+      "dataset_id": "networkengineering-stackexchange",
+      "name": "Network Engineering Stack Exchange",
+      "description": "Questions and answers about professionally managed networks, routing, switching, firewalls, wireless, and network protocols.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://networkengineering.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Network Engineering Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Network Engineering Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/networkengineering.stackexchange.com.7z",
+        "publisher_checksum": "289900036589c8139777ba370c0df51a020dee2ac27c085509d2d498d7d3a51a",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://networkengineering.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "BGP route advertisement"},
+      "storage": {"download_min_bytes": 52000000, "download_max_bytes": 53000000, "extracted_max_bytes": 500000000, "indexed_max_bytes": 1000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/networkengineering",
+        "processed": "corpora/processed/stack-exchange/networkengineering",
+        "index": "indexes/stack-exchange/networkengineering.sqlite3",
+        "semantic_index": "indexes/semantic/networkengineering-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 52,567,199-byte archive, which expanded to 281,434,555 bytes. Parsed 17,048 questions, 10,049 accepted answers, and 12,495 other positively scored answers into 39,592 post documents and 44,174 chunks. The 166,412,288-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 18-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "dba-stackexchange",
+      "name": "Database Administrators Stack Exchange",
+      "description": "Questions and answers about database administration, recovery, replication, indexing, performance, and data platforms.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://dba.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Database Administrators Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Database Administrators Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/dba.stackexchange.com.7z",
+        "publisher_checksum": "db3d39514e381a0f6ba1849b096c2fae73aa15811f6aa57f204d397b7e35de93",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://dba.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "PostgreSQL index performance"},
+      "storage": {"download_min_bytes": 334000000, "download_max_bytes": 335000000, "extracted_max_bytes": 3000000000, "indexed_max_bytes": 5000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/dba",
+        "processed": "corpora/processed/stack-exchange/dba",
+        "index": "indexes/stack-exchange/dba.sqlite3",
+        "semantic_index": "indexes/semantic/dba-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 334,305,094-byte archive, which expanded to 1,843,167,634 bytes. Parsed 105,626 questions, 51,397 accepted answers, and 63,765 other positively scored answers into 220,788 post documents and 262,323 chunks. The 1,061,568,512-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 18-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "electronics-stackexchange",
+      "name": "Electrical Engineering Stack Exchange",
+      "description": "Questions and answers about electronics, circuits, components, embedded systems, power, measurement, and diagnostics.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://electronics.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Electrical Engineering Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Electrical Engineering Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/electronics.stackexchange.com.7z",
+        "publisher_checksum": "15307939bcad56eff42eec0268b3e20a0d9b52bec9984a867046ce1373754904",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://electronics.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "MOSFET gate resistor"},
+      "storage": {"download_min_bytes": 711000000, "download_max_bytes": 712000000, "extracted_max_bytes": 7000000000, "indexed_max_bytes": 10000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/electronics",
+        "processed": "corpora/processed/stack-exchange/electronics",
+        "index": "indexes/stack-exchange/electronics.sqlite3",
+        "semantic_index": "indexes/semantic/electronics-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 711,176,809-byte archive, which expanded to 3,540,707,743 bytes. Parsed 214,700 questions, 102,074 accepted answers, and 193,032 other positively scored answers into 509,806 post documents and 545,211 chunks. The 2,027,102,208-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 18-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "unix-stackexchange",
+      "name": "Unix & Linux Stack Exchange",
+      "description": "Questions and answers about Unix and Linux administration, shells, storage, boot, permissions, networking, and recovery.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://unix.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Unix & Linux Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Unix & Linux Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/unix.stackexchange.com.7z",
+        "publisher_checksum": "9b8569dec866eedc7fd8129d0b1731b33c5f7eb22703d7e1b3c514fe3e38a19d",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://unix.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "systemd boot filesystem"},
+      "storage": {"download_min_bytes": 759000000, "download_max_bytes": 760000000, "extracted_max_bytes": 8000000000, "indexed_max_bytes": 12000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/unix",
+        "processed": "corpora/processed/stack-exchange/unix",
+        "index": "indexes/stack-exchange/unix.sqlite3",
+        "semantic_index": "indexes/semantic/unix-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 759,322,794-byte archive, which expanded to 4,097,378,801 bytes. Parsed 245,953 questions, 117,526 accepted answers, and 165,412 other positively scored answers into 528,891 post documents and 602,485 chunks. The 2,176,270,336-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 18-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "serverfault-stackexchange",
+      "name": "Server Fault",
+      "description": "Questions and answers about managing production servers, networks, storage, virtualization, security, and infrastructure operations.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://serverfault.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Server Fault contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Server Fault site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/serverfault.com.7z",
+        "publisher_checksum": "c7c913cf119365040bf1367b8efd7665235ba57edbfd38890cde2840c1db5316",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://serverfault.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "DNS server configuration"},
+      "storage": {"download_min_bytes": 907000000, "download_max_bytes": 908000000, "extracted_max_bytes": 10000000000, "indexed_max_bytes": 15000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/serverfault",
+        "processed": "corpora/processed/stack-exchange/serverfault",
+        "index": "indexes/stack-exchange/serverfault.sqlite3",
+        "semantic_index": "indexes/semantic/serverfault-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 907,565,303-byte archive, which expanded to 4,514,836,663 bytes. Parsed 329,168 questions, 155,230 accepted answers, and 220,315 other positively scored answers into 704,713 post documents and 775,708 chunks. The 2,803,294,208-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 18-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "softwareengineering-stackexchange",
+      "name": "Software Engineering Stack Exchange",
+      "description": "Questions and answers about software architecture, design, development process, testing, requirements, and engineering practice.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://softwareengineering.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Software Engineering Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Software Engineering Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/softwareengineering.stackexchange.com.7z",
+        "publisher_checksum": "01761e03b5cd24276dfb1018300fba546fe17c0ad39e43a57f386b057c7afd00",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://softwareengineering.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "dependency injection design"},
+      "storage": {"download_min_bytes": 377000000, "download_max_bytes": 379000000, "extracted_max_bytes": 4000000000, "indexed_max_bytes": 8000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/softwareengineering",
+        "processed": "corpora/processed/stack-exchange/softwareengineering",
+        "index": "indexes/stack-exchange/softwareengineering.sqlite3",
+        "semantic_index": "indexes/semantic/softwareengineering-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 377,945,136-byte archive, which expanded to 1,919,811,603 bytes. Parsed 64,504 questions, 37,031 accepted answers, and 112,479 other positively scored answers into 214,014 post documents and 239,207 chunks. The 997,220,352-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 12-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "cs-stackexchange",
+      "name": "Computer Science Stack Exchange",
+      "description": "Questions and answers about algorithms, computability, complexity, data structures, languages, architecture, and theoretical computer science.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://cs.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Computer Science Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Computer Science Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/cs.stackexchange.com.7z",
+        "publisher_checksum": "e91665994e134ccd9dcaec775672c9ade861e943df3256333b978bd00c935348",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://cs.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "Dijkstra shortest path"},
+      "storage": {"download_min_bytes": 139000000, "download_max_bytes": 140000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 3000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/cs",
+        "processed": "corpora/processed/stack-exchange/cs",
+        "index": "indexes/stack-exchange/cs.sqlite3",
+        "semantic_index": "indexes/semantic/cs-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 139,405,386-byte archive, which expanded to 718,367,220 bytes. Parsed 50,201 questions, 22,736 accepted answers, and 28,707 other positively scored answers into 101,644 post documents and 109,770 chunks. The 411,676,672-byte BM25 database passed validation. The 12-topic lexical gate achieved Success@1 0.916667, Success@5/10 1.0, MRR@10 0.944444, Recall@5/10/50 1.0, and nDCG@10 0.958333."
+    },
+    {
+      "dataset_id": "arduino-stackexchange",
+      "name": "Arduino Stack Exchange",
+      "description": "Questions and answers about Arduino hardware, firmware, sensors, communication buses, libraries, and embedded projects.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://arduino.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Arduino Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Arduino Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/arduino.stackexchange.com.7z",
+        "publisher_checksum": "c333da61aee118872d93b5cb0db6f49a79b920b241b12be680943adc6ada2f0d",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://arduino.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "Arduino I2C sensor"},
+      "storage": {"download_min_bytes": 84000000, "download_max_bytes": 86000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 2000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/arduino",
+        "processed": "corpora/processed/stack-exchange/arduino",
+        "index": "indexes/stack-exchange/arduino.sqlite3",
+        "semantic_index": "indexes/semantic/arduino-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 84,936,332-byte archive, which expanded to 460,463,158 bytes. Parsed 25,048 questions, 10,733 accepted answers, and 16,557 other positively scored answers into 52,338 post documents and 62,506 chunks. The 257,703,936-byte BM25 database passed validation. The 12-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "raspberrypi-stackexchange",
+      "name": "Raspberry Pi Stack Exchange",
+      "description": "Questions and answers about Raspberry Pi hardware, Linux, GPIO, boot, networking, peripherals, and embedded projects.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://raspberrypi.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Raspberry Pi Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Raspberry Pi Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/raspberrypi.stackexchange.com.7z",
+        "publisher_checksum": "af31c187677df4e84133d7dbb3faaab29acf34cd2d083d057f5a9123f257ca3f",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://raspberrypi.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "Raspberry Pi GPIO boot"},
+      "storage": {"download_min_bytes": 108000000, "download_max_bytes": 109000000, "extracted_max_bytes": 1500000000, "indexed_max_bytes": 2500000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/raspberrypi",
+        "processed": "corpora/processed/stack-exchange/raspberrypi",
+        "index": "indexes/stack-exchange/raspberrypi.sqlite3",
+        "semantic_index": "indexes/semantic/raspberrypi-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 108,037,406-byte archive, which expanded to 570,468,885 bytes. Parsed 37,606 questions, 13,620 accepted answers, and 24,772 other positively scored answers into 75,998 post documents and 85,362 chunks. The 313,184,256-byte BM25 database passed validation. The 12-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "dsp-stackexchange",
+      "name": "Signal Processing Stack Exchange",
+      "description": "Questions and answers about digital signal processing, filters, transforms, sampling, estimation, communications, and implementation.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://dsp.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Signal Processing Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Signal Processing Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/dsp.stackexchange.com.7z",
+        "publisher_checksum": "b9da8948ce6194a29fd8babd16f996fa3b2b1b5fa35ec3867c59a9ad5047b5c9",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://dsp.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "FFT window spectral leakage"},
+      "storage": {"download_min_bytes": 93000000, "download_max_bytes": 94000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 2000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/dsp",
+        "processed": "corpora/processed/stack-exchange/dsp",
+        "index": "indexes/stack-exchange/dsp.sqlite3",
+        "semantic_index": "indexes/semantic/dsp-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 93,328,686-byte archive, which expanded to 506,287,371 bytes. Parsed 29,107 questions, 13,236 accepted answers, and 18,033 other positively scored answers into 60,376 post documents and 66,988 chunks. The 271,622,144-byte BM25 database passed validation. The 12-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "superuser-stackexchange",
+      "name": "Super User Stack Exchange",
+      "description": "Questions and answers about desktop operating systems, applications, storage, networking, hardware, recovery, and power-user troubleshooting.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://superuser.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Super User contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Super User site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/superuser.com.7z",
+        "publisher_checksum": "811f4170a6c3696973a6592eb48d8979b2b3314a4276c830358c56b678dd84ca",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://superuser.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "Windows boot recovery disk"},
+      "storage": {"download_min_bytes": 1400000000, "download_max_bytes": 1401000000, "extracted_max_bytes": 12000000000, "indexed_max_bytes": 20000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/superuser",
+        "processed": "corpora/processed/stack-exchange/superuser",
+        "index": "indexes/stack-exchange/superuser.sqlite3",
+        "semantic_index": "indexes/semantic/superuser-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 1,400,358,958-byte archive, which expanded to 7,031,637,025 bytes. Parsed 516,469 questions, 209,926 accepted answers, and 303,740 other positively scored answers into 1,030,135 post documents and 1,110,380 chunks. The 3,665,461,248-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 12-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0 with 19.716 ms mean latency."
+    },
+    {
+      "dataset_id": "askubuntu-stackexchange",
+      "name": "Ask Ubuntu Stack Exchange",
+      "description": "Questions and answers about Ubuntu installation, packages, boot, hardware, networking, administration, applications, and recovery.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://askubuntu.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Ask Ubuntu contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Ask Ubuntu site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/askubuntu.com.7z",
+        "publisher_checksum": "39bfca796c0b00782ec95a5f5720556b48d10f7fe1c9f1e6c49e3d4ab3904413",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://askubuntu.com/{post_type}/{post_id}"
+      },
+      "ingestion": {"smoke_query": "Ubuntu apt dependency recovery"},
+      "storage": {"download_min_bytes": 1147000000, "download_max_bytes": 1148000000, "extracted_max_bytes": 10000000000, "indexed_max_bytes": 16000000000},
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/askubuntu",
+        "processed": "corpora/processed/stack-exchange/askubuntu",
+        "index": "indexes/stack-exchange/askubuntu.sqlite3",
+        "semantic_index": "indexes/semantic/askubuntu-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Publisher SHA-256 verified for the 1,147,225,611-byte archive, which expanded to 6,380,033,549 bytes. Parsed 425,374 questions, 139,202 accepted answers, and 225,311 other positively scored answers into 789,887 post documents and 901,300 chunks. The 3,112,361,984-byte BM25 database passed integrity, foreign-key, source-count, FTS-count, citation, and smoke-query validation. The 12-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0 with 31.754 ms mean latency."
+    },
+    {
       "dataset_id": "python-3.14-docs",
       "name": "Python 3.14 Documentation",
       "description": "Official Python language, standard-library, tutorial, HOWTO, and C API documentation.",

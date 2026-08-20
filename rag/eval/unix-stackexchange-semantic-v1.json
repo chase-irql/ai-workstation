@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "Unix and Linux Stack Exchange June 2026 semantic paraphrase gate",
+  "description": "Natural-language Unix and Linux troubleshooting questions that avoid source-title wording.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "systemd-paraphrase-001", "query": "a boot managed background program will not launch because the journal flush operation times out", "query_type": "services_paraphrase", "relevance": {"unix-stackexchange:post:740162": 3}},
+    {"id": "permissions-paraphrase-001", "query": "change access bits through a symbolic reference without accidentally modifying the wrong object", "query_type": "permissions_paraphrase", "relevance": {"unix-stackexchange:post:325634": 3}},
+    {"id": "shell-expansion-paraphrase-001", "query": "what the command interpreter does when replacing a named parameter with its stored value", "query_type": "shell_paraphrase", "relevance": {"unix-stackexchange:post:403867": 3}},
+    {"id": "inode-paraphrase-001", "query": "writes fail saying the device is full even though byte capacity remains because file metadata entries are exhausted", "query_type": "storage_paraphrase", "relevance": {"unix-stackexchange:post:86080": 3}},
+    {"id": "lvm-paraphrase-001", "query": "grow a filesystem contained inside a dynamically allocated block storage volume", "query_type": "storage_paraphrase", "relevance": {"unix-stackexchange:post:295798": 3}},
+    {"id": "raid-paraphrase-001", "query": "bring a software parity array online after reboot when one member disk is unavailable", "query_type": "storage_paraphrase", "relevance": {"unix-stackexchange:post:686578": 3}},
+    {"id": "kernel-panic-paraphrase-001", "query": "the operating system stops during startup because it cannot locate an initial userspace process", "query_type": "boot_paraphrase", "relevance": {"unix-stackexchange:post:18149": 3}},
+    {"id": "cron-paraphrase-001", "query": "a scheduled command cannot see variables that are present in an interactive login session", "query_type": "scheduling_paraphrase", "relevance": {"unix-stackexchange:post:542458": 3}},
+    {"id": "tar-paraphrase-001", "query": "archive a directory tree while retaining owners groups modes and timestamps", "query_type": "backup_paraphrase", "relevance": {"unix-stackexchange:post:444692": 3}},
+    {"id": "leak-paraphrase-001", "query": "identify why a long running process continually consumes more resident memory", "query_type": "diagnostics_paraphrase", "relevance": {"unix-stackexchange:post:36450": 3}}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "name": "Unix and Linux Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering boot, services, filesystems, shell tools, storage, networking, scheduling, and diagnostics.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "systemd-failure-001", "query": "systemd failed service start", "query_type": "services", "relevance": {"unix-stackexchange:post:740162": 3}},
+    {"id": "fstab-mount-001", "query": "filesystem mount fstab", "query_type": "filesystems", "relevance": {"unix-stackexchange:post:460010": 3}},
+    {"id": "chmod-001", "query": "Linux file permissions chmod", "query_type": "permissions", "relevance": {"unix-stackexchange:post:325634": 3}},
+    {"id": "ssh-key-001", "query": "SSH public key authentication", "query_type": "networking", "relevance": {"unix-stackexchange:post:99230": 3}},
+    {"id": "bash-expansion-001", "query": "Bash variable expansion", "query_type": "shell", "relevance": {"unix-stackexchange:post:403867": 3}},
+    {"id": "grep-regex-001", "query": "grep regular expression", "query_type": "text_processing", "relevance": {"unix-stackexchange:post:347852": 3}},
+    {"id": "sed-replace-001", "query": "sed replace text", "query_type": "text_processing", "relevance": {"unix-stackexchange:post:589676": 3}},
+    {"id": "inode-full-001", "query": "no space left device inodes", "query_type": "storage", "relevance": {"unix-stackexchange:post:86080": 3}},
+    {"id": "lvm-resize-001", "query": "LVM logical volume resize", "query_type": "storage", "relevance": {"unix-stackexchange:post:295798": 3}},
+    {"id": "raid-degraded-001", "query": "RAID degraded array", "query_type": "storage", "relevance": {"unix-stackexchange:post:686578": 3}},
+    {"id": "kernel-panic-001", "query": "kernel panic boot", "query_type": "boot", "relevance": {"unix-stackexchange:post:18149": 3}},
+    {"id": "dns-resolver-001", "query": "DNS resolver configuration", "query_type": "networking", "relevance": {"unix-stackexchange:post:758614": 3}},
+    {"id": "iptables-forward-001", "query": "iptables port forwarding", "query_type": "networking", "relevance": {"unix-stackexchange:post:91680": 3}},
+    {"id": "cron-env-001", "query": "cron environment variables", "query_type": "scheduling", "relevance": {"unix-stackexchange:post:542458": 3}},
+    {"id": "broken-symlink-001", "query": "symbolic link broken", "query_type": "filesystems", "relevance": {"unix-stackexchange:post:407476": 3}},
+    {"id": "find-mtime-001", "query": "find files modified time", "query_type": "shell", "relevance": {"unix-stackexchange:post:185915": 3}},
+    {"id": "tar-permissions-001", "query": "tar preserve ownership permissions", "query_type": "backup", "relevance": {"unix-stackexchange:post:444692": 3}},
+    {"id": "memory-leak-001", "query": "process memory leak", "query_type": "diagnostics", "relevance": {"unix-stackexchange:post:36450": 3}}
+  ]
+}

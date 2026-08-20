@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "Electrical Engineering Stack Exchange June 2026 semantic paraphrase gate",
+  "description": "Natural-language electronics questions that avoid source-title wording.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "mosfet-gate-paraphrase-001", "query": "why place resistance in series between a driver output and a power transistor control terminal", "query_type": "power_paraphrase", "relevance": {"electronics-stackexchange:post:447016": 3}},
+    {"id": "feedback-paraphrase-001", "query": "how feeding an amplifier output back to its inverting input stabilizes its behavior", "query_type": "analog_paraphrase", "relevance": {"electronics-stackexchange:post:754368": 3}},
+    {"id": "buck-paraphrase-001", "query": "choose the energy storage coil and saturation rating for a step down switching supply", "query_type": "power_paraphrase", "relevance": {"electronics-stackexchange:post:5842": 3}},
+    {"id": "i2c-paraphrase-001", "query": "why open drain serial clock and data wires need resistors to the positive rail", "query_type": "digital_paraphrase", "relevance": {"electronics-stackexchange:post:514907": 3}},
+    {"id": "decoupling-paraphrase-001", "query": "where bypass capacitors should sit relative to an integrated circuit supply pin", "query_type": "pcb_paraphrase", "relevance": {"electronics-stackexchange:post:260920": 3}},
+    {"id": "flyback-paraphrase-001", "query": "protect a switching transistor from the voltage spike when an electromagnetic coil turns off", "query_type": "components_paraphrase", "relevance": {"electronics-stackexchange:post:181805": 3}},
+    {"id": "adc-reference-paraphrase-001", "query": "improve converter resolution by lowering its reference versus amplifying a weak sensor signal", "query_type": "mixed_signal_paraphrase", "relevance": {"electronics-stackexchange:post:153670": 3}},
+    {"id": "scope-ground-paraphrase-001", "query": "why connecting a bench oscilloscope ground clip can alter or short the circuit under test", "query_type": "measurement_paraphrase", "relevance": {"electronics-stackexchange:post:357605": 3}},
+    {"id": "crystal-load-paraphrase-001", "query": "select external capacitor values required by a quartz resonator specification", "query_type": "timing_paraphrase", "relevance": {"electronics-stackexchange:post:685784": 3}},
+    {"id": "emi-paraphrase-001", "query": "reduce switching supply noise conducted equally on both mains wires", "query_type": "emc_paraphrase", "relevance": {"electronics-stackexchange:post:652884": 3}}
+  ]
+}

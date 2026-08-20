@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "Database Administrators Stack Exchange June 2026 semantic paraphrase gate",
+  "description": "Natural-language database operations questions that avoid source-title wording.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "autovacuum-paraphrase-001", "query": "how the database decides which relations need automatic cleanup and fresh planner statistics", "query_type": "postgresql_paraphrase", "relevance": {"dba-stackexchange:post:347610": 3, "dba-stackexchange:post:147817": 2}},
+    {"id": "replication-lag-paraphrase-001", "query": "whether a standby can catch up after falling behind when old write ahead log files are gone", "query_type": "postgresql_paraphrase", "relevance": {"dba-stackexchange:post:10742": 3, "dba-stackexchange:post:10540": 3, "dba-stackexchange:post:89111": 2}},
+    {"id": "deadlock-paraphrase-001", "query": "two concurrent transactions each wait forever for a resource held by the other", "query_type": "transactions_paraphrase", "relevance": {"dba-stackexchange:post:145074": 3, "dba-stackexchange:post:37100": 3, "dba-stackexchange:post:321924": 3, "dba-stackexchange:post:193165": 2}},
+    {"id": "slow-query-paraphrase-001", "query": "a relational query remains slow even though its filtering columns appear to be indexed", "query_type": "performance_paraphrase", "relevance": {"dba-stackexchange:post:174656": 3, "dba-stackexchange:post:43473": 3, "dba-stackexchange:post:112810": 3, "dba-stackexchange:post:123612": 2, "dba-stackexchange:post:123891": 2}},
+    {"id": "pitr-paraphrase-001", "query": "restore a database to the moment just before an accidental change", "query_type": "recovery_paraphrase", "relevance": {"dba-stackexchange:post:306104": 3, "dba-stackexchange:post:40876": 3, "dba-stackexchange:post:40872": 3, "dba-stackexchange:post:80385": 3, "dba-stackexchange:post:11170": 2}},
+    {"id": "phantom-paraphrase-001", "query": "repeating a range query inside one transaction returns newly appearing rows", "query_type": "transactions_paraphrase", "relevance": {"dba-stackexchange:post:320195": 3, "dba-stackexchange:post:108830": 2, "dba-stackexchange:post:165259": 2}},
+    {"id": "selectivity-paraphrase-001", "query": "why an index on a column with only a few distinct values can make reads slower", "query_type": "performance_paraphrase", "relevance": {"dba-stackexchange:post:278135": 3, "dba-stackexchange:post:278126": 3, "dba-stackexchange:post:101096": 2, "dba-stackexchange:post:225293": 2}},
+    {"id": "tablespace-paraphrase-001", "query": "recover when the main Oracle storage allocation cannot be enlarged and has no free blocks", "query_type": "oracle_paraphrase", "relevance": {"dba-stackexchange:post:111209": 3, "dba-stackexchange:post:123027": 2, "dba-stackexchange:post:23822": 2}},
+    {"id": "optimizer-stats-paraphrase-001", "query": "whether the query planner can use statistics collected separately for new table partitions", "query_type": "performance_paraphrase", "relevance": {"dba-stackexchange:post:346744": 3, "dba-stackexchange:post:301530": 3, "dba-stackexchange:post:165164": 2, "dba-stackexchange:post:171284": 2}},
+    {"id": "unique-paraphrase-001", "query": "insert only unseen records while safely handling rows that violate a uniqueness rule", "query_type": "constraints_paraphrase", "relevance": {"dba-stackexchange:post:161903": 3, "dba-stackexchange:post:189079": 3, "dba-stackexchange:post:30499": 3, "dba-stackexchange:post:190157": 2}}
+  ]
+}

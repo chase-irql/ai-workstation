@@ -15,12 +15,33 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 8)
-        self.assertIn("devops-stackexchange", {dataset.dataset_id for dataset in datasets})
-        self.assertIn("security-stackexchange", {dataset.dataset_id for dataset in datasets})
+        self.assertEqual(len(datasets), 20)
+        dataset_ids = {dataset.dataset_id for dataset in datasets}
+        self.assertIn("devops-stackexchange", dataset_ids)
+        self.assertIn("security-stackexchange", dataset_ids)
+        self.assertTrue(
+            {
+                "networkengineering-stackexchange",
+                "dba-stackexchange",
+                "electronics-stackexchange",
+                "unix-stackexchange",
+                "serverfault-stackexchange",
+            }.issubset(dataset_ids)
+        )
+        self.assertTrue(
+            {
+                "softwareengineering-stackexchange",
+                "cs-stackexchange",
+                "arduino-stackexchange",
+                "raspberrypi-stackexchange",
+                "dsp-stackexchange",
+                "superuser-stackexchange",
+                "askubuntu-stackexchange",
+            }.issubset(dataset_ids)
+        )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 4_000_000_000)
-        self.assertLess(summary["indexed_max_bytes"], 15_000_000_000)
+        self.assertLess(summary["download_max_bytes"], 8_000_000_000)
+        self.assertLess(summary["indexed_max_bytes"], 120_000_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "name": "Electrical Engineering Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering analog, digital, power, embedded, PCB, measurement, motor, and component topics.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "mosfet-gate-001", "query": "MOSFET gate resistor", "query_type": "power_electronics", "relevance": {"electronics-stackexchange:post:447016": 3}},
+    {"id": "opamp-feedback-001", "query": "op amp negative feedback", "query_type": "analog", "relevance": {"electronics-stackexchange:post:754368": 3}},
+    {"id": "buck-inductor-001", "query": "buck converter inductor", "query_type": "power_electronics", "relevance": {"electronics-stackexchange:post:5842": 3}},
+    {"id": "regulator-heat-001", "query": "linear voltage regulator heat", "query_type": "power_electronics", "relevance": {"electronics-stackexchange:post:150844": 3}},
+    {"id": "i2c-pullup-001", "query": "I2C pull up resistor", "query_type": "digital", "relevance": {"electronics-stackexchange:post:514907": 3}},
+    {"id": "decoupling-001", "query": "decoupling capacitor placement", "query_type": "pcb", "relevance": {"electronics-stackexchange:post:260920": 3}},
+    {"id": "ground-plane-001", "query": "PCB ground plane", "query_type": "pcb", "relevance": {"electronics-stackexchange:post:161580": 3}},
+    {"id": "base-resistor-001", "query": "transistor base resistor", "query_type": "components", "relevance": {"electronics-stackexchange:post:685738": 3}},
+    {"id": "flyback-diode-001", "query": "flyback diode relay coil", "query_type": "components", "relevance": {"electronics-stackexchange:post:181805": 3}},
+    {"id": "adc-reference-001", "query": "ADC reference voltage noise", "query_type": "mixed_signal", "relevance": {"electronics-stackexchange:post:153670": 3}},
+    {"id": "lithium-charging-001", "query": "battery charging lithium ion", "query_type": "power_electronics", "relevance": {"electronics-stackexchange:post:673792": 3}},
+    {"id": "motor-control-001", "query": "three phase motor control", "query_type": "motors", "relevance": {"electronics-stackexchange:post:542960": 3}},
+    {"id": "transformer-ratio-001", "query": "transformer turns ratio", "query_type": "magnetics", "relevance": {"electronics-stackexchange:post:547410": 3}},
+    {"id": "scope-ground-001", "query": "oscilloscope probe grounding", "query_type": "measurement", "relevance": {"electronics-stackexchange:post:357605": 3}},
+    {"id": "uart-level-001", "query": "UART logic level", "query_type": "embedded", "relevance": {"electronics-stackexchange:post:745502": 3}},
+    {"id": "crystal-load-001", "query": "crystal oscillator load capacitance", "query_type": "timing", "relevance": {"electronics-stackexchange:post:685784": 3}},
+    {"id": "led-resistor-001", "query": "current limiting resistor LED", "query_type": "components", "relevance": {"electronics-stackexchange:post:395646": 3}},
+    {"id": "emi-choke-001", "query": "EMI filter common mode choke", "query_type": "emc", "relevance": {"electronics-stackexchange:post:652884": 3}}
+  ]
+}

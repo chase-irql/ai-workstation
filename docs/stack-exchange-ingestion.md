@@ -1,8 +1,10 @@
 # Stack Exchange corpus ingestion
 
-The Stack Exchange adapter preserves each site dump's question-and-answer structure while emitting the same common document and chunk records used by the rest of the retrieval system. DevOps Stack Exchange validated the initial lifecycle; Information Security validates the same bounded-memory importer and retrieval stack at more than fourteen times the chunk count before attempting Stack Overflow.
+The Stack Exchange adapter preserves each site dump's question-and-answer structure while emitting the same common document and chunk records used by the rest of the retrieval system. It is now validated across 14 coordinated June 2026 site archives totaling 4,511,100 retained post documents and 5,007,715 chunks. Full Stack Overflow remains gated behind a separate storage review.
 
 ## Pinned corpora
+
+The complete machine-readable source URLs, checksums, byte ceilings, local paths, lifecycle status, and measured outcomes live in `config/datasets.json`. The published sites are DevOps, Information Security, Network Engineering, Database Administrators, Electrical Engineering, Unix & Linux, Server Fault, Software Engineering, Computer Science, Arduino, Raspberry Pi, Signal Processing, Super User, and Ask Ubuntu.
 
 ### DevOps Stack Exchange
 

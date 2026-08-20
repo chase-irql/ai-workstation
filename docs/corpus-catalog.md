@@ -17,8 +17,22 @@ This catalog is the human-readable inventory of every corpus currently published
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
 | `devops-stackexchange` | DevOps Stack Exchange 2026-06-30 community dump | CC BY-SA 3.0 or 4.0 per retained post | 11,877 retained posts; 13,531 chunks | BM25 + experimental 1,024-dim semantic/hybrid |
 | `security-stackexchange` | Information Security Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 171,041 retained posts; 188,770 chunks | BM25 + 256-dim semantic/hybrid |
+| `networkengineering-stackexchange` | Network Engineering Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 39,592 retained posts; 44,174 chunks | BM25 + 256-dim semantic/hybrid |
+| `dba-stackexchange` | Database Administrators Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 220,788 retained posts; 262,323 chunks | BM25 + 256-dim semantic/hybrid |
+| `electronics-stackexchange` | Electrical Engineering Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 509,806 retained posts; 545,211 chunks | BM25; semantic generation in progress |
+| `unix-stackexchange` | Unix & Linux Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 528,891 retained posts; 602,485 chunks | BM25; semantic generation queued |
+| `serverfault-stackexchange` | Server Fault Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 704,713 retained posts; 775,708 chunks | BM25; semantic generation queued |
+| `softwareengineering-stackexchange` | Software Engineering Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 214,014 retained posts; 239,207 chunks | BM25 |
+| `cs-stackexchange` | Computer Science Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 101,644 retained posts; 109,770 chunks | BM25 |
+| `arduino-stackexchange` | Arduino Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 52,338 retained posts; 62,506 chunks | BM25 |
+| `raspberrypi-stackexchange` | Raspberry Pi Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 75,998 retained posts; 85,362 chunks | BM25 |
+| `dsp-stackexchange` | Signal Processing Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 60,376 retained posts; 66,988 chunks | BM25 |
+| `superuser-stackexchange` | Super User 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 1,030,135 retained posts; 1,110,380 chunks | BM25 |
+| `askubuntu-stackexchange` | Ask Ubuntu 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 789,887 retained posts; 901,300 chunks | BM25 |
 
 Counts describe the pinned local generations, not upstream projects in perpetuity. Evaluation suites are small, versioned regression gates rather than broad claims about corpus completeness or answer accuracy.
+
+The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007,715 chunks, 6,405,663,549 compressed source bytes, and 18,045,620,224 bytes of validated BM25 databases. Source archives, processed records, indexes, and run results remain local and are not redistributed by this repository.
 
 ## Provenance and update records
 

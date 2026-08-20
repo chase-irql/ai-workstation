@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "Ask Ubuntu June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering package recovery, boot, drivers, services, storage, remote access, upgrades, mounting, firewalling, and audio.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "apt-001", "query": "apt broken dependencies", "query_type": "packages", "relevance": {"askubuntu-stackexchange:post:1298737": 3}},
+    {"id": "grub-001", "query": "GRUB repair", "query_type": "boot", "relevance": {"askubuntu-stackexchange:post:539442": 3}},
+    {"id": "wifi-001", "query": "Ubuntu WiFi driver", "query_type": "drivers", "relevance": {"askubuntu-stackexchange:post:1361624": 3}},
+    {"id": "systemd-001", "query": "systemd service failed", "query_type": "services", "relevance": {"askubuntu-stackexchange:post:1501926": 3}},
+    {"id": "disk-001", "query": "disk full cleanup", "query_type": "storage", "relevance": {"askubuntu-stackexchange:post:418049": 3}},
+    {"id": "nvidia-001", "query": "NVIDIA driver recovery", "query_type": "drivers", "relevance": {"askubuntu-stackexchange:post:1188552": 3}},
+    {"id": "ssh-001", "query": "SSH permission denied", "query_type": "remote_access", "relevance": {"askubuntu-stackexchange:post:1378153": 3}},
+    {"id": "snap-001", "query": "snap remove package", "query_type": "packages", "relevance": {"askubuntu-stackexchange:post:1356916": 3}},
+    {"id": "upgrade-001", "query": "Ubuntu upgrade release", "query_type": "upgrade", "relevance": {"askubuntu-stackexchange:post:539238": 3}},
+    {"id": "ntfs-001", "query": "mount NTFS drive", "query_type": "storage", "relevance": {"askubuntu-stackexchange:post:548421": 3}},
+    {"id": "ufw-001", "query": "ufw firewall port", "query_type": "networking", "relevance": {"askubuntu-stackexchange:post:1188083": 3}},
+    {"id": "audio-001", "query": "audio no sound", "query_type": "audio", "relevance": {"askubuntu-stackexchange:post:1238986": 3}}
+  ]
+}

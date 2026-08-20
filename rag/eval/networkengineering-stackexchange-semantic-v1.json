@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "Network Engineering Stack Exchange June 2026 semantic paraphrase gate",
+  "description": "Natural-language networking questions that avoid copying source titles and exact phrasing.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "ospf-area-paraphrase-001", "query": "why divide one routing domain into several smaller link state regions", "query_type": "routing_paraphrase", "relevance": {"networkengineering-stackexchange:post:4997": 3}},
+    {"id": "dhcp-relay-paraphrase-001", "query": "how can a client broadcast reach an address assignment server on another subnet", "query_type": "services_paraphrase", "relevance": {"networkengineering-stackexchange:post:32130": 3, "networkengineering-stackexchange:post:76590": 3}},
+    {"id": "spanning-tree-paraphrase-001", "query": "whether redundant switched Ethernet links need a protocol that blocks forwarding loops", "query_type": "switching_paraphrase", "relevance": {"networkengineering-stackexchange:post:60397": 3, "networkengineering-stackexchange:post:60398": 3, "networkengineering-stackexchange:post:80221": 2, "networkengineering-stackexchange:post:36172": 2, "networkengineering-stackexchange:post:36977": 2}},
+    {"id": "cidr-paraphrase-001", "query": "calculate usable host addresses and network divisions from a slash prefix", "query_type": "addressing_paraphrase", "relevance": {"networkengineering-stackexchange:post:23836": 3, "networkengineering-stackexchange:post:23841": 3, "networkengineering-stackexchange:post:53994": 3, "networkengineering-stackexchange:post:45383": 2, "networkengineering-stackexchange:post:26439": 2}},
+    {"id": "path-mtu-paraphrase-001", "query": "discover the smallest packet size supported along an IPv6 route without fragmentation", "query_type": "transport_paraphrase", "relevance": {"networkengineering-stackexchange:post:38070": 3, "networkengineering-stackexchange:post:72549": 2}},
+    {"id": "neighbor-discovery-paraphrase-001", "query": "how an IPv6 node learns the link layer address of a nearby peer", "query_type": "addressing_paraphrase", "relevance": {"networkengineering-stackexchange:post:14780": 3, "networkengineering-stackexchange:post:55667": 3, "networkengineering-stackexchange:post:55666": 3, "networkengineering-stackexchange:post:55602": 2}},
+    {"id": "vrrp-paraphrase-001", "query": "keep a default gateway available when the active router stops responding", "query_type": "resilience_paraphrase", "relevance": {"networkengineering-stackexchange:post:55540": 3}},
+    {"id": "lacp-paraphrase-001", "query": "combine multiple physical switch links into one logical higher capacity connection", "query_type": "switching_paraphrase", "relevance": {"networkengineering-stackexchange:post:46464": 3, "networkengineering-stackexchange:post:29728": 3, "networkengineering-stackexchange:post:71622": 3, "networkengineering-stackexchange:post:18319": 2}},
+    {"id": "wireless-paraphrase-001", "query": "diagnose outdoor radio packet loss caused by other transmitters sharing spectrum", "query_type": "wireless_paraphrase", "relevance": {"networkengineering-stackexchange:post:23324": 3, "networkengineering-stackexchange:post:12656": 3, "networkengineering-stackexchange:post:1881": 2, "networkengineering-stackexchange:post:1883": 2}},
+    {"id": "acl-paraphrase-001", "query": "difference between filtering traffic on a router and enforcing rules on a security appliance", "query_type": "security_paraphrase", "relevance": {"networkengineering-stackexchange:post:46062": 3, "networkengineering-stackexchange:post:78909": 3, "networkengineering-stackexchange:post:78911": 3, "networkengineering-stackexchange:post:19305": 2, "networkengineering-stackexchange:post:19318": 2}}
+  ]
+}

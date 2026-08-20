@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "name": "Network Engineering Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering routing, switching, addressing, transport, wireless, security, and network operations.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "bgp-advertisement-001", "query": "BGP route advertisement", "query_type": "routing", "relevance": {"networkengineering-stackexchange:post:44569": 3}},
+    {"id": "ospf-area-001", "query": "OSPF area configuration", "query_type": "routing", "relevance": {"networkengineering-stackexchange:post:4997": 3}},
+    {"id": "vlan-trunk-001", "query": "VLAN trunk native VLAN", "query_type": "switching", "relevance": {"networkengineering-stackexchange:post:45923": 3}},
+    {"id": "spanning-tree-001", "query": "spanning tree network loop", "query_type": "switching", "relevance": {"networkengineering-stackexchange:post:60397": 3}},
+    {"id": "cidr-subnet-001", "query": "CIDR subnet mask", "query_type": "addressing", "relevance": {"networkengineering-stackexchange:post:23836": 3}},
+    {"id": "path-mtu-001", "query": "MTU fragmentation path MTU", "query_type": "transport", "relevance": {"networkengineering-stackexchange:post:38070": 3}},
+    {"id": "dhcp-relay-001", "query": "DHCP relay agent", "query_type": "services", "relevance": {"networkengineering-stackexchange:post:32130": 3}},
+    {"id": "nat-forwarding-001", "query": "NAT port forwarding", "query_type": "addressing", "relevance": {"networkengineering-stackexchange:post:23653": 3}},
+    {"id": "ipv6-nd-001", "query": "IPv6 neighbor discovery", "query_type": "addressing", "relevance": {"networkengineering-stackexchange:post:14780": 3}},
+    {"id": "ipsec-tunnel-001", "query": "IPsec site to site tunnel", "query_type": "security", "relevance": {"networkengineering-stackexchange:post:68737": 3}},
+    {"id": "qos-shaping-001", "query": "QoS traffic shaping", "query_type": "quality_of_service", "relevance": {"networkengineering-stackexchange:post:1212": 3}},
+    {"id": "dot1x-001", "query": "802.1X authentication", "query_type": "security", "relevance": {"networkengineering-stackexchange:post:68546": 3}},
+    {"id": "vrrp-001", "query": "VRRP failover", "query_type": "resilience", "relevance": {"networkengineering-stackexchange:post:55540": 3}},
+    {"id": "arp-table-001", "query": "ARP table", "query_type": "addressing", "relevance": {"networkengineering-stackexchange:post:20622": 3}},
+    {"id": "lacp-001", "query": "link aggregation LACP", "query_type": "switching", "relevance": {"networkengineering-stackexchange:post:46464": 3}},
+    {"id": "mpls-001", "query": "MPLS label switching", "query_type": "routing", "relevance": {"networkengineering-stackexchange:post:78721": 3}},
+    {"id": "wireless-interference-001", "query": "wireless channel interference", "query_type": "wireless", "relevance": {"networkengineering-stackexchange:post:23324": 3}},
+    {"id": "acl-firewall-001", "query": "access control list firewall", "query_type": "security", "relevance": {"networkengineering-stackexchange:post:46062": 3}}
+  ]
+}
