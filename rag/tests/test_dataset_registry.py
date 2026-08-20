@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 70)
+        self.assertEqual(len(datasets), 71)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -23,6 +23,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("faa-amt-general-2023", dataset_ids)
         self.assertIn("doe-fundamentals-handbooks", dataset_ids)
         self.assertIn("faa-amt-airframe-powerplant-2023", dataset_ids)
+        self.assertIn("hesperian-english-health-guides-20260820", dataset_ids)
         self.assertIn("cmake-4.4-docs", dataset_ids)
         self.assertIn("openssl-4.0-docs", dataset_ids)
         self.assertIn("openssh-10.5p1-docs", dataset_ids)
@@ -94,8 +95,8 @@ class DatasetRegistryTests(unittest.TestCase):
             }.issubset(dataset_ids)
         )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 15_800_000_000)
-        self.assertLess(summary["indexed_max_bytes"], 127_000_000_000)
+        self.assertLess(summary["download_max_bytes"], 16_100_000_000)
+        self.assertLess(summary["indexed_max_bytes"], 128_500_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -223,6 +224,63 @@ class DatasetRegistryTests(unittest.TestCase):
             invalid = {**template, "acquisition": {**template["acquisition"], "assets": [{"url": "https://example.invalid/a", "filename": "../a", "min_bytes": 1, "max_bytes": 2}]}}
             registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "filename must be a basename"):
+                load_registry(registry)
+
+    def test_http_catalog_file_set_constraints_are_validated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            registry = Path(directory) / "datasets.json"
+            template = {
+                "dataset_id": "catalog-set",
+                "name": "Catalog set",
+                "description": "Official linked files",
+                "category": "docs",
+                "official_source_url": "https://example.invalid/catalog",
+                "license": "test",
+                "attribution": "test",
+                "release": "1",
+                "update_frequency": "release",
+                "scope": "all",
+                "formats": ["PDF"],
+                "acquisition": {
+                    "method": "http-catalog-file-set",
+                    "location": "https://example.invalid/catalog",
+                    "asset_url_prefix": "https://example.invalid/files/",
+                    "asset_path_pattern": r"^book/[^/]+\.pdf$",
+                    "min_assets": 1,
+                    "max_assets": 10,
+                    "asset_min_bytes": 5,
+                    "asset_max_bytes": 100,
+                    "asset_magic": "%PDF-",
+                    "max_concurrency": 4,
+                    "excluded_relative_paths": ["book/broken.pdf"],
+                    "collection_titles": {"book": "Book"},
+                },
+                "storage": {
+                    "download_min_bytes": 5,
+                    "download_max_bytes": 1000,
+                    "extracted_max_bytes": 1000,
+                    "indexed_max_bytes": 2000,
+                },
+                "paths": {
+                    "raw": "raw/catalog",
+                    "processed": "processed/catalog",
+                    "index": "indexes/catalog.sqlite3",
+                },
+                "status": "planned",
+                "notes": "",
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [template]}), encoding="utf-8")
+            self.assertEqual(load_registry(registry)[0].acquisition["max_concurrency"], 4)
+
+            invalid = {
+                **template,
+                "acquisition": {
+                    **template["acquisition"],
+                    "excluded_relative_paths": ["../escape.pdf"],
+                },
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "unsafe or duplicate exclusion"):
                 load_registry(registry)
 
 

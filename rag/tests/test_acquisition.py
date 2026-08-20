@@ -64,6 +64,122 @@ class AcquisitionTests(unittest.TestCase):
             self.assertEqual([item["filename"] for item in manifest["files"]], ["a.html", "b.html"])
             self.assertTrue((root / "raw/manuals/acquisition-manifest.json").is_file())
 
+    def test_http_catalog_file_set_discovers_nested_assets_and_preserves_titles(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry = root / "datasets.json"
+            prefix = "https://publisher.example/files/"
+            dataset = {
+                "dataset_id": "catalog-manuals",
+                "name": "Catalog manuals",
+                "description": "Official catalog fixture",
+                "category": "docs",
+                "official_source_url": "https://publisher.example/catalog.html",
+                "license": "test",
+                "attribution": "test",
+                "release": "2026",
+                "update_frequency": "release",
+                "scope": "selected manuals",
+                "formats": ["PDF"],
+                "acquisition": {
+                    "method": "http-catalog-file-set",
+                    "location": "https://publisher.example/catalog.html",
+                    "asset_url_prefix": prefix,
+                    "asset_path_pattern": r"^book_[a-z]+/book_[a-z]+_[a-z]+\.pdf$",
+                    "min_assets": 2,
+                    "max_assets": 2,
+                    "asset_min_bytes": 6,
+                    "asset_max_bytes": 20,
+                    "asset_magic": "%PDF-",
+                    "max_concurrency": 2,
+                    "excluded_relative_paths": ["book_a/book_a_broken.pdf"],
+                    "collection_titles": {"book_a": "Book A", "book_b": "Book B"},
+                },
+                "storage": {
+                    "download_min_bytes": 12,
+                    "download_max_bytes": 40,
+                    "extracted_max_bytes": 40,
+                    "indexed_max_bytes": 100,
+                },
+                "paths": {
+                    "raw": "raw/catalog-manuals",
+                    "processed": "processed/catalog-manuals",
+                    "index": "indexes/catalog-manuals.sqlite3",
+                },
+                "status": "planned",
+                "notes": "",
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [dataset]}), encoding="utf-8")
+            catalog = b"""<html><body>
+                <a href="https://publisher.example/files/book_b/book_b_two.pdf"><b>Chapter Two</b></a>
+                <a href="https://publisher.example/files/book_a/book_a_one.pdf">Chapter One</a>
+                <a href="https://publisher.example/files/book_a/book_a_broken.pdf">Broken Link</a>
+                <a href="https://elsewhere.invalid/not-selected.pdf">Ignore Me</a>
+            </body></html>"""
+
+            def fake_download(definition, destination):
+                payload = b"%PDF-x"
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(payload)
+                return {
+                    "path": destination,
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                    "bytes": len(payload),
+                    "reused": False,
+                    "publisher_checksum": None,
+                }
+
+            with (
+                patch(
+                    "offline_rag.acquisition._fetch_http_catalog",
+                    return_value=(catalog, "https://publisher.example/catalog.html"),
+                ),
+                patch("offline_rag.acquisition._download_http", side_effect=fake_download),
+            ):
+                manifest = acquire_dataset(registry, "catalog-manuals", root)
+            self.assertEqual(manifest["status"], "validated")
+            self.assertEqual(manifest["catalog"]["discovered_assets"], 3)
+            self.assertEqual(manifest["catalog"]["selected_assets"], 2)
+            self.assertEqual(
+                [item["relative_path"] for item in manifest["files"]],
+                ["book_a/book_a_one.pdf", "book_b/book_b_two.pdf"],
+            )
+            titles = json.loads(
+                (root / "raw/catalog-manuals/acquisition-title-overrides.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(titles["book_a/book_a_one.pdf"], "Book A — Chapter One")
+            self.assertTrue((root / "raw/catalog-manuals/files/book_b/book_b_two.pdf").is_file())
+
+    def test_existing_http_file_must_still_satisfy_registered_size_bounds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / "existing.bin"
+            destination.write_bytes(b"x")
+            dataset = DatasetDefinition(
+                dataset_id="bounded-existing",
+                name="Bounded existing",
+                description="Fixture",
+                category="docs",
+                official_source_url="https://example.invalid",
+                license="test",
+                attribution="test",
+                release="1",
+                update_frequency="never",
+                scope="fixture",
+                formats=("binary",),
+                acquisition={"method": "http", "location": "https://example.invalid/file.bin"},
+                storage={
+                    "download_min_bytes": 2,
+                    "download_max_bytes": 10,
+                    "extracted_max_bytes": 10,
+                    "indexed_max_bytes": 10,
+                },
+                paths={"raw": "raw", "processed": "processed", "index": "index"},
+                status="planned",
+                notes="",
+            )
+            with self.assertRaisesRegex(ValueError, "Existing file size"):
+                _download_http(dataset, destination)
+
     def test_http_download_resumes_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

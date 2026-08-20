@@ -25,6 +25,14 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
+### Planned practical-health extension: Hesperian English guides
+
+The next bounded corpus is the official Hesperian English chapter-PDF catalog. The 2026-08-20 discovery snapshot lists 434 links across 16 named guide editions; 432 are currently reachable and total about 317 MB, while two named 2026 back-matter links return HTTP 404 and are recorded as explicit exclusions. Coverage includes community health, first aid, oral health, midwifery, disability, mental health, environmental health, occupational safety, and health-worker education.
+
+This milestone introduces `http-catalog-file-set`: a bounded acquisition mode that snapshots and hashes the publisher's HTML catalog, permits only one registered HTTPS asset prefix and anchored relative-path pattern, enforces discovery-count and per-file size limits, downloads with bounded concurrency, validates PDF magic bytes, hashes every local file, and derives reviewed document titles from catalog labels. It refuses stale extra files rather than silently mixing snapshots. The catalog and generated title map are local provenance artifacts.
+
+Hesperian retains copyright. Its Open Copyright Policy requires attribution and written permission for digital reuse or redistribution, so source PDFs, extracted records, indexes, and catalog-derived content remain private local data and are never included in the Git repository. The corpus is reference material only: citations must expose the edition, and answers must not present it as diagnosis, emergency care, current clinical guidance, or a replacement for local protocols and qualified professionals.
+
 ### Completed repair-handbook extension: FAA Airframe and Powerplant
 
 The bounded practical-repair set completing the FAA Aviation Maintenance Technician trilogy is acquired and evaluated. The current FAA page identifies the 2023 FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant handbooks as companions to the already indexed General volume. Official files are 111,959,636 and 214,668,861 bytes (326,628,497 bytes total), and their July 2023 modification dates agree with the FAA catalog. Local SHA-256 values pin both files because the FAA provides no adjacent publisher digests.

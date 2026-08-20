@@ -19,7 +19,7 @@ if ($matches.Count -ne 1) { throw "Unknown or duplicate dataset ID '$DatasetId'.
 $dataset = $matches[0]
 $sourceCandidate = if ($Source) {
     $Source
-} elseif ([string]$dataset.acquisition.method -eq 'http-file-set') {
+} elseif ([string]$dataset.acquisition.method -in @('http-file-set', 'http-catalog-file-set')) {
     Join-Path (Join-Path $root ([string]$dataset.paths.raw)) 'files'
 } else {
     Join-Path $root ([string]$dataset.paths.raw)
@@ -58,6 +58,13 @@ if ($dataset.ingestion -and $dataset.ingestion.PSObject.Properties.Name -contain
     }
     if (-not (Test-Path -LiteralPath $overridesPath -PathType Leaf)) {
         throw "Title overrides file not found: $overridesPath"
+    }
+    $importArguments += @('--title-overrides', $overridesPath)
+} elseif ($dataset.ingestion -and $dataset.ingestion.PSObject.Properties.Name -contains 'title_overrides_from_acquisition' -and [bool]$dataset.ingestion.title_overrides_from_acquisition) {
+    $overridesPath = Join-Path (Join-Path $root ([string]$dataset.paths.raw)) 'acquisition-title-overrides.json'
+    $overridesPath = [System.IO.Path]::GetFullPath($overridesPath)
+    if (-not (Test-Path -LiteralPath $overridesPath -PathType Leaf)) {
+        throw "Acquisition-derived title overrides file not found: $overridesPath"
     }
     $importArguments += @('--title-overrides', $overridesPath)
 }

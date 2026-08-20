@@ -13,7 +13,15 @@ from urllib.parse import urlparse
 REGISTRY_SCHEMA_VERSION = 1
 DATASET_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 STAGES = ("planned", "downloaded", "validated", "extracted", "parsed", "indexed", "evaluated")
-ACQUISITION_METHODS = ("http", "http-file-set", "git", "rsync", "official-export", "manual")
+ACQUISITION_METHODS = (
+    "http",
+    "http-file-set",
+    "http-catalog-file-set",
+    "git",
+    "rsync",
+    "official-export",
+    "manual",
+)
 PUBLISHER_CHECKSUM_ALGORITHMS = {"sha256": 64, "sha3-256": 64}
 
 
@@ -140,6 +148,71 @@ def validate_dataset(item: Mapping[str, Any]) -> DatasetDefinition:
                 or maximum < minimum
             ):
                 raise ValueError(f"Dataset {dataset_id!r} HTTP file-set asset has invalid byte bounds")
+    if method == "http-catalog-file-set":
+        asset_url_prefix = acquisition.get("asset_url_prefix")
+        parsed_prefix = urlparse(asset_url_prefix) if isinstance(asset_url_prefix, str) else None
+        if (
+            not parsed_prefix
+            or parsed_prefix.scheme != "https"
+            or not parsed_prefix.netloc
+            or not asset_url_prefix.endswith("/")
+            or parsed_prefix.query
+            or parsed_prefix.fragment
+        ):
+            raise ValueError(
+                f"Dataset {dataset_id!r} HTTP catalog asset_url_prefix must be a query-free HTTPS directory URL"
+            )
+        asset_path_pattern = acquisition.get("asset_path_pattern")
+        if not isinstance(asset_path_pattern, str) or not asset_path_pattern.startswith("^") or not asset_path_pattern.endswith("$"):
+            raise ValueError(
+                f"Dataset {dataset_id!r} HTTP catalog asset_path_pattern must be an anchored regular expression"
+            )
+        try:
+            re.compile(asset_path_pattern)
+        except re.error as error:
+            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog asset_path_pattern is invalid") from error
+        for field in ("min_assets", "max_assets", "asset_min_bytes", "asset_max_bytes", "max_concurrency"):
+            value = acquisition.get(field)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise ValueError(f"Dataset {dataset_id!r} HTTP catalog field {field!r} must be a positive integer")
+        if acquisition["min_assets"] > acquisition["max_assets"]:
+            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog min_assets exceeds max_assets")
+        if acquisition["asset_min_bytes"] > acquisition["asset_max_bytes"]:
+            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog asset_min_bytes exceeds asset_max_bytes")
+        if acquisition["max_concurrency"] > 16:
+            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog max_concurrency must not exceed 16")
+        excluded = acquisition.get("excluded_relative_paths", [])
+        if not isinstance(excluded, list) or any(not isinstance(value, str) for value in excluded):
+            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog excluded_relative_paths must be a string array")
+        seen_excluded: set[str] = set()
+        for relative in excluded:
+            path = Path(relative)
+            folded = relative.casefold()
+            if (
+                not relative
+                or path.is_absolute()
+                or ".." in path.parts
+                or "\\" in relative
+                or folded in seen_excluded
+            ):
+                raise ValueError(f"Dataset {dataset_id!r} HTTP catalog contains an unsafe or duplicate exclusion")
+            seen_excluded.add(folded)
+        magic = acquisition.get("asset_magic")
+        if magic is not None and (not isinstance(magic, str) or not 1 <= len(magic.encode("utf-8")) <= 32):
+            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog asset_magic must contain 1..32 UTF-8 bytes")
+        collection_titles = acquisition.get("collection_titles")
+        if collection_titles is not None:
+            if not isinstance(collection_titles, Mapping) or not collection_titles:
+                raise ValueError(f"Dataset {dataset_id!r} HTTP catalog collection_titles must be a nonempty object")
+            for key, title in collection_titles.items():
+                if (
+                    not isinstance(key, str)
+                    or not key
+                    or Path(key).name != key
+                    or not isinstance(title, str)
+                    or not title.strip()
+                ):
+                    raise ValueError(f"Dataset {dataset_id!r} HTTP catalog collection_titles is invalid")
     publisher_checksum = acquisition.get("publisher_checksum")
     publisher_algorithm = acquisition.get("publisher_checksum_algorithm", "sha256")
     if publisher_checksum is not None:

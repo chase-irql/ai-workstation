@@ -39,9 +39,11 @@ Useful controls:
 .\scripts\run-pdf-manual-pipeline.ps1 -DatasetId <dataset-id> -Force
 ```
 
-The script defaults to the registry `paths.raw` location. For an `http-file-set`, it automatically uses that acquisition method's publication-ready `files/` payload root so stable document paths and `source_url_template` values do not acquire an internal storage prefix. `-Source` can point to a single PDF or a directory tree. `-Force` never replaces an output directory containing unrelated files.
+The script defaults to the registry `paths.raw` location. For an `http-file-set` or `http-catalog-file-set`, it automatically uses that acquisition method's publication-ready `files/` payload root so stable document paths and `source_url_template` values do not acquire an internal storage prefix. `-Source` can point to a single PDF or a directory tree. `-Force` never replaces an output directory containing unrelated files.
 
 When a publisher's embedded PDF title is wrong, add a reviewed JSON mapping of relative PDF paths to exact titles and reference it as `ingestion.title_overrides` in the dataset registry. The importer validates every override against a source file, retains the original embedded title as `pdf_title`, marks the document `title_overridden`, and binds a deterministic override-map digest into the corpus manifest. This is for correcting provenance defects, not casually rewriting publisher titles.
+
+For a publisher-maintained HTML file catalog, `http-catalog-file-set` can discover a tightly bounded linked set without committing hundreds of URLs. The registry must constrain the HTTPS asset prefix, anchored relative-path pattern, expected asset count, individual and total byte ranges, concurrency, exclusions, and optional magic bytes. Acquisition stores and hashes the exact catalog snapshot, refuses path traversal, case collisions, conflicting duplicates, missing declared exclusions, and stale extra files, and hashes every downloaded asset. When `collection_titles` and `ingestion.title_overrides_from_acquisition` are set, visible publisher link labels become deterministic titles and their map digest is bound into the processed-corpus manifest.
 
 ## Evaluation and publication
 

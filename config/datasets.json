@@ -1033,6 +1033,72 @@
       "notes": "Acquired the two official FAA PDFs (326,628,497 bytes total) and pinned local SHA-256 e5adb2696b545344b42bf7bf93c113ea94ff1456e8f8f772a6b6b02e243c4f13 for Airframe and 7fe4ee09e6593af9307df1d1088d93be39ffa3839ad376ed975c0c952a066eb2 for Powerplant; the FAA provides no adjacent publisher digests. Page-aware import examined 1,552 pages: 1,550 have searchable text and the two covers are image-only. It recorded 183 rotated-text pages for targeted visual review, with no uninterpretable-font pages, and published 3,498 chunks in a 19,853,312-byte database. Integrity, foreign-key, row-count, FTS-count, citation, and discriminating Powerplant smoke-query validation passed. The 47-topic Airframe/Powerplant stable-ID gate achieved every Success, Recall, MRR, and nDCG cutoff at 1.0. The handbooks are generalized training references and do not supersede regulations or manufacturer instructions."
     },
     {
+      "dataset_id": "hesperian-english-health-guides-20260820",
+      "name": "Hesperian English Health Guides",
+      "description": "The official English Hesperian chapter-PDF catalog: practical community health, first aid, oral health, midwifery, disability, mental health, environmental health, occupational safety, and health-worker education guides.",
+      "category": "practical-health-guides",
+      "official_source_url": "https://languages.hesperian.org/pages/en/pdf.html",
+      "license": "Copyright Hesperian Health Guides; official downloads retained for private offline reference; attribution required and written permission is required for digital reuse or redistribution under Hesperian's Open Copyright Policy",
+      "attribution": "Hesperian Health Guides and the contributors credited in each guide",
+      "release": "English PDF catalog snapshot 2026-08-20; named guide editions 2000-2026",
+      "update_frequency": "quarterly catalog review, with each changed guide retained as a new versioned snapshot",
+      "scope": "all 432 reachable chapter PDFs in the 16 English guide editions listed by the official catalog; two catalog links returning HTTP 404 are explicitly recorded and excluded",
+      "formats": ["PDF", "HTML catalog"],
+      "acquisition": {
+        "method": "http-catalog-file-set",
+        "location": "https://languages.hesperian.org/pages/en/pdf.html",
+        "asset_url_prefix": "https://hesperian.org/wp-content/uploads/pdf/",
+        "asset_path_pattern": "^en_[a-z0-9_]+/[A-Za-z0-9_.-]+\\.pdf$",
+        "source_url_template": "https://hesperian.org/wp-content/uploads/pdf/{relative_path}",
+        "min_assets": 430,
+        "max_assets": 440,
+        "asset_min_bytes": 1024,
+        "asset_max_bytes": 50000000,
+        "asset_magic": "%PDF-",
+        "max_concurrency": 6,
+        "excluded_relative_paths": [
+          "en_hcwd_2026/en_hcwd_2026_bm.pdf",
+          "en_midw_2026/en_midw_2026_bm.pdf"
+        ],
+        "collection_titles": {
+          "en_cgeh_2012": "A Community Guide to Environmental Health (2012)",
+          "en_dent_2024": "Where There Is No Dentist (2024)",
+          "en_dvc_2025": "Disabled Village Children (2025)",
+          "en_easb_2026": "Epilepsy and Seizures (2026)",
+          "en_haw_2015": "Health Actions for Women (2015)",
+          "en_hclhiv_2019": "Helping Children Live with HIV (2019)",
+          "en_hcwb_2000": "Helping Children Who Are Blind (2000)",
+          "en_hcwd_2026": "Helping Children Who Are Deaf (2026)",
+          "en_hhwl_2026": "Helping Health Workers Learn (2026)",
+          "en_midw_2026": "A Book for Midwives (2026)",
+          "en_nwtnd_2011": "New Where There Is No Doctor (2011)",
+          "en_pcmh_2025": "Promoting Community Mental Health (2025)",
+          "en_wgthas_2015": "Workers' Guide to Health and Safety (2015)",
+          "en_wtnd_2025": "Where There Is No Doctor (2025)",
+          "en_wwd_2008": "A Health Handbook for Women with Disabilities (2008)",
+          "en_wwhnd_2024": "Where Women Have No Doctor (2024)"
+        }
+      },
+      "ingestion": {
+        "smoke_query": "oral rehydration drink dehydration diarrhea",
+        "title_overrides_from_acquisition": true
+      },
+      "storage": {
+        "download_min_bytes": 300000000,
+        "download_max_bytes": 340000000,
+        "extracted_max_bytes": 340000000,
+        "indexed_max_bytes": 1500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/health/hesperian-english-health-guides-20260820",
+        "processed": "corpora/processed/health/hesperian-english-health-guides-20260820",
+        "index": "indexes/health/hesperian-english-health-guides-20260820.sqlite3",
+        "semantic_index": "indexes/semantic/hesperian-english-health-guides-20260820"
+      },
+      "status": "planned",
+      "notes": "The official catalog currently exposes 434 chapter links totaling about 317 MB by origin ETag size; two named 2026 back-matter links return HTTP 404, leaving 432 selected PDFs. This is copyrighted medical reference material, not a public-domain corpus and not a substitute for diagnosis, emergency services, current clinical guidance, local protocols, or professional care. Generated corpora and indexes remain local and are not distributed with the source repository."
+    },
+    {
       "dataset_id": "cmake-4.4-docs",
       "name": "CMake 4.4 Documentation Source",
       "description": "Official CMake command, variable, property, module, policy, generator, manual, and release documentation.",

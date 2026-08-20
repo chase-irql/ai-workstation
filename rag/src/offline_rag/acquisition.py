@@ -15,10 +15,12 @@ import urllib.request
 import zipfile
 import zlib
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timezone
-from pathlib import Path
-from urllib.parse import unquote, urlparse
+from html.parser import HTMLParser
+from pathlib import Path, PurePosixPath
+from urllib.parse import unquote, urldefrag, urljoin, urlparse
 
 import py7zr
 
@@ -161,6 +163,12 @@ def _download_http(dataset: DatasetDefinition, destination: Path, retries: int =
     partial = destination.with_suffix(destination.suffix + ".partial")
     publisher = _publisher_checksum(dataset)
     if destination.exists():
+        actual_size = destination.stat().st_size
+        if actual_size < dataset.storage["download_min_bytes"] or actual_size > dataset.storage["download_max_bytes"]:
+            raise ValueError(
+                f"Existing file size {actual_size} is outside registry range "
+                f"{dataset.storage['download_min_bytes']}..{dataset.storage['download_max_bytes']}: {destination}"
+            )
         algorithms = ("sha256",) if publisher is None else ("sha256", publisher[0])
         actual = _checksums(destination, algorithms)
         if publisher and actual[publisher[0]] != publisher[1]:
@@ -168,7 +176,7 @@ def _download_http(dataset: DatasetDefinition, destination: Path, retries: int =
         return {
             "path": destination,
             "sha256": actual["sha256"],
-            "bytes": destination.stat().st_size,
+            "bytes": actual_size,
             "reused": True,
             "publisher_checksum": (
                 {"algorithm": publisher[0], "value": actual[publisher[0]], "verified": True}
@@ -480,6 +488,262 @@ def validate_extraction(archive: Path, output: Path) -> dict[str, object]:
     }
 
 
+class _CatalogLinkParser(HTMLParser):
+    """Collect anchor targets and visible labels without a third-party HTML dependency."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.links: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.casefold() != "a" or self._href is not None:
+            return
+        attributes = {name.casefold(): value for name, value in attrs}
+        href = attributes.get("href")
+        if href:
+            self._href = href
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.casefold() == "a" and self._href is not None:
+            label = re.sub(r"\s+", " ", " ".join(self._text)).strip()
+            self.links.append((self._href, label))
+            self._href = None
+            self._text = []
+
+
+def _atomic_bytes(path: Path, payload: bytes) -> None:
+    temporary = path.with_suffix(path.suffix + ".partial")
+    with temporary.open("wb") as stream:
+        stream.write(payload)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
+
+
+def _fetch_http_catalog(url: str, *, max_bytes: int = 10 * 1024 * 1024, retries: int = 4) -> tuple[bytes, str]:
+    """Fetch a bounded HTML catalog and return its bytes plus final URL."""
+
+    for attempt in range(1, retries + 1):
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": USER_AGENT, "Accept-Encoding": "identity", "Accept": "text/html"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                media_type = response.headers.get_content_type()
+                if media_type not in {"text/html", "application/xhtml+xml"}:
+                    raise ValueError(f"Catalog returned unexpected media type {media_type!r}: {url}")
+                advertised = response.headers.get("Content-Length")
+                if advertised is not None and int(advertised) > max_bytes:
+                    raise ValueError(f"Catalog exceeds the {max_bytes}-byte safety limit: {url}")
+                payload = response.read(max_bytes + 1)
+                if len(payload) > max_bytes:
+                    raise ValueError(f"Catalog exceeds the {max_bytes}-byte safety limit: {url}")
+                return payload, response.geturl()
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
+            if attempt == retries:
+                raise RuntimeError(f"Catalog fetch failed after {retries} attempts: {url}") from error
+            time.sleep(min(2 ** (attempt - 1), 30))
+    raise AssertionError("unreachable")
+
+
+def _catalog_relative_path(prefix: str, absolute_url: str) -> str | None:
+    clean_url, _ = urldefrag(absolute_url)
+    parsed = urlparse(clean_url)
+    if parsed.query or not clean_url.startswith(prefix):
+        return None
+    encoded = clean_url[len(prefix) :]
+    relative = unquote(encoded)
+    raw_parts = relative.split("/")
+    path = PurePosixPath(relative)
+    if (
+        not relative
+        or "\\" in relative
+        or path.is_absolute()
+        or any(part in {"", ".", ".."} for part in raw_parts)
+    ):
+        raise ValueError(f"Catalog asset has an unsafe relative path: {absolute_url}")
+    return path.as_posix()
+
+
+def _discover_catalog_assets(
+    dataset: DatasetDefinition,
+    catalog: bytes,
+    catalog_url: str,
+) -> tuple[list[dict[str, str]], list[dict[str, str]], dict[str, str]]:
+    """Discover a deterministic, bounded file set from one publisher HTML catalog."""
+
+    parser = _CatalogLinkParser()
+    parser.feed(catalog.decode("utf-8", errors="replace"))
+    prefix = str(dataset.acquisition["asset_url_prefix"])
+    pattern = re.compile(str(dataset.acquisition["asset_path_pattern"]))
+    discovered_by_path: dict[str, dict[str, str]] = {}
+    folded_paths: dict[str, str] = {}
+    for href, link_text in parser.links:
+        absolute = urljoin(catalog_url, href)
+        relative = _catalog_relative_path(prefix, absolute)
+        if relative is None or pattern.fullmatch(relative) is None:
+            continue
+        folded = relative.casefold()
+        prior_spelling = folded_paths.get(folded)
+        if prior_spelling is not None and prior_spelling != relative:
+            raise ValueError(f"Catalog contains case-colliding asset paths: {prior_spelling!r} and {relative!r}")
+        folded_paths[folded] = relative
+        row = {"relative_path": relative, "url": urldefrag(absolute)[0], "link_text": link_text}
+        existing = discovered_by_path.get(relative)
+        if existing is not None and existing != row:
+            raise ValueError(f"Catalog contains conflicting duplicate asset metadata: {relative}")
+        discovered_by_path[relative] = row
+
+    exclusions = {str(value) for value in dataset.acquisition.get("excluded_relative_paths", [])}
+    missing_exclusions = sorted(exclusions - set(discovered_by_path))
+    if missing_exclusions:
+        raise ValueError(f"Catalog no longer contains declared exclusions: {missing_exclusions}")
+    excluded = [discovered_by_path[path] for path in sorted(exclusions, key=str.casefold)]
+    assets = [
+        row
+        for path, row in sorted(discovered_by_path.items(), key=lambda item: (item[0].casefold(), item[0]))
+        if path not in exclusions
+    ]
+    minimum = int(dataset.acquisition["min_assets"])
+    maximum = int(dataset.acquisition["max_assets"])
+    if len(assets) < minimum or len(assets) > maximum:
+        raise ValueError(f"Catalog discovered {len(assets)} assets, outside registry range {minimum}..{maximum}")
+
+    collection_titles = dataset.acquisition.get("collection_titles") or {}
+    title_overrides: dict[str, str] = {}
+    if collection_titles:
+        for asset in assets:
+            collection = asset["relative_path"].split("/", 1)[0]
+            title_prefix = collection_titles.get(collection)
+            if not isinstance(title_prefix, str) or not title_prefix.strip():
+                raise ValueError(f"Catalog asset has no configured collection title: {asset['relative_path']}")
+            link_text = re.sub(r"\s+", " ", asset["link_text"]).strip()
+            if not link_text:
+                raise ValueError(f"Catalog asset has no visible title: {asset['relative_path']}")
+            title_overrides[asset["relative_path"]] = f"{title_prefix.strip()} — {link_text}"
+    return assets, excluded, title_overrides
+
+
+def _acquire_http_catalog_file_set(dataset: DatasetDefinition, raw: Path) -> dict[str, object]:
+    raw.parent.mkdir(parents=True, exist_ok=True)
+    if shutil.disk_usage(raw.parent).free < dataset.storage["download_max_bytes"] + 1024 * 1024 * 1024:
+        raise OSError(
+            f"Insufficient free space for {dataset.dataset_id}: need the registry ceiling plus a 1 GiB reserve"
+        )
+    raw.mkdir(parents=True, exist_ok=True)
+    catalog, final_catalog_url = _fetch_http_catalog(str(dataset.acquisition["location"]))
+    assets, excluded, title_overrides = _discover_catalog_assets(dataset, catalog, final_catalog_url)
+    files_root = raw / "files"
+    files_root.mkdir(parents=True, exist_ok=True)
+    expected_paths = {asset["relative_path"] for asset in assets}
+    unexpected = sorted(
+        path.relative_to(files_root).as_posix()
+        for path in files_root.rglob("*")
+        if path.is_file()
+        and not path.name.endswith(".partial")
+        and path.relative_to(files_root).as_posix() not in expected_paths
+    )
+    if unexpected:
+        raise ValueError(
+            f"Catalog file-set directory contains files outside the current discovery snapshot: {unexpected}"
+        )
+
+    minimum = int(dataset.acquisition["asset_min_bytes"])
+    maximum = int(dataset.acquisition["asset_max_bytes"])
+    magic_value = dataset.acquisition.get("asset_magic")
+    magic = str(magic_value).encode("utf-8") if magic_value is not None else None
+
+    def acquire_one(asset: dict[str, str]) -> dict[str, object]:
+        destination = _safe_archive_member(files_root, asset["relative_path"])
+        bounded = replace(
+            dataset,
+            acquisition={"method": "http", "location": asset["url"]},
+            storage={
+                **dataset.storage,
+                "download_min_bytes": minimum,
+                "download_max_bytes": maximum,
+            },
+        )
+        acquired = _download_http(bounded, destination)
+        if magic is not None:
+            with destination.open("rb") as stream:
+                if stream.read(len(magic)) != magic:
+                    raise ValueError(f"Catalog asset failed its magic-byte check: {asset['relative_path']}")
+        return {
+            "filename": asset["relative_path"],
+            "relative_path": asset["relative_path"],
+            "url": asset["url"],
+            "link_text": asset["link_text"],
+            "bytes": acquired["bytes"],
+            "sha256": acquired["sha256"],
+            "reused": acquired["reused"],
+            "publisher_checksum": acquired["publisher_checksum"],
+        }
+
+    with ThreadPoolExecutor(max_workers=int(dataset.acquisition["max_concurrency"])) as executor:
+        acquired_assets = list(executor.map(acquire_one, assets))
+    total_bytes = sum(int(asset["bytes"]) for asset in acquired_assets)
+    if total_bytes < dataset.storage["download_min_bytes"] or total_bytes > dataset.storage["download_max_bytes"]:
+        raise ValueError(
+            f"HTTP catalog file-set size {total_bytes} is outside registry range "
+            f"{dataset.storage['download_min_bytes']}..{dataset.storage['download_max_bytes']}"
+        )
+
+    _atomic_bytes(raw / "catalog.html", catalog)
+    if title_overrides:
+        _atomic_json(raw / "acquisition-title-overrides.json", title_overrides)
+    manifest = {
+        "schema_version": 1,
+        "dataset_id": dataset.dataset_id,
+        "name": dataset.name,
+        "official_source_url": dataset.official_source_url,
+        "download_url": str(dataset.acquisition["location"]),
+        "release": dataset.release,
+        "license": dataset.license,
+        "attribution": dataset.attribution,
+        "acquired_at": datetime.now(timezone.utc).isoformat(),
+        "status": "validated",
+        "catalog": {
+            "requested_url": str(dataset.acquisition["location"]),
+            "final_url": final_catalog_url,
+            "bytes": len(catalog),
+            "sha256": hashlib.sha256(catalog).hexdigest(),
+            "discovered_assets": len(assets) + len(excluded),
+            "selected_assets": len(assets),
+            "excluded_assets": excluded,
+        },
+        "integrity": {
+            "files_hashed": len(acquired_assets),
+            "publisher_checksums_verified": 0,
+            "asset_magic_verified": magic is not None,
+            "catalog_snapshot_hashed": True,
+        },
+        "title_overrides": {
+            "path": "acquisition-title-overrides.json" if title_overrides else None,
+            "entries": len(title_overrides),
+            "sha256": (
+                hashlib.sha256(
+                    (json.dumps(title_overrides, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+                ).hexdigest()
+                if title_overrides
+                else None
+            ),
+        },
+        "files": acquired_assets,
+        "total_bytes": total_bytes,
+    }
+    _atomic_json(raw / "acquisition-manifest.json", manifest)
+    return manifest
+
+
 def acquire_dataset(
     registry: Path,
     dataset_id: str,
@@ -488,6 +752,11 @@ def acquire_dataset(
     extract: bool = False,
 ) -> dict[str, object]:
     dataset = _dataset(registry, dataset_id)
+    if dataset.acquisition.get("method") == "http-catalog-file-set":
+        if extract:
+            raise ValueError("HTTP catalog file sets are publication-ready files and cannot be archive-extracted")
+        raw = _safe_project_path(project_root, dataset.paths["raw"])
+        return _acquire_http_catalog_file_set(dataset, raw)
     if dataset.acquisition.get("method") == "http-file-set":
         if extract:
             raise ValueError("HTTP file sets are already publication-ready files and cannot be archive-extracted")
