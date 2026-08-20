@@ -23,6 +23,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `systemd-261-docs` | systemd 261.2 DocBook manuals and Markdown guides | LGPL-2.1-or-later; per-file notices retained | 542 documents; 9,614 chunks | BM25 |
 | `nodejs-24-docs` | Node.js 24.19.0 LTS Krypton API and guides | MIT and included third-party licenses | 126 documents; 5,732 chunks | BM25 |
 | `apache-httpd-2.4-docs` | Apache HTTP Server 2.4.68 English manual | Apache-2.0 | 232 documents; 3,055 chunks | BM25 |
+| `docker-docs-20260820` | Official Docker docs commit `510f85c…`, 2026-08-20 | Apache-2.0 | 1,174 documents; 11,190 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -183,6 +184,13 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Official source archive: `https://downloads.apache.org/httpd/httpd-2.4.68.tar.gz`. Its 10,065,436 bytes match publisher SHA-256 `ed9a9d4500fb48bb28eaffb3ba71d06ccf86d498fa13ab9f781da010cc488498`; the adjacent detached-signature URL is retained as additional provenance.
 - All 3,119 source-release files and 43,134,994 extracted bytes passed archive validation. The source distribution's complete generated English manual uses `.html.en`; compound-suffix support was added to the common HTML path, and Apache header, breadcrumb, language-selector, quick-view, sitemap, and index navigation are filtered rather than embedded.
 - The final generation contains 232 documents and 3,055 chunks in a verified 8,142,848-byte BM25 database. Its 30-topic gate covers proxying and FastCGI, TLS and OCSP, HTTP/2, authorization, password formats, rewrites, virtual hosts, logging, caching, compression, headers, MPM tuning, status, WebSockets, ACME, forwarded addresses, `.htaccess`, request timeouts, Lua hooks, graceful restarts, core dumps, directory indexes, and MIME handling; every metric cutoff is `1.0`.
+
+### Docker documentation snapshot 2026-08-20
+
+- Source is pinned to GitHub-verified immutable commit `510f85c26eeb055817763a14ac2338e20fc0d913` in Docker's official docs repository. The 29,837,619-byte commit archive has local SHA-256 `d66329e2e51d454f94ae1714de22594dee703d792a7133c4e593664402d8983d`; GitHub does not provide an adjacent publisher digest for generated commit archives.
+- All 2,541 archive files and 53,237,754 extracted bytes passed structural validation. Retrieval includes Docker's 1,077 site Markdown sources and the vendored official Docker/Moby CLI, Compose, BuildKit, Engine, plugin, and component references.
+- Pilot ranking caught an old Engine 20.10 release note outranking the current BuildKit secret-mount guide. Release-note, changelog, and prior-Desktop-version trees are therefore excluded explicitly rather than allowed to dilute current operational evidence. Of 1,293 remaining candidates, 119 navigation/front-matter-only files are empty after parsing and intentionally skipped.
+- The published generation contains 1,174 documents and 11,190 chunks in a verified 26,365,952-byte BM25 database. Standalone Hugo presentation shortcodes are removed, while parameter placeholders inside code examples remain. Its 40-topic lexical gate spans Compose dependencies/profiles/includes/watch, Dockerfiles, BuildKit secrets/cache/multi-platform builds, networks, volumes, namespaces, seccomp/AppArmor/capabilities, live restore, logging, contexts, pruning, resources, content trust, Scout, daemon TLS/proxying, OverlayFS, Desktop backup, attestations, containerd storage, and plugins; every metric cutoff passes at `1.0`.
 
 ### DevOps Stack Exchange
 

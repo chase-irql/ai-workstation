@@ -1250,6 +1250,50 @@
       },
       "status": "evaluated",
       "notes": "Pinned to the current release listed by the official Apache distribution directory. Acquired the 10,065,436-byte source archive and verified publisher SHA-256 ed9a9d4500fb48bb28eaffb3ba71d06ccf86d498fa13ab9f781da010cc488498; the detached-signature URL is also retained. All 3,119 archive files / 43,134,994 extracted bytes passed structural validation. The complete English generated manual, excluding navigation-only indexes, produced 232 documents, 3,055 chunks, and a verified 8,142,848-byte BM25 database. Its 30-topic stable-ID lexical gate achieved every metric cutoff at 1.0."
+    },
+    {
+      "dataset_id": "docker-docs-20260820",
+      "name": "Docker Documentation Snapshot 2026-08-20",
+      "description": "Official Docker Engine, CLI, Compose, BuildKit, Buildx, networking, storage, security, administration, Desktop, Scout, registry, and troubleshooting documentation.",
+      "category": "container-platform-documentation",
+      "official_source_url": "https://docs.docker.com/",
+      "license": "Apache License 2.0",
+      "attribution": "Docker, Inc. and contributors; vendored Moby/Docker component authors",
+      "release": "2026-08-20 commit 510f85c26eeb055817763a14ac2338e20fc0d913",
+      "update_frequency": "monthly snapshot or after a material Docker release",
+      "scope": "complete content/**/*.md site documentation plus vendored official Docker and Moby Markdown references from immutable commit 510f85c26eeb055817763a14ac2338e20fc0d913",
+      "formats": ["Markdown", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/docker/docs/archive/510f85c26eeb055817763a14ac2338e20fc0d913.tar.gz",
+        "source_commit": "510f85c26eeb055817763a14ac2338e20fc0d913",
+        "source_commit_verified": true,
+        "source_url_template": "https://github.com/docker/docs/blob/510f85c26eeb055817763a14ac2338e20fc0d913/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["content/*.md", "content/**/*.md", "_vendor/github.com/docker/**/*.md", "_vendor/github.com/moby/**/*.md"],
+        "exclude_globs": [
+          "content/**/release-notes/**",
+          "content/**/release-notes.md",
+          "content/**/changelog.md",
+          "content/manuals/desktop/previous-versions/**"
+        ],
+        "smoke_query": "Docker Compose healthcheck depends_on service_healthy"
+      },
+      "storage": {
+        "download_min_bytes": 10000000,
+        "download_max_bytes": 40000000,
+        "extracted_max_bytes": 100000000,
+        "indexed_max_bytes": 100000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/docker-docs-20260820",
+        "processed": "corpora/processed/documentation/docker-docs-20260820",
+        "index": "indexes/documentation/docker-docs-20260820.sqlite3",
+        "semantic_index": "indexes/semantic/docker-docs-20260820"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to GitHub-verified immutable commit 510f85c26eeb055817763a14ac2338e20fc0d913 in Docker's official documentation repository. Acquired the 29,837,619-byte commit archive, recorded local SHA-256 d66329e2e51d454f94ae1714de22594dee703d792a7133c4e593664402d8983d, and structurally validated 2,541 files / 53,237,754 extracted bytes. The scoped site and vendored official Docker/Moby Markdown set excludes release-note/changelog and prior-Desktop-version trees after pilot ranking exposed obsolete evidence; 1,293 candidates produced 1,174 documents and 11,190 chunks, with 119 navigation/front-matter-only files skipped. Standalone Hugo presentation shortcodes are removed while inline parameter placeholders inside examples remain. The verified BM25 database is 26,365,952 bytes and its 40-topic lexical gate achieved every metric cutoff at 1.0. GitHub does not publish an adjacent digest for commit archives, so the archive SHA-256 is explicitly local."
     }
   ]
 }

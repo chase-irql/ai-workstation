@@ -75,6 +75,8 @@ Node.js 24.19.0 LTS adds 126 current API/guidance documents and 5,732 chunks in 
 
 Apache HTTP Server 2.4.68 adds 232 English manuals and 3,055 chunks in an 8,142,848-byte verified BM25 database from a publisher-checksum-verified source release. The common HTML path now recognizes generated `.html.en` files and filters Apache navigation furniture. Its 30-topic operational gate passes every cutoff, so exact directives remain BM25-first.
 
+The official Docker documentation snapshot at commit `510f85c…` adds 1,174 substantive documents and 11,190 chunks in a 26,365,952-byte verified BM25 database. A pilot exposed obsolete Engine release notes outranking current BuildKit guidance, so changelog and prior-version trees are excluded; presentation-only Hugo shortcodes are also filtered. The resulting 40-topic Engine, Compose, BuildKit, networking, storage, security, and operations gate passes every cutoff.
+
 The first Wave 4/manual pilot is also complete. FAA-H-8083-30B (2023) exercises the page-aware PDF path on a real 92,539,602-byte engineering handbook: 676 of 677 pages have searchable text, one cover is image-only, and 1,837 page-bounded chunks feed a verified 9,388,032-byte BM25 database. The importer retains outline/page citations and rotated labels, demotes front-matter matches, and fails atomically when a scan requires OCR. This makes it safe to expand into selected FAA, DOE, NASA, NIST, USACE, and equipment-specific manuals without pretending an image-only archive is searchable.
 
 ### Wave 3: official programming and systems documentation

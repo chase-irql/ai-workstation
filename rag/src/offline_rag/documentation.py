@@ -40,6 +40,7 @@ RST_ADORNMENT_RE = re.compile(r"^\s*([=\-~^\"'`:+_*#<>])\1{2,}\s*$")
 ASCIIDOC_HEADING_RE = re.compile(r"^(={1,6})\s+(.+?)\s*$")
 ASCIIDOC_SETEXT_RE = re.compile(r"^\s*([=\-~^+])\1{2,}\s*$")
 ASCIIDOC_DELIMITER_RE = re.compile(r"^(?:-{4,}|\.{4,})$")
+HUGO_SHORTCODE_LINE_RE = re.compile(r"^\s*\{\{[<%].*[>%]\}\}\s*$")
 MAN_MACRO_RE = re.compile(r"^\.([A-Za-z]{1,4})\s*(.*)$")
 RFC_MARKER_RE = re.compile(r"(?im)^\s*(?:Request for Comments|RFC)\s*:\s*\d+")
 RFC_HEADING_RE = re.compile(r"^\s{0,3}((?:[1-9]\d*)(?:\.\d+)*)\.\s{2,}(\S(?:.*\S)?)\s*$")
@@ -279,6 +280,7 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
     fence: str | None = None
     fence_language: str | None = None
     html_comment = False
+    shortcode_block = False
     title = ""
     index = 0
     if lines and lines[0].strip() == "---":
@@ -312,9 +314,23 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
                 html_comment = False
             index += 1
             continue
+        if shortcode_block:
+            if ">}}" in line or "%}}" in line:
+                shortcode_block = False
+            index += 1
+            continue
         if stripped.startswith("<!--"):
             _flush_paragraph(blocks, headings, paragraph)
             html_comment = "-->" not in stripped
+            index += 1
+            continue
+        if HUGO_SHORTCODE_LINE_RE.fullmatch(line):
+            _flush_paragraph(blocks, headings, paragraph)
+            index += 1
+            continue
+        if stripped.startswith(("{{<", "{{%")) and ">}}" not in line and "%}}" not in line:
+            _flush_paragraph(blocks, headings, paragraph)
+            shortcode_block = True
             index += 1
             continue
         if fence_match:
