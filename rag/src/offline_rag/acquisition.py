@@ -15,6 +15,7 @@ import urllib.request
 import zipfile
 import zlib
 from collections.abc import Iterable
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -444,6 +445,71 @@ def acquire_dataset(
     extract: bool = False,
 ) -> dict[str, object]:
     dataset = _dataset(registry, dataset_id)
+    if dataset.acquisition.get("method") == "http-file-set":
+        if extract:
+            raise ValueError("HTTP file sets are already publication-ready files and cannot be archive-extracted")
+        raw = _safe_project_path(project_root, dataset.paths["raw"])
+        files_root = raw / "files"
+        files_root.mkdir(parents=True, exist_ok=True)
+        acquired_assets: list[dict[str, object]] = []
+        total_bytes = 0
+        for asset in dataset.acquisition["assets"]:
+            filename = str(asset["filename"])
+            url = str(asset["url"])
+            acquisition = {"method": "http", "location": url}
+            if asset.get("publisher_checksum") is not None:
+                acquisition["publisher_checksum"] = asset["publisher_checksum"]
+                acquisition["publisher_checksum_algorithm"] = asset.get(
+                    "publisher_checksum_algorithm", "sha256"
+                )
+            bounded_dataset = replace(
+                dataset,
+                acquisition=acquisition,
+                storage={
+                    **dataset.storage,
+                    "download_min_bytes": int(asset["min_bytes"]),
+                    "download_max_bytes": int(asset["max_bytes"]),
+                },
+            )
+            acquired = _download_http(bounded_dataset, files_root / filename)
+            total_bytes += int(acquired["bytes"])
+            acquired_assets.append(
+                {
+                    "filename": filename,
+                    "url": url,
+                    "bytes": acquired["bytes"],
+                    "sha256": acquired["sha256"],
+                    "reused": acquired["reused"],
+                    "publisher_checksum": acquired["publisher_checksum"],
+                }
+            )
+        if total_bytes < dataset.storage["download_min_bytes"] or total_bytes > dataset.storage["download_max_bytes"]:
+            raise ValueError(
+                f"HTTP file-set size {total_bytes} is outside registry range "
+                f"{dataset.storage['download_min_bytes']}..{dataset.storage['download_max_bytes']}"
+            )
+        manifest = {
+            "schema_version": 1,
+            "dataset_id": dataset.dataset_id,
+            "name": dataset.name,
+            "official_source_url": dataset.official_source_url,
+            "download_url": str(dataset.acquisition["location"]),
+            "release": dataset.release,
+            "license": dataset.license,
+            "attribution": dataset.attribution,
+            "acquired_at": datetime.now(timezone.utc).isoformat(),
+            "status": "validated",
+            "integrity": {
+                "files_hashed": len(acquired_assets),
+                "publisher_checksums_verified": sum(
+                    asset["publisher_checksum"] is not None for asset in acquired_assets
+                ),
+            },
+            "files": acquired_assets,
+            "total_bytes": total_bytes,
+        }
+        _atomic_json(raw / "acquisition-manifest.json", manifest)
+        return manifest
     if dataset.acquisition.get("method") != "http":
         raise ValueError(
             f"Dataset {dataset_id!r} uses {dataset.acquisition.get('method')!r}; "

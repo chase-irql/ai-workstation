@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 import sys
 import tarfile
 import tempfile
@@ -10,15 +11,59 @@ import unittest
 import zipfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from offline_rag.acquisition import _download_http, extract_archive, validate_extraction
+from offline_rag.acquisition import _download_http, acquire_dataset, extract_archive, validate_extraction
 from offline_rag.dataset_registry import DatasetDefinition
 import py7zr
 
 
 class AcquisitionTests(unittest.TestCase):
+    def test_http_file_set_hashes_and_manifests_each_bounded_asset(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry = root / "datasets.json"
+            dataset = {
+                "dataset_id": "manual-set",
+                "name": "Manual set",
+                "description": "Several official manuals",
+                "category": "docs",
+                "official_source_url": "https://example.invalid/docs/",
+                "license": "test",
+                "attribution": "test",
+                "release": "1",
+                "update_frequency": "release",
+                "scope": "manuals",
+                "formats": ["HTML"],
+                "acquisition": {
+                    "method": "http-file-set",
+                    "location": "https://example.invalid/docs/",
+                    "assets": [
+                        {"url": "https://example.invalid/docs/a.html", "filename": "a.html", "min_bytes": 1, "max_bytes": 10},
+                        {"url": "https://example.invalid/docs/b.html", "filename": "b.html", "min_bytes": 1, "max_bytes": 10}
+                    ]
+                },
+                "storage": {"download_min_bytes": 2, "download_max_bytes": 20, "extracted_max_bytes": 20, "indexed_max_bytes": 100},
+                "paths": {"raw": "raw/manuals", "processed": "processed/manuals", "index": "indexes/manuals.sqlite3"},
+                "status": "planned",
+                "notes": ""
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [dataset]}), encoding="utf-8")
+
+            def fake_download(definition, destination):
+                payload = destination.name.encode("ascii")
+                destination.write_bytes(payload)
+                return {"path": destination, "sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload), "reused": False, "publisher_checksum": None}
+
+            with patch("offline_rag.acquisition._download_http", side_effect=fake_download):
+                manifest = acquire_dataset(registry, "manual-set", root)
+            self.assertEqual(manifest["status"], "validated")
+            self.assertEqual(manifest["integrity"]["files_hashed"], 2)
+            self.assertEqual([item["filename"] for item in manifest["files"]], ["a.html", "b.html"])
+            self.assertTrue((root / "raw/manuals/acquisition-manifest.json").is_file())
+
     def test_http_download_resumes_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

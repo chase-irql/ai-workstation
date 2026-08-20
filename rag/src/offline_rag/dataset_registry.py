@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 REGISTRY_SCHEMA_VERSION = 1
 DATASET_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 STAGES = ("planned", "downloaded", "validated", "extracted", "parsed", "indexed", "evaluated")
-ACQUISITION_METHODS = ("http", "git", "rsync", "official-export", "manual")
+ACQUISITION_METHODS = ("http", "http-file-set", "git", "rsync", "official-export", "manual")
 PUBLISHER_CHECKSUM_ALGORITHMS = {"sha256": 64, "sha3-256": 64}
 
 
@@ -105,6 +105,41 @@ def validate_dataset(item: Mapping[str, Any]) -> DatasetDefinition:
     parsed_location = urlparse(location)
     if parsed_location.scheme not in {"https", "rsync"} or not parsed_location.netloc:
         raise ValueError(f"Dataset {dataset_id!r} acquisition location must be an HTTPS or rsync URL")
+    if method == "http-file-set":
+        assets = acquisition.get("assets")
+        if not isinstance(assets, list) or not assets:
+            raise ValueError(f"Dataset {dataset_id!r} HTTP file set must declare a nonempty assets array")
+        seen_names: set[str] = set()
+        for asset in assets:
+            if not isinstance(asset, Mapping):
+                raise ValueError(f"Dataset {dataset_id!r} HTTP file-set assets must be objects")
+            asset_url = asset.get("url")
+            parsed_asset_url = urlparse(asset_url) if isinstance(asset_url, str) else None
+            if not parsed_asset_url or parsed_asset_url.scheme != "https" or not parsed_asset_url.netloc:
+                raise ValueError(f"Dataset {dataset_id!r} HTTP file-set asset URL must use HTTPS")
+            filename = asset.get("filename")
+            if (
+                not isinstance(filename, str)
+                or not filename
+                or Path(filename).name != filename
+                or filename in {".", ".."}
+            ):
+                raise ValueError(f"Dataset {dataset_id!r} HTTP file-set asset filename must be a basename")
+            folded_name = filename.casefold()
+            if folded_name in seen_names:
+                raise ValueError(f"Dataset {dataset_id!r} HTTP file set contains duplicate filenames")
+            seen_names.add(folded_name)
+            minimum = asset.get("min_bytes")
+            maximum = asset.get("max_bytes")
+            if (
+                not isinstance(minimum, int)
+                or isinstance(minimum, bool)
+                or minimum < 0
+                or not isinstance(maximum, int)
+                or isinstance(maximum, bool)
+                or maximum < minimum
+            ):
+                raise ValueError(f"Dataset {dataset_id!r} HTTP file-set asset has invalid byte bounds")
     publisher_checksum = acquisition.get("publisher_checksum")
     publisher_algorithm = acquisition.get("publisher_checksum_algorithm", "sha256")
     if publisher_checksum is not None:

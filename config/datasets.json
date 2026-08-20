@@ -1690,6 +1690,52 @@
       "notes": "Pinned to Podman's official signed v6.1.0 annotated tag and immutable commit cade97a52ebdf9dbf9e81de8009015776837a074. GitHub provides no publisher digest for the tag archive, so the acquisition pins local SHA-256 e086183db2f852476a7fa2580d0276cef32086b4cf17ae7020948f06eb613e0d without claiming publisher-checksum verification. Safe extraction validated the 20,956,524-byte archive as 10,195 files / 93,605,870 bytes, skipped 8 links, and reversibly encoded 1,170 Windows-incompatible members. Retrieval excludes reusable option/link fragments and contains 223 independently citable manuals/guides with 2,484 chunks in a 3,604,480-byte verified BM25 database. Pandoc manual title blocks are preserved for useful citations. Its 40-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
+      "dataset_id": "binutils-2.47-docs",
+      "name": "GNU Binutils 2.47 Documentation",
+      "description": "Official GNU assembler, linker, binary utilities, BFD, CTF, SFrame, gprof, and gprofng manuals.",
+      "category": "programming-tool-documentation",
+      "official_source_url": "https://sourceware.org/binutils/docs/",
+      "license": "GNU Free Documentation License 1.3; exact notices retained in each manual",
+      "attribution": "Free Software Foundation and GNU Binutils contributors",
+      "release": "2.47, published 2026-07-26",
+      "update_frequency": "each GNU Binutils release",
+      "scope": "all eight official single-page HTML manuals published for GNU Binutils 2.47; PDFs and duplicate split-page HTML excluded",
+      "formats": ["HTML"],
+      "acquisition": {
+        "method": "http-file-set",
+        "location": "https://sourceware.org/binutils/docs/",
+        "source_url_template": "https://sourceware.org/binutils/docs/{relative_path}",
+        "assets": [
+          {"url": "https://sourceware.org/binutils/docs/as.html", "filename": "as.html", "min_bytes": 100000, "max_bytes": 30000000},
+          {"url": "https://sourceware.org/binutils/docs/bfd.html", "filename": "bfd.html", "min_bytes": 10000, "max_bytes": 10000000},
+          {"url": "https://sourceware.org/binutils/docs/binutils.html", "filename": "binutils.html", "min_bytes": 100000, "max_bytes": 20000000},
+          {"url": "https://sourceware.org/binutils/docs/ctf-spec.html", "filename": "ctf-spec.html", "min_bytes": 10000, "max_bytes": 10000000},
+          {"url": "https://sourceware.org/binutils/docs/ld.html", "filename": "ld.html", "min_bytes": 100000, "max_bytes": 20000000},
+          {"url": "https://sourceware.org/binutils/docs/gprofng.html", "filename": "gprofng.html", "min_bytes": 10000, "max_bytes": 20000000},
+          {"url": "https://sourceware.org/binutils/docs/gprof.html", "filename": "gprof.html", "min_bytes": 10000, "max_bytes": 10000000},
+          {"url": "https://sourceware.org/binutils/docs/sframe-spec.html", "filename": "sframe-spec.html", "min_bytes": 10000, "max_bytes": 10000000}
+        ]
+      },
+      "ingestion": {
+        "include_globs": ["*.html"],
+        "smoke_query": "ld linker script MEMORY SECTIONS"
+      },
+      "storage": {
+        "download_min_bytes": 1000000,
+        "download_max_bytes": 120000000,
+        "extracted_max_bytes": 120000000,
+        "indexed_max_bytes": 150000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/binutils-2.47",
+        "processed": "corpora/processed/documentation/binutils-2.47",
+        "index": "indexes/documentation/binutils-2.47.sqlite3",
+        "semantic_index": "indexes/semantic/binutils-2.47-docs"
+      },
+      "status": "planned",
+      "notes": "Sourceware identifies these files as the HTML conversion of the documentation included in GNU Binutils 2.47 and dates the publication 2026-07-26. Sourceware does not publish adjacent checksums for generated HTML; acquisition will pin a local SHA-256 for every independently downloaded manual without claiming publisher-checksum verification."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

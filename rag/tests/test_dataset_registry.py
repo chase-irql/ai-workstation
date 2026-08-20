@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 53)
+        self.assertEqual(len(datasets), 54)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -40,6 +40,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("llvm-project-22.1.8-docs", dataset_ids)
         self.assertIn("go-1.26.7-docs", dataset_ids)
         self.assertIn("podman-6.1-docs", dataset_ids)
+        self.assertIn("binutils-2.47-docs", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",
@@ -174,6 +175,38 @@ class DatasetRegistryTests(unittest.TestCase):
             }
             registry.write_text(json.dumps({"schema_version": 1, "datasets": [missing]}))
             with self.assertRaisesRegex(ValueError, "without a checksum"):
+                load_registry(registry)
+
+    def test_http_file_set_assets_are_validated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            registry = Path(directory) / "datasets.json"
+            template = {
+                "dataset_id": "manual-set",
+                "name": "Manual set",
+                "description": "Official manuals",
+                "category": "docs",
+                "official_source_url": "https://example.invalid/docs/",
+                "license": "test",
+                "attribution": "test",
+                "release": "1",
+                "update_frequency": "release",
+                "scope": "all",
+                "formats": ["HTML"],
+                "acquisition": {
+                    "method": "http-file-set",
+                    "location": "https://example.invalid/docs/",
+                    "assets": [{"url": "https://example.invalid/docs/a.html", "filename": "a.html", "min_bytes": 1, "max_bytes": 10}],
+                },
+                "storage": {"download_min_bytes": 1, "download_max_bytes": 10, "extracted_max_bytes": 10, "indexed_max_bytes": 20},
+                "paths": {"raw": "raw/manuals", "processed": "processed/manuals", "index": "indexes/manuals.sqlite3"},
+                "status": "planned",
+                "notes": "",
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [template]}), encoding="utf-8")
+            self.assertEqual(load_registry(registry)[0].acquisition["assets"][0]["filename"], "a.html")
+            invalid = {**template, "acquisition": {**template["acquisition"], "assets": [{"url": "https://example.invalid/a", "filename": "../a", "min_bytes": 1, "max_bytes": 2}]}}
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "filename must be a basename"):
                 load_registry(registry)
 
 
