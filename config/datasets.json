@@ -2139,6 +2139,36 @@
       "notes": "Pinned to immutable official commit 633850257fbd3ccf6187b9428c55e80b69236382. The 329,184,733-byte archive has local SHA-256 ba89936e92a84cc964c66df73b805ac8a0a9dfb23057ad57ca40097625cf8ab8 and safely expands to 1,047 files / 362,279,562 bytes with no links; 882 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 159 modules yield 4,115 chunks in a verified 11,165,696-byte index. The 57-topic cell-biology-through-immunity-and-infectious-disease stable-ID gate passes every configured metric at 1.0. This is dated educational microbiology, not current clinical guidance or a substitute for professional medical judgment."
     },
     {
+      "dataset_id": "openstax-astronomy",
+      "name": "OpenStax Astronomy 2e",
+      "description": "Complete OpenStax Astronomy 2e textbook covering observational methods, orbits and gravity, radiation and spectra, the solar system, stars and stellar evolution, the Milky Way, galaxies, cosmology, and astrobiology.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/astronomy-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-astronomy main commit dff6acf8df597ceda73985308f838ed38417a606, 2026-07-21",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Astronomy 2e manifest and referenced CNXML modules from the immutable official snapshot",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-astronomy/archive/dff6acf8df597ceda73985308f838ed38417a606.tar.gz",
+        "source_commit": "dff6acf8df597ceda73985308f838ed38417a606",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-astronomy/blob/dff6acf8df597ceda73985308f838ed38417a606/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-astronomy-dff6acf8df597ceda73985308f838ed38417a606",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "stellar evolution main sequence red giant white dwarf"
+      },
+      "storage": {"download_min_bytes": 50000000, "download_max_bytes": 500000000, "extracted_max_bytes": 1500000000, "indexed_max_bytes": 400000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-astronomy", "processed": "corpora/processed/textbooks/openstax-astronomy", "index": "indexes/textbooks/openstax-astronomy.sqlite3", "semantic_index": "indexes/semantic/openstax-astronomy"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. Repository LICENSE and the Astronomy 2e collection structure were checked before registration; collection metadata will be revalidated after extraction."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

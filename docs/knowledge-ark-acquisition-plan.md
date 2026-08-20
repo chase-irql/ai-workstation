@@ -29,6 +29,10 @@ Every corpus moves through these observable states:
 
 The complete official OpenStax Microbiology source at immutable main commit `63385025…` (2026-07-08) is acquired and evaluated. It fills the gap between general biology and clinical reference with structured coverage of microbial cell biology, genetics, diversity, epidemiology, immunology, antimicrobial drugs, and infectious diseases. Its locally pinned 329,184,733-byte archive safely expands to 1,047 files / 362,279,562 bytes; repository and collection notices confirm CC BY-NC-SA 4.0. All 159 modules yield 4,115 chunks in a verified 11,165,696-byte database, and a 57-topic stable-ID gate passes every configured metric. GitHub reports the source commit unsigned and supplies no adjacent archive digest, so only local integrity is claimed. The corpus remains explicitly educational rather than current clinical guidance.
 
+### Active textbook extension: astronomy
+
+The next registered textbook is the complete official OpenStax Astronomy 2e source at immutable main commit `dff6acf8…` (2026-07-21). It adds a coherent path from naked-eye observation and orbital mechanics through stellar evolution, galaxies, cosmology, and astrobiology. GitHub reports the commit unsigned and no publisher archive digest, so the acquisition will record local SHA-256 integrity, validate archive structure, enforce a 500 MB download ceiling and 1.5 GB extraction ceiling, confirm the collection license, and preserve its source hierarchy and figures through the existing CNXML adapter.
+
 ### Wave 1: operational Stack Exchange sites
 
 These reuse the bounded-memory Stack Exchange importer and therefore have the lowest implementation risk.
