@@ -2043,7 +2043,7 @@
         "module_path_template": "modules/{module_id}/index.cnxml",
         "smoke_query": "solve quadratic equation factoring"
       },
-      "storage": {"download_min_bytes": 100000000, "download_max_bytes": 500000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 500000000},
+      "storage": {"download_min_bytes": 100000000, "download_max_bytes": 600000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 500000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-foundational-algebra", "processed": "corpora/processed/textbooks/openstax-foundational-algebra", "index": "indexes/textbooks/openstax-foundational-algebra.sqlite3", "semantic_index": "indexes/semantic/openstax-foundational-algebra"},
       "status": "planned",
       "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Repository and all three collection licenses must be validated after extraction."
