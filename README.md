@@ -155,10 +155,9 @@ OpenCode can search Wikipedia, Python, Git, Linux man-pages, RFCs, and IANA prot
 To run the same local Ollama models through Codex without changing the normal global Codex model, use the isolated launcher:
 
 ```powershell
-.\scripts\start-codex.ps1 -ModelId glm-4.7-flash
-.\scripts\start-codex.ps1 -ModelId qwen3-coder-30b -WorkingDirectory C:\GitHub\your-project
+.\scripts\start-codex.ps1
 ```
 
-Omit `-ModelId` to select the same default general-agent model as the OpenCode launcher. The temporary Codex home is scoped to the launched process; plain `codex` continues to use the personal global configuration.
+Every launch prompts for the working directory, then shows a terminal selector containing the non-embedding models currently installed in Ollama. Use the arrow keys and Enter to select a model, or Escape to cancel. The temporary Codex home is scoped to the launched process; plain `codex` continues to use the personal global configuration.
 
 The unified tools are `search_knowledge`, `retrieve_knowledge_context`, `retrieve_knowledge_document`, and `knowledge_index_status`. The existing Wikipedia-specific MCP tools remain configured for compatibility. See `docs/unified-knowledge-mcp.md` for corpus filters, CPU-only BM25 selection, ranking behavior, fallback behavior, and example prompts.
