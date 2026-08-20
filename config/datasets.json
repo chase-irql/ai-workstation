@@ -2015,8 +2015,8 @@
         "index": "indexes/textbooks/openstax-anatomy-physiology.sqlite3",
         "semantic_index": "indexes/semantic/openstax-anatomy-physiology"
       },
-      "status": "planned",
-      "notes": "Pinned to current official commit 716383a4c6c16037b14d75a156c65145e75e895e before acquisition. GitHub reports it unsigned and provides no adjacent archive digest, so publisher verification will not be claimed. Repository license is CC BY-NC-SA 4.0 and the collection manifest must be revalidated after extraction. Medical-foundation content is version-sensitive; source dates, stable module IDs, and explicit limitations will be retained."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 716383a4c6c16037b14d75a156c65145e75e895e. The 452,199,473-byte archive has local SHA-256 e53cc279a599c751f65bdbb6dbb5b0b84c36d47c27d3e32cdc6032bfcb9d38e4; safe extraction produced 1,153 files / 538,916,603 bytes with no links. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 198 modules resolve to distinct stable documents and 4,590 chunks in a verified 12,288,000-byte index. The 42-topic stable-ID gate covers foundations and every major human organ system and passes all configured metrics at 1.0. This dated educational textbook is foundational reference material, not current clinical guidance or a substitute for professional medical judgment."
     },
     {
       "dataset_id": "cpp-16.2-manual",
