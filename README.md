@@ -40,6 +40,7 @@ These corpora are implemented and verified in the current development installati
 | OpenSSH Portable manuals | OpenSSH 10.5p1 | 19 documents, 195 chunks | BM25 |
 | Ninja manual | Ninja 1.13.2 | 1 manual, 58 chunks | BM25 |
 | PostgreSQL documentation | PostgreSQL 18.6 | 1,148 documents, 6,931 chunks | BM25 |
+| systemd documentation | systemd 261.2 | 542 manuals/guides, 9,614 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |

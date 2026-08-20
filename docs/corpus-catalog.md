@@ -20,6 +20,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `openssh-10.5p1-docs` | OpenSSH Portable 10.5p1 manuals | BSD-style OpenSSH licenses | 19 documents; 195 chunks | BM25 |
 | `ninja-1.13-docs` | Ninja 1.13.2 manual at commit `3441b633…` | Apache-2.0 | 1 manual; 58 chunks | BM25 |
 | `postgresql-18-docs` | PostgreSQL 18.6 generated HTML documentation | PostgreSQL License | 1,148 documents; 6,931 chunks | BM25 |
+| `systemd-261-docs` | systemd 261.2 DocBook manuals and Markdown guides | LGPL-2.1-or-later; per-file notices retained | 542 documents; 9,614 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -161,6 +162,13 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - The 3,906,887-byte artifact is pinned by local SHA-256 `0419dec0d3b7ca55a80c0519a1dd88a8d172019ef9841288889f0281ea1f97ed`. PostgreSQL does not publish an adjacent digest for this docs-only archive, so the acquisition record explicitly distinguishes the local digest from a publisher checksum.
 - All 1,449 archive members and 19,416,147 extracted bytes passed path, size, and format validation. The complete generated HTML set produced 1,148 documents, 6,931 chunks, and a verified 22,126,592-byte BM25 database.
 - The 18-topic stable-ID gate exercises recovery, routine vacuuming, MVCC, concurrent indexes, query analysis, statistics, physical and logical replication, row security, JSONB indexes, deadlocks, partition pruning, backup, SCRAM authentication, full-text search, and generated/identity columns. Success@1/5/10, MRR@10, and Recall@10/50 are `1.0`; Recall@5 is `0.972222` and nDCG@10 is `0.985629` because some queries have multiple graded relevant references.
+
+### systemd 261.2 documentation
+
+- Source is pinned by immutable commit `4925d9f07fc697efccd98a93046ff535b8832445`, the object referenced by systemd's signed v261.2 annotated tag. The 18,468,555-byte GitHub commit archive has local SHA-256 `018b0aa52a3a5d792233a3a599dd8d7dfb6302442bde88da37b0ccf847ecb54d`; GitHub does not provide an adjacent publisher digest for that generated archive.
+- The complete archive passed member, path, and size validation: 7,193 regular files and 100,857,467 extracted bytes. The retrieval scope is all 455 published `man/*.xml` refentries plus 90 `docs/*.md` candidates; empty guides are skipped and shared DocBook fragments are incorporated through their XIncludes rather than indexed as misleading standalone pages.
+- The shared documentation adapter now supports DocBook XML. It disables network DTD resolution, converts build-time entities deterministically, resolves only same-directory include fragments by stable XML ID, preserves section hierarchy, option definitions, lists, tables, code examples, admonitions, and man-page cross-references, and extracts Markdown YAML front matter without polluting titles or searchable text.
+- The final generation contains 542 documents and 9,614 chunks in a verified 17,846,272-byte BM25 database. A 23-topic gate covering service restart limits, journal storage, timers, network configuration, DNSSEC, automounts, credentials, resource controls, socket activation, boot analysis, coredumps, containers, tmpfiles, watchdogs, portable services, sandboxing, online readiness, cryptenrollment, and boot control passes every cutoff at `1.0`.
 
 ### DevOps Stack Exchange
 

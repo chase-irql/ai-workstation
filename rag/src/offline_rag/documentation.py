@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import fnmatch
 import hashlib
 import html
@@ -11,6 +12,7 @@ import shutil
 import tempfile
 import unicodedata
 import uuid
+import xml.etree.ElementTree as ET
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -25,7 +27,7 @@ from .records import CommonChunk, CommonDocument, make_content_id, normalize_con
 DOCUMENTATION_MANIFEST_SCHEMA_VERSION = 1
 PORTABLE_NAMES_MARKER = ".archive-name-encoding-v1.json"
 SUPPORTED_SUFFIXES = frozenset(
-    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod"}
+    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod", ".xml"}
     | {f".{number}" for number in range(1, 10)}
 )
 IGNORED_DIRECTORY_NAMES = frozenset({".git", ".hg", ".svn", "node_modules", "_static", "_sources"})
@@ -62,6 +64,10 @@ RFC_UNNUMBERED_HEADINGS = frozenset(
         "table of contents",
     }
 )
+DOCBOOK_ENTITY_RE = re.compile(r"&([A-Za-z_][A-Za-z0-9_.:-]*);")
+DOCBOOK_BUILTIN_ENTITIES = frozenset({"amp", "lt", "gt", "quot", "apos"})
+XML_ID = "{http://www.w3.org/XML/1998/namespace}id"
+XI_INCLUDE = "{http://www.w3.org/2001/XInclude}include"
 
 
 def _supported_source(path: Path) -> bool:
@@ -258,6 +264,15 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
     fence_language: str | None = None
     title = ""
     index = 0
+    if lines and lines[0].strip() == "---":
+        closing = next((candidate for candidate in range(1, len(lines)) if lines[candidate].strip() == "---"), None)
+        if closing is not None:
+            for metadata_line in lines[1:closing]:
+                key, separator, value = metadata_line.partition(":")
+                if separator and key.strip().casefold() == "title":
+                    title = value.strip().strip("'\"")
+                    break
+            index = closing + 1
     while index < len(lines):
         line = lines[index]
         stripped = line.strip()
@@ -614,6 +629,194 @@ def parse_pod(text: str, fallback_title: str) -> ParsedDocument:
     return ParsedDocument(title or fallback_title, tuple(blocks), "pod")
 
 
+def _xml_local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1].casefold()
+
+
+def _prepare_docbook_xml(text: str) -> str:
+    """Make build-time DocBook entities deterministic without network DTD access."""
+
+    return DOCBOOK_ENTITY_RE.sub(
+        lambda match: match.group(0) if match.group(1) in DOCBOOK_BUILTIN_ENTITIES else match.group(1), text
+    )
+
+
+def _docbook_element_id(element: ET.Element) -> str | None:
+    return element.get(XML_ID) or element.get("id")
+
+
+def _load_docbook_fragment(path: Path, pointer: str) -> ET.Element | None:
+    try:
+        root = ET.fromstring(_prepare_docbook_xml(path.read_text(encoding="utf-8", errors="replace")))
+    except (OSError, ET.ParseError):
+        return None
+    for element in root.iter():
+        if _docbook_element_id(element) == pointer:
+            return copy.deepcopy(element)
+    return None
+
+
+def _resolve_docbook_includes(root: ET.Element, source_path: Path | None) -> None:
+    """Resolve systemd-style local XIncludes by ID, never external paths or URLs."""
+
+    base = source_path.resolve().parent if source_path is not None else None
+    for parent in list(root.iter()):
+        for index, child in enumerate(list(parent)):
+            if child.tag != XI_INCLUDE:
+                continue
+            href = child.get("href", "")
+            pointer = child.get("xpointer", "")
+            replacement: ET.Element | None = None
+            if href == "version-info.xml" and re.fullmatch(r"v\d+", pointer):
+                replacement = ET.Element("para")
+                replacement.text = f"Added in systemd version {pointer[1:]}."
+            elif base is not None and href and pointer and "://" not in href:
+                candidate = (base / href).resolve()
+                try:
+                    candidate.relative_to(base)
+                except ValueError:
+                    candidate = Path()
+                if candidate.is_file():
+                    replacement = _load_docbook_fragment(candidate, pointer)
+            if replacement is None:
+                replacement = ET.Element("phrase")
+            replacement.tail = child.tail
+            parent.remove(child)
+            parent.insert(index, replacement)
+
+
+def _docbook_inline(element: ET.Element) -> str:
+    name = _xml_local_name(element.tag)
+    if name == "citerefentry":
+        title = next(
+            (_clean_text("".join(candidate.itertext())) for candidate in element if _xml_local_name(candidate.tag) == "refentrytitle"),
+            "",
+        )
+        volume = next(
+            (_clean_text("".join(candidate.itertext())) for candidate in element if _xml_local_name(candidate.tag) == "manvolnum"),
+            "",
+        )
+        value = f"{title}({volume})" if title and volume else title or volume
+    elif element.tag == XI_INCLUDE:
+        pointer = element.get("xpointer", "")
+        value = f"Added in systemd version {pointer[1:]}." if re.fullmatch(r"v\d+", pointer) else ""
+    else:
+        parts = [element.text or ""]
+        for child in element:
+            parts.append(_docbook_inline(child))
+            parts.append(child.tail or "")
+        value = "".join(parts)
+    return value
+
+
+def parse_docbook(text: str, fallback_title: str, source_path: Path | None = None) -> ParsedDocument:
+    """Parse a DocBook reference into citation-friendly structured blocks."""
+
+    try:
+        root = ET.fromstring(_prepare_docbook_xml(text))
+    except ET.ParseError as error:
+        raise ValueError(f"invalid DocBook XML: {error}") from error
+    _resolve_docbook_includes(root, source_path)
+
+    def first_text(name: str) -> str:
+        for element in root.iter():
+            if _xml_local_name(element.tag) == name:
+                value = _clean_text(_docbook_inline(element))
+                if value:
+                    return value
+        return ""
+
+    title = first_text("refentrytitle") or first_text("refname") or first_text("title") or fallback_title
+    purpose = first_text("refpurpose")
+    blocks: list[ContentBlock] = []
+    if purpose:
+        blocks.append(ContentBlock(("NAME",), f"{title} — {purpose}", "paragraph", {}))
+
+    section_names = {"refsect1", "refsect2", "refsect3", "section", "chapter", "appendix"}
+    code_names = {"programlisting", "screen", "literallayout", "synopsis", "cmdsynopsis", "funcsynopsis"}
+    admonition_names = {"note", "warning", "tip", "important", "caution"}
+    ignored_names = {"refentryinfo", "refmeta", "refnamediv", "title"}
+
+    def attributes_for(element: ET.Element) -> dict[str, Any]:
+        anchor = _docbook_element_id(element)
+        return {"anchor": anchor} if anchor else {}
+
+    def append_block(headings: tuple[str, ...], element: ET.Element, kind: str, *, preserve: bool = False) -> None:
+        value = _clean_text(_docbook_inline(element), preserve=preserve)
+        if value:
+            blocks.append(ContentBlock(headings, value, kind, attributes_for(element)))
+
+    def visit(element: ET.Element, headings: tuple[str, ...]) -> None:
+        name = _xml_local_name(element.tag)
+        if name in ignored_names:
+            return
+        if name in section_names or name in {"refsynopsisdiv", "refsection"}:
+            section_title = next(
+                (_clean_text(_docbook_inline(child)) for child in element if _xml_local_name(child.tag) == "title"),
+                "Synopsis" if name == "refsynopsisdiv" else "",
+            )
+            nested = headings + ((section_title,) if section_title else ())
+            for child in element:
+                if _xml_local_name(child.tag) != "title":
+                    visit(child, nested)
+            return
+        if name == "varlistentry":
+            terms = [
+                _clean_text(_docbook_inline(child)) for child in element if _xml_local_name(child.tag) == "term"
+            ]
+            term = ", ".join(item for item in terms if item)
+            body = " ".join(
+                _clean_text(_docbook_inline(child)) for child in element if _xml_local_name(child.tag) == "listitem"
+            ).strip()
+            value = f"{term}\n{body}".strip()
+            if value:
+                blocks.append(ContentBlock(headings + ((term,) if term else ()), value, "definition", attributes_for(element)))
+            return
+        if name in {"itemizedlist", "orderedlist", "simplelist"}:
+            for child in element:
+                if _xml_local_name(child.tag) in {"listitem", "member"}:
+                    append_block(headings, child, "list_item")
+            return
+        if name in {"table", "informaltable"}:
+            caption = next(
+                (_clean_text(_docbook_inline(child)) for child in element if _xml_local_name(child.tag) == "title"), ""
+            )
+            table_headings = headings + ((caption,) if caption else ())
+            for row in element.iter():
+                if _xml_local_name(row.tag) == "row":
+                    cells = [
+                        _clean_text(_docbook_inline(cell))
+                        for cell in row
+                        if _xml_local_name(cell.tag) in {"entry", "td", "th"}
+                    ]
+                    value = " | ".join(cell for cell in cells if cell)
+                    if value:
+                        blocks.append(ContentBlock(table_headings, value, "table_row", attributes_for(row)))
+            return
+        if name in code_names:
+            append_block(headings, element, "code", preserve=True)
+            return
+        if name in admonition_names or name == "example":
+            label = next(
+                (_clean_text(_docbook_inline(child)) for child in element if _xml_local_name(child.tag) == "title"),
+                name.capitalize(),
+            )
+            nested = headings + (label,)
+            for child in element:
+                if _xml_local_name(child.tag) != "title":
+                    visit(child, nested)
+            return
+        if name in {"para", "simpara", "formalpara", "blockquote", "bridgehead"}:
+            append_block(headings, element, "paragraph")
+            return
+        for child in element:
+            visit(child, headings)
+
+    for child in root:
+        visit(child, ())
+    return ParsedDocument(title, tuple(blocks), "docbook")
+
+
 def parse_text(text: str, fallback_title: str) -> ParsedDocument:
     blocks: list[ContentBlock] = []
     paragraph: list[str] = []
@@ -786,6 +989,8 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
         return parse_man(text, fallback)
     if suffix == ".pod" or path.name.casefold().endswith(".pod.in"):
         return parse_pod(text, fallback)
+    if suffix == ".xml":
+        return parse_docbook(text, fallback, path)
     if MAN_MACRO_RE.match(text.lstrip().splitlines()[0] if text.strip() else ""):
         return parse_man(text, fallback)
     if suffix == ".txt" and RFC_MARKER_RE.search(text[:12000]):

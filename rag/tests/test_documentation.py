@@ -18,6 +18,7 @@ from offline_rag.documentation import (
     parse_markdown,
     parse_pod,
     parse_document,
+    parse_docbook,
     parse_rfc,
     parse_rst,
 )
@@ -126,6 +127,22 @@ Example
         self.assertIn("PubkeyAuthentication", mdoc.blocks[0].text)
         self.assertIn("AuthorizedKeysFile", mdoc.blocks[1].text)
 
+        frontmatter = parse_markdown(
+            """---
+title: Credentials
+SPDX-License-Identifier: LGPL-2.1-or-later
+---
+
+# System and Service Credentials
+
+Load credentials without environment variables.
+""",
+            "fallback",
+        )
+        self.assertEqual(frontmatter.title, "Credentials")
+        self.assertFalse(any("SPDX" in block.text for block in frontmatter.blocks))
+        self.assertEqual(frontmatter.blocks[0].heading_path, ("System and Service Credentials",))
+
         asciidoc = parse_asciidoc(
             """= Git Manual
 
@@ -210,6 +227,40 @@ Load trusted certificates from C<file>.
         templated = parse_document(Path("openssl-s_client.pod.in"), "=head1 NAME\n\nopenssl-s_client - TLS client\n")
         self.assertEqual(templated.format, "pod")
         self.assertEqual(templated.title, "openssl-s_client")
+
+    def test_docbook_preserves_manual_sections_definitions_tables_and_local_includes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            helper = root / "standard-options.xml"
+            helper.write_text(
+                '<variablelist xmlns:xml="http://www.w3.org/XML/1998/namespace">'
+                '<varlistentry xml:id="no-pager"><term><option>--no-pager</option></term>'
+                '<listitem><para>Do not pipe output into a pager.</para></listitem></varlistentry>'
+                '</variablelist>',
+                encoding="utf-8",
+            )
+            source = root / "systemd-demo.xml"
+            text = """<?xml version='1.0'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://example.invalid/docbook.dtd">
+<refentry xmlns:xi="http://www.w3.org/2001/XInclude">
+  <refmeta><refentrytitle>systemd-demo</refentrytitle><manvolnum>1</manvolnum></refmeta>
+  <refnamediv><refname>systemd-demo</refname><refpurpose>Demonstrate DocBook parsing</refpurpose></refnamediv>
+  <refsect1><title>Options</title><variablelist>
+    <varlistentry><term><varname>Restart=</varname></term><listitem><para>Restart after &DEFAULT_TIMEOUT_SEC;.</para></listitem></varlistentry>
+    <xi:include href="standard-options.xml" xpointer="no-pager"/>
+  </variablelist></refsect1>
+  <refsect1><title>Example</title><programlisting>systemctl restart demo.service</programlisting>
+  <table><title>States</title><tgroup><tbody><row><entry>active</entry><entry>running</entry></row></tbody></tgroup></table></refsect1>
+</refentry>"""
+            source.write_text(text, encoding="utf-8")
+            parsed = parse_docbook(text, "fallback", source)
+        self.assertEqual(parsed.title, "systemd-demo")
+        self.assertEqual(parsed.format, "docbook")
+        self.assertTrue(any(block.heading_path == ("NAME",) for block in parsed.blocks))
+        self.assertTrue(any("Restart=" in block.text and "DEFAULT_TIMEOUT_SEC" in block.text for block in parsed.blocks))
+        self.assertTrue(any("--no-pager" in block.text and "pager" in block.text for block in parsed.blocks))
+        self.assertTrue(any(block.kind == "code" and "systemctl restart" in block.text for block in parsed.blocks))
+        self.assertTrue(any(block.kind == "table_row" and "active | running" in block.text for block in parsed.blocks))
 
     def test_oversized_content_and_short_trailing_chunks(self):
         from offline_rag.documentation import ContentBlock

@@ -111,6 +111,8 @@
         "ninja-1.13-docs=indexes\\documentation\\ninja-1.13.sqlite3",
         "--index",
         "postgresql-18-docs=indexes\\documentation\\postgresql-18.sqlite3",
+        "--index",
+        "systemd-261-docs=indexes\\documentation\\systemd-261.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
         "--corpus-vector",

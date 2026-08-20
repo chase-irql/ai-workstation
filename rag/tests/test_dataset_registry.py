@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 39)
+        self.assertEqual(len(datasets), 40)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -26,6 +26,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("openssh-10.5p1-docs", dataset_ids)
         self.assertIn("ninja-1.13-docs", dataset_ids)
         self.assertIn("postgresql-18-docs", dataset_ids)
+        self.assertIn("systemd-261-docs", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",

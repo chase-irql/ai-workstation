@@ -141,12 +141,16 @@ The importer emits the common records described in `docs/rag-record-schema.md`. 
 Supported inputs are:
 
 - HTML, with navigation, search, sidebar, generated-index, script, and static boilerplate filtered;
-- Markdown, reStructuredText, and AsciiDoc, including code fences/directives;
+- Markdown (including YAML front matter), reStructuredText, and AsciiDoc, including code fences/directives;
+- DocBook XML with section/option/list/table/code structure, network-disabled DTD handling, and same-directory ID-based XInclude resolution;
 - roff/man pages with section hierarchy;
+- Perl POD and generated POD.IN command/API manuals;
 - RFC text with titles, numbered/appendix/common section hierarchy, conservative page-furniture filtering, and publication metadata;
 - plain text as a safe fallback.
 
 Chunks respect structural boundaries where possible. Oversized blocks split deterministically, and short trailing chunks merge when doing so stays within the configured ceiling.
+
+DocBook build-time entities that cannot be resolved without a project build are retained as deterministic searchable names. Shared include fragments should be excluded as standalone inputs after being incorporated into their published manuals; includes never resolve outside the source file's directory or across the network.
 
 ## Updating a documentation dataset
 
