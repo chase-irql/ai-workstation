@@ -39,7 +39,7 @@ The official OpenStax Principles of Economics bundle at immutable main commit `d
 
 ### Active textbook extension: psychology
 
-The next registered textbook is the official OpenStax Psychology 2e source at immutable main commit `de7e40c9…` (2026-07-09). It supplies a structured introduction to research methods, neuroscience and behavior, perception, learning, memory, cognition, development, motivation, personality, social and organizational psychology, disorders, and therapy. Acquisition is bounded to 300 MB compressed and 1 GB extracted, records a local SHA-256, validates archive structure and the collection license, and labels mental-health content as educational rather than current clinical guidance.
+The official OpenStax Psychology 2e source at immutable main commit `de7e40c9…` (2026-07-09) is acquired and evaluated. It supplies a structured introduction to research methods, neuroscience and behavior, perception, learning, memory, cognition, development, motivation, personality, social and organizational psychology, disorders, and therapy. Its locally pinned 58,780,943-byte archive safely expands to 506 files / 70,467,311 bytes and the collection confirms CC BY-NC-SA 4.0. All 105 modules yield 2,228 chunks in a verified 6,627,328-byte database, and a 50-topic stable-ID gate passes every configured metric. Mental-health material remains explicitly educational rather than current diagnostic or therapeutic guidance.
 
 ### Wave 1: operational Stack Exchange sites
 

@@ -30,6 +30,8 @@ Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection 
 
 `openstax-principles-economics` contains Principles of Economics 3e, Principles of Microeconomics 3e, Principles of Macroeconomics 3e, and AP micro/macro sequences from official repository commit `d5cadb403718ff88078259a300eddc20d38563d5` (2026-07-09). Its 132,754,792-byte archive has locally measured SHA-256 `b2c1670f41c0b7fc2c29b682c2e89ae4df52618d519d568449a05ab89822e89c` and safely expands to 1,027 files totaling 174,919,048 bytes with no links. All five collection manifests state CC BY-NC-SA 4.0. Their 603 ordered occurrences reuse modules heavily, yielding 190 stable documents while retaining all book and chapter placements in provenance.
 
+`openstax-psychology` contains Psychology 2e from official repository commit `de7e40c91813dabdc2875df9d0709fc4f46080bb` (2026-07-09). Its 58,780,943-byte archive has locally measured SHA-256 `f5c94a1c226ca4244edc23f684281ad20c261be683b62460187117b1115b81ca` and safely expands to 506 files totaling 70,467,311 bytes with no links. Its 105-module collection states CC BY-NC-SA 4.0. Treat disorder and treatment content as dated educational foundation, not current diagnostic or therapeutic advice.
+
 ## Structure retained
 
 The adapter preserves:
@@ -98,5 +100,7 @@ The Microbiology index has 159 documents, 4,115 chunks and FTS rows, valid forei
 The Astronomy 2e index has 199 documents, 2,095 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 9,064,448 bytes. The 54-case lexical suite has every reported rank metric at 1.0.
 
 The Principles of Economics index has 190 documents, 2,787 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 8,994,816 bytes. The 53-case lexical suite has every reported rank metric at 1.0.
+
+The Psychology 2e index has 105 documents, 2,228 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 6,627,328 bytes. The 50-case lexical suite has every reported rank metric at 1.0.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.

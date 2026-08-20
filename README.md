@@ -67,6 +67,7 @@ These corpora are implemented and verified in the current development installati
 | OpenStax Microbiology | Official source snapshot at `63385025…` | 159 modules, 4,115 chunks | BM25 |
 | OpenStax Astronomy 2e | Official source snapshot at `dff6acf8…` | 199 modules, 2,095 chunks | BM25 |
 | OpenStax Principles of Economics 3e + micro/macro/AP | Official source snapshot at `d5cadb40…` | 190 modules, 2,787 chunks | BM25 |
+| OpenStax Psychology 2e | Official source snapshot at `de7e40c9…` | 105 modules, 2,228 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |

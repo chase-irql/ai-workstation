@@ -47,6 +47,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `openstax-microbiology` | OpenStax Microbiology commit `63385025…`, 2026-07-08 | CC BY-NC-SA 4.0; attribution retained; educational, not current clinical guidance | 159 modules; 4,115 chunks | BM25 |
 | `openstax-astronomy` | OpenStax Astronomy 2e commit `dff6acf8…`, 2026-07-21 | CC BY-NC-SA 4.0; attribution retained | 199 modules; 2,095 chunks | BM25 |
 | `openstax-principles-economics` | OpenStax Principles of Economics 3e, microeconomics, macroeconomics, and AP bundle commit `d5cadb40…`, 2026-07-09 | CC BY-NC-SA 4.0; per-book attribution retained | 190 unique modules / 603 book occurrences; 2,787 chunks | BM25 |
+| `openstax-psychology` | OpenStax Psychology 2e commit `de7e40c9…`, 2026-07-09 | CC BY-NC-SA 4.0; attribution retained; educational, not current clinical guidance | 105 modules; 2,228 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |

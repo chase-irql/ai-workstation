@@ -2225,8 +2225,8 @@
       },
       "storage": {"download_min_bytes": 25000000, "download_max_bytes": 300000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 300000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-psychology", "processed": "corpora/processed/textbooks/openstax-psychology", "index": "indexes/textbooks/openstax-psychology.sqlite3", "semantic_index": "indexes/semantic/openstax-psychology"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. Repository LICENSE and the Psychology 2e collection structure were checked before registration; collection metadata will be revalidated after extraction. Mental-health material will be labeled educational rather than current clinical guidance."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit de7e40c91813dabdc2875df9d0709fc4f46080bb. The 58,780,943-byte archive has local SHA-256 f5c94a1c226ca4244edc23f684281ad20c261be683b62460187117b1115b81ca and safely expands to 506 files / 70,467,311 bytes with no links; 392 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 105 modules yield 2,228 chunks in a verified 6,627,328-byte index. The 50-topic research-through-cognition-development-social-psychology-and-treatment stable-ID gate passes every configured metric at 1.0. Mental-health content is dated educational material, not current diagnostic or therapeutic guidance."
     },
     {
       "dataset_id": "cpp-16.2-manual",
