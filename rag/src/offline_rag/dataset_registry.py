@@ -14,6 +14,7 @@ REGISTRY_SCHEMA_VERSION = 1
 DATASET_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 STAGES = ("planned", "downloaded", "validated", "extracted", "parsed", "indexed", "evaluated")
 ACQUISITION_METHODS = ("http", "git", "rsync", "official-export", "manual")
+PUBLISHER_CHECKSUM_ALGORITHMS = {"sha256": 64, "sha3-256": 64}
 
 
 @dataclass(frozen=True)
@@ -104,6 +105,29 @@ def validate_dataset(item: Mapping[str, Any]) -> DatasetDefinition:
     parsed_location = urlparse(location)
     if parsed_location.scheme not in {"https", "rsync"} or not parsed_location.netloc:
         raise ValueError(f"Dataset {dataset_id!r} acquisition location must be an HTTPS or rsync URL")
+    publisher_checksum = acquisition.get("publisher_checksum")
+    publisher_algorithm = acquisition.get("publisher_checksum_algorithm", "sha256")
+    if publisher_checksum is not None:
+        if (
+            not isinstance(publisher_algorithm, str)
+            or publisher_algorithm not in PUBLISHER_CHECKSUM_ALGORITHMS
+        ):
+            raise ValueError(
+                f"Dataset {dataset_id!r} has unsupported publisher checksum algorithm {publisher_algorithm!r}"
+            )
+        expected_length = PUBLISHER_CHECKSUM_ALGORITHMS[publisher_algorithm]
+        if (
+            not isinstance(publisher_checksum, str)
+            or len(publisher_checksum) != expected_length
+            or any(character not in "0123456789abcdefABCDEF" for character in publisher_checksum)
+        ):
+            raise ValueError(
+                f"Dataset {dataset_id!r} has an invalid publisher {publisher_algorithm} checksum"
+            )
+    elif "publisher_checksum_algorithm" in acquisition:
+        raise ValueError(
+            f"Dataset {dataset_id!r} declares a publisher checksum algorithm without a checksum"
+        )
     status = _string(item, "status")
     if status not in STAGES:
         raise ValueError(f"Dataset {dataset_id!r} has invalid status {status!r}")

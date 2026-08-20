@@ -91,6 +91,7 @@ class _StructuredHTMLParser(HTMLParser):
         "toctree-wrapper",
         "contents",
         "breadcrumbs",
+        "nosearch",
     }
     void_tags = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
@@ -99,7 +100,7 @@ class _StructuredHTMLParser(HTMLParser):
         self.blocks: list[ContentBlock] = []
         self.title = ""
         self._headings: list[str] = []
-        self._ignored_depth = 0
+        self._ignored_stack: list[str] = []
         self._capture_tag: str | None = None
         self._capture_depth = 0
         self._capture_parts: list[str] = []
@@ -109,16 +110,16 @@ class _StructuredHTMLParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag = tag.casefold()
-        if self._ignored_depth:
+        if self._ignored_stack:
             if tag not in self.void_tags:
-                self._ignored_depth += 1
+                self._ignored_stack.append(tag)
             return
         attributes = dict(attrs)
         classes = set((attributes.get("class") or "").casefold().split())
         role = (attributes.get("role") or "").casefold()
         if tag in self.ignored_tags or role in {"navigation", "search"} or classes.intersection(self.ignored_classes):
             if tag not in self.void_tags:
-                self._ignored_depth = 1
+                self._ignored_stack = [tag]
             return
         if tag == "title":
             self._title_depth = 1
@@ -128,9 +129,18 @@ class _StructuredHTMLParser(HTMLParser):
         if self._capture_tag is not None:
             if tag == "br":
                 self._capture_parts.append("\n")
-            if tag not in self.void_tags:
-                self._capture_depth += 1
-            return
+                return
+            # Generated manuals commonly omit optional HTML end tags (for
+            # example, ``<p>one<p>two`` or ``<p><dl>``). HTMLParser is a
+            # tokenizer and does not apply the browser's implicit-closing
+            # rules, so finish the current structural block before starting
+            # another one. Inline markup remains part of the active block.
+            if tag in self.block_tags or re.fullmatch(r"h[1-6]", tag):
+                self._finish_capture()
+            else:
+                if tag not in self.void_tags:
+                    self._capture_depth += 1
+                return
         if tag in self.block_tags or re.fullmatch(r"h[1-6]", tag):
             self._capture_tag = tag
             self._capture_depth = 1
@@ -146,8 +156,11 @@ class _StructuredHTMLParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         tag = tag.casefold()
-        if self._ignored_depth:
-            self._ignored_depth -= 1
+        if self._ignored_stack:
+            for index in range(len(self._ignored_stack) - 1, -1, -1):
+                if self._ignored_stack[index] == tag:
+                    del self._ignored_stack[index:]
+                    break
             return
         if self._title_depth:
             self._title_depth -= 1
@@ -158,6 +171,11 @@ class _StructuredHTMLParser(HTMLParser):
             return
         self._capture_depth -= 1
         if self._capture_depth > 0:
+            return
+        self._finish_capture()
+
+    def _finish_capture(self) -> None:
+        if self._capture_tag is None:
             return
         captured_tag = self._capture_tag
         preserve = captured_tag == "pre"
@@ -183,7 +201,7 @@ class _StructuredHTMLParser(HTMLParser):
         self._capture_attributes = {}
 
     def handle_data(self, data: str) -> None:
-        if self._ignored_depth:
+        if self._ignored_stack:
             return
         if self._title_depth:
             self._title_parts.append(data)

@@ -57,6 +57,66 @@ class DatasetRegistryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "project root"):
                 load_registry(registry)
 
+    def test_publisher_checksum_algorithm_is_validated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            registry = Path(directory) / "datasets.json"
+            template = {
+                "dataset_id": "sqlite",
+                "name": "SQLite",
+                "description": "SQLite documentation",
+                "category": "docs",
+                "official_source_url": "https://sqlite.org/docs.html",
+                "license": "Public domain",
+                "attribution": "SQLite authors",
+                "release": "1",
+                "update_frequency": "release",
+                "scope": "all",
+                "formats": ["HTML"],
+                "acquisition": {
+                    "method": "http",
+                    "location": "https://sqlite.org/docs.zip",
+                    "publisher_checksum_algorithm": "sha3-256",
+                    "publisher_checksum": "a" * 64,
+                },
+                "storage": {
+                    "download_min_bytes": 1,
+                    "download_max_bytes": 2,
+                    "extracted_max_bytes": 3,
+                    "indexed_max_bytes": 4,
+                },
+                "paths": {"raw": "raw/sqlite", "processed": "processed/sqlite", "index": "index/sqlite"},
+                "status": "planned",
+                "notes": "",
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [template]}))
+            dataset = load_registry(registry)[0]
+            self.assertEqual(dataset.acquisition["publisher_checksum_algorithm"], "sha3-256")
+
+            invalid = {**template, "acquisition": {**template["acquisition"], "publisher_checksum_algorithm": "md5"}}
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}))
+            with self.assertRaisesRegex(ValueError, "unsupported publisher checksum algorithm"):
+                load_registry(registry)
+
+            invalid_type = {
+                **template,
+                "acquisition": {**template["acquisition"], "publisher_checksum_algorithm": ["sha3-256"]},
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid_type]}))
+            with self.assertRaisesRegex(ValueError, "unsupported publisher checksum algorithm"):
+                load_registry(registry)
+
+            missing = {
+                **template,
+                "acquisition": {
+                    "method": "http",
+                    "location": "https://sqlite.org/docs.zip",
+                    "publisher_checksum_algorithm": "sha3-256",
+                },
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [missing]}))
+            with self.assertRaisesRegex(ValueError, "without a checksum"):
+                load_registry(registry)
+
 
 if __name__ == "__main__":
     unittest.main()

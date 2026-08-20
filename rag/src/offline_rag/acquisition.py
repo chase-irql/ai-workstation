@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-from .dataset_registry import DatasetDefinition, load_registry
+from .dataset_registry import DatasetDefinition, PUBLISHER_CHECKSUM_ALGORITHMS, load_registry
 
 
 USER_AGENT = "offline-ai-knowledge-ark/0.9 (+local archival acquisition)"
@@ -30,12 +30,24 @@ WINDOWS_RESERVED_NAMES = frozenset(
 )
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
+HASHLIB_ALGORITHMS = {"sha256": "sha256", "sha3-256": "sha3_256"}
+
+
+def _checksums(path: Path, algorithms: Iterable[str]) -> dict[str, str]:
+    requested = tuple(dict.fromkeys(algorithms))
+    unknown = set(requested) - set(HASHLIB_ALGORITHMS)
+    if unknown:
+        raise ValueError(f"Unsupported checksum algorithm(s): {', '.join(sorted(unknown))}")
+    digests = {name: hashlib.new(HASHLIB_ALGORITHMS[name]) for name in requested}
     with path.open("rb") as stream:
         while block := stream.read(8 * 1024 * 1024):
-            digest.update(block)
-    return digest.hexdigest()
+            for digest in digests.values():
+                digest.update(block)
+    return {name: digest.hexdigest() for name, digest in digests.items()}
+
+
+def _sha256(path: Path) -> str:
+    return _checksums(path, ("sha256",))["sha256"]
 
 
 def _atomic_json(path: Path, value: object) -> None:
@@ -63,13 +75,23 @@ def _dataset(registry: Path, dataset_id: str) -> DatasetDefinition:
     return matches[0]
 
 
-def _publisher_sha256(dataset: DatasetDefinition) -> str | None:
+def _publisher_checksum(dataset: DatasetDefinition) -> tuple[str, str] | None:
     value = dataset.acquisition.get("publisher_checksum")
     if value is None:
         return None
-    if not isinstance(value, str) or len(value) != 64 or any(character not in "0123456789abcdefABCDEF" for character in value):
-        raise ValueError(f"Dataset {dataset.dataset_id!r} has an invalid publisher SHA-256")
-    return value.casefold()
+    algorithm = dataset.acquisition.get("publisher_checksum_algorithm", "sha256")
+    if not isinstance(algorithm, str) or algorithm not in PUBLISHER_CHECKSUM_ALGORITHMS:
+        raise ValueError(
+            f"Dataset {dataset.dataset_id!r} has unsupported publisher checksum algorithm {algorithm!r}"
+        )
+    expected_length = PUBLISHER_CHECKSUM_ALGORITHMS[algorithm]
+    if (
+        not isinstance(value, str)
+        or len(value) != expected_length
+        or any(character not in "0123456789abcdefABCDEF" for character in value)
+    ):
+        raise ValueError(f"Dataset {dataset.dataset_id!r} has an invalid publisher {algorithm} checksum")
+    return algorithm, value.casefold()
 
 
 def _archive_name(url: str) -> str:
@@ -82,12 +104,23 @@ def _archive_name(url: str) -> str:
 def _download_http(dataset: DatasetDefinition, destination: Path, retries: int = 4) -> dict[str, object]:
     url = str(dataset.acquisition["location"])
     partial = destination.with_suffix(destination.suffix + ".partial")
+    publisher = _publisher_checksum(dataset)
     if destination.exists():
-        actual = _sha256(destination)
-        expected = _publisher_sha256(dataset)
-        if expected and actual != expected:
+        algorithms = ("sha256",) if publisher is None else ("sha256", publisher[0])
+        actual = _checksums(destination, algorithms)
+        if publisher and actual[publisher[0]] != publisher[1]:
             raise ValueError(f"Existing archive checksum mismatch: {destination}")
-        return {"path": destination, "sha256": actual, "bytes": destination.stat().st_size, "reused": True}
+        return {
+            "path": destination,
+            "sha256": actual["sha256"],
+            "bytes": destination.stat().st_size,
+            "reused": True,
+            "publisher_checksum": (
+                {"algorithm": publisher[0], "value": actual[publisher[0]], "verified": True}
+                if publisher
+                else None
+            ),
+        }
     partial.parent.mkdir(parents=True, exist_ok=True)
     for attempt in range(1, retries + 1):
         existing = partial.stat().st_size if partial.exists() else 0
@@ -126,12 +159,22 @@ def _download_http(dataset: DatasetDefinition, destination: Path, retries: int =
                     f"Downloaded size {actual_size} is outside registry range "
                     f"{dataset.storage['download_min_bytes']}..{dataset.storage['download_max_bytes']}"
                 )
-            actual_sha256 = _sha256(partial)
-            expected_sha256 = _publisher_sha256(dataset)
-            if expected_sha256 and actual_sha256 != expected_sha256:
-                raise ValueError(f"Publisher SHA-256 mismatch for {destination.name}")
+            algorithms = ("sha256",) if publisher is None else ("sha256", publisher[0])
+            actual = _checksums(partial, algorithms)
+            if publisher and actual[publisher[0]] != publisher[1]:
+                raise ValueError(f"Publisher {publisher[0]} mismatch for {destination.name}")
             os.replace(partial, destination)
-            return {"path": destination, "sha256": actual_sha256, "bytes": actual_size, "reused": False}
+            return {
+                "path": destination,
+                "sha256": actual["sha256"],
+                "bytes": actual_size,
+                "reused": False,
+                "publisher_checksum": (
+                    {"algorithm": publisher[0], "value": actual[publisher[0]], "verified": True}
+                    if publisher
+                    else None
+                ),
+            }
         except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
             if attempt == retries:
                 raise RuntimeError(f"Download failed after {retries} attempts: {url}") from error
@@ -406,7 +449,8 @@ def acquire_dataset(
         "status": "extracted" if extracted else "validated",
         "integrity": {
             "archive_sha256": acquired["sha256"],
-            "publisher_checksum_verified": _publisher_sha256(dataset) is not None,
+            "publisher_checksum_verified": acquired["publisher_checksum"] is not None,
+            "publisher_checksum": acquired["publisher_checksum"],
             "archive_structure_validated": bool(extracted),
         },
         "archive": {

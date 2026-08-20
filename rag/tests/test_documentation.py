@@ -44,6 +44,30 @@ class DocumentationParserTests(unittest.TestCase):
         self.assertTrue(any(block.text == "E23" and block.kind == "td" for block in parsed.blocks))
         self.assertFalse(any("discard" in block.text for block in parsed.blocks))
 
+    def test_html_handles_generated_optional_end_tags_and_nosearch_navigation(self):
+        parsed = parse_html(
+            """
+            <html><head><title>Write-Ahead Logging</title></head><body>
+            <div class=nosearch><h2>Navigation</h2><p>discard table of contents</div>
+            <h1 id=overview><span>1. </span>Overview</h1>
+            <p>The rollback journal stores old database content.
+            <p>The WAL stores new database content.</p>
+            <p><dl><dt>Checkpoint</dt><dd>Transfers WAL content into the database.</dd></dl></p>
+            <h2>Example</h2><blockquote><pre>PRAGMA journal_mode=WAL;</pre></blockquote>
+            </body></html>
+            """,
+            "fallback",
+        )
+        texts = [block.text for block in parsed.blocks]
+        self.assertEqual(parsed.title, "Write-Ahead Logging")
+        self.assertIn("The rollback journal stores old database content.", texts)
+        self.assertIn("The WAL stores new database content.", texts)
+        self.assertIn("Checkpoint", texts)
+        self.assertIn("Transfers WAL content into the database.", texts)
+        self.assertIn("PRAGMA journal_mode=WAL;", texts)
+        self.assertFalse(any("discard" in text for text in texts))
+        self.assertEqual(parsed.blocks[-1].heading_path, ("1. Overview", "Example"))
+
     def test_markdown_rst_and_man_structure(self):
         markdown = parse_markdown(
             """# Build Guide

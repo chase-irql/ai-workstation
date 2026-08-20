@@ -11,9 +11,10 @@ The current OpenCode configuration exposes:
 - `git-docs`: Git 2.55.0 documentation;
 - `linux-man-pages`: Linux man-pages 6.18;
 - `rfc-editor-text`: RFC Editor text snapshot 2026-08-19;
-- `iana-protocol-registries`: IANA assignments snapshot 2026-08-19.
+- `iana-protocol-registries`: IANA assignments snapshot 2026-08-19;
+- `sqlite-docs`: SQLite 3.53.4 documentation.
 
-Python, Git, Linux man-pages, and RFC Editor have independently published chunk-level semantic generations. Wikipedia retains its article-level semantic generation, while IANA remains BM25/structured-first. All semantic resources are lazy: server startup and `knowledge_index_status` do not invoke Ollama or load an embedding model. A caller can request `retrieval: "bm25"` to guarantee a CPU-only search. If a semantic backend is unavailable, the federated tool reports the reason and explicitly falls back to BM25 for that corpus.
+Python, Git, Linux man-pages, RFC Editor, and SQLite have independently published chunk-level semantic generations. Wikipedia retains its article-level semantic generation, while IANA remains BM25/structured-first. All semantic resources are lazy: server startup and `knowledge_index_status` do not invoke Ollama or load an embedding model. A caller can request `retrieval: "bm25"` to guarantee a CPU-only search. If a semantic backend is unavailable, the federated tool reports the reason and explicitly falls back to BM25 for that corpus.
 
 IANA is table-aware: each nested registry is a document and each registry record is independently searchable with its field names, references, stable IANA URL fragment, and CC0 provenance. Exact ports, protocol numbers, media types, and cipher-suite identifiers should use BM25 and a corpus filter. See `docs/corpus-semantic-roadmap.md` for why registry rows are not the first embedding target.
 

@@ -1,0 +1,153 @@
+{
+  "schema_version": 2,
+  "name": "SQLite 3.53.4 documentation lexical gate",
+  "description": "Exact API, SQL, operational, architecture, and troubleshooting queries against the official SQLite documentation bundle.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "wal-concurrency-001",
+      "query": "write ahead logging checkpoint concurrency",
+      "query_type": "conceptual_exact",
+      "relevance": {"sqlite-docs:63f8ce0c43ab602b5ddb5d73": 3}
+    },
+    {
+      "id": "open-uri-001",
+      "query": "sqlite3_open_v2 URI immutable",
+      "query_type": "c_api_lookup",
+      "relevance": {
+        "sqlite-docs:f5ce2e851e10554da24fb641": 3,
+        "sqlite-docs:eb6988c0ea10c522dedb6582": 2
+      }
+    },
+    {
+      "id": "fts5-trigram-001",
+      "query": "FTS5 trigram tokenizer",
+      "query_type": "extension_lookup",
+      "relevance": {"sqlite-docs:304d9a7ccabcd11a50df85b8": 3}
+    },
+    {
+      "id": "vacuum-backup-001",
+      "query": "VACUUM INTO backup database",
+      "query_type": "sql_lookup",
+      "relevance": {
+        "sqlite-docs:fa0de071e5b0a015d1e57c8b": 3,
+        "sqlite-docs:6af5365a2c718e2017b892a9": 2,
+        "sqlite-docs:adc31efa83dff12a1956d601": 1
+      }
+    },
+    {
+      "id": "strict-any-001",
+      "query": "STRICT tables ANY datatype",
+      "query_type": "sql_lookup",
+      "relevance": {"sqlite-docs:27a3da09da1b3d7c256cdda5": 3}
+    },
+    {
+      "id": "integrity-check-001",
+      "query": "PRAGMA integrity_check missing pages",
+      "query_type": "troubleshooting",
+      "relevance": {
+        "sqlite-docs:0fb6972a8c84eb612b83044b": 3,
+        "sqlite-docs:e493a2bc8223653a29ebec70": 2
+      }
+    },
+    {
+      "id": "foreign-keys-001",
+      "query": "foreign key constraint enforcement",
+      "query_type": "sql_lookup",
+      "relevance": {
+        "sqlite-docs:4883f311dfad44460d477496": 3,
+        "sqlite-docs:fb70c30a76f5d12401a4241c": 3,
+        "sqlite-docs:0fb6972a8c84eb612b83044b": 2
+      }
+    },
+    {
+      "id": "json-functions-001",
+      "query": "JSON functions operators json_extract JSONB",
+      "query_type": "function_lookup",
+      "relevance": {"sqlite-docs:0216f9113e00da4e34df0a24": 3}
+    },
+    {
+      "id": "date-functions-001",
+      "query": "date time functions unixepoch timediff",
+      "query_type": "function_lookup",
+      "relevance": {"sqlite-docs:4772ff2aee46b76e74e18e90": 3}
+    },
+    {
+      "id": "without-rowid-001",
+      "query": "WITHOUT ROWID clustered primary key",
+      "query_type": "architecture",
+      "relevance": {"sqlite-docs:d5235736d6c14e716aa48faf": 3}
+    },
+    {
+      "id": "generated-columns-001",
+      "query": "generated columns VIRTUAL STORED",
+      "query_type": "sql_lookup",
+      "relevance": {"sqlite-docs:b4610aaa2377f712a58c9a69": 3}
+    },
+    {
+      "id": "upsert-001",
+      "query": "UPSERT excluded uniqueness conflict",
+      "query_type": "sql_lookup",
+      "relevance": {"sqlite-docs:62208ba822ca73bef5cda792": 3}
+    },
+    {
+      "id": "window-functions-001",
+      "query": "window functions frame specification",
+      "query_type": "sql_lookup",
+      "relevance": {"sqlite-docs:d4e98729f1023a47ad6c636d": 3}
+    },
+    {
+      "id": "recursive-cte-001",
+      "query": "WITH recursive common table expression",
+      "query_type": "sql_lookup",
+      "relevance": {"sqlite-docs:b3c4b970136e97814c22a341": 3}
+    },
+    {
+      "id": "partial-index-001",
+      "query": "partial indexes WHERE clause",
+      "query_type": "indexing",
+      "relevance": {"sqlite-docs:0ff5aefc4736a5b64f46909a": 3}
+    },
+    {
+      "id": "file-format-001",
+      "query": "database file format b-tree pages",
+      "query_type": "architecture",
+      "relevance": {
+        "sqlite-docs:44f6a4aedc79cea4c0c18b1e": 3,
+        "sqlite-docs:3e5be2a9a51addd8c004aa8d": 2
+      }
+    },
+    {
+      "id": "transactions-001",
+      "query": "transaction DEFERRED IMMEDIATE EXCLUSIVE",
+      "query_type": "sql_lookup",
+      "relevance": {"sqlite-docs:4ff8d56fa140bc415f79b361": 3}
+    },
+    {
+      "id": "query-planner-001",
+      "query": "next generation query planner star query heuristic",
+      "query_type": "architecture",
+      "relevance": {"sqlite-docs:e0379878a644d5699b014c89": 3}
+    },
+    {
+      "id": "in-memory-001",
+      "query": "in memory database shared cache URI",
+      "query_type": "configuration",
+      "relevance": {
+        "sqlite-docs:17cfc951e571b36c39a72318": 3,
+        "sqlite-docs:73cb8c39b181f0d67063c3e9": 1
+      }
+    },
+    {
+      "id": "locking-001",
+      "query": "file locking concurrency rollback journal",
+      "query_type": "architecture",
+      "relevance": {"sqlite-docs:1542bfa642f90e332415f11e": 3}
+    }
+  ]
+}

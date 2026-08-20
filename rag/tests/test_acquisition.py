@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import sys
 import tarfile
@@ -73,6 +74,75 @@ class AcquisitionTests(unittest.TestCase):
                 self.assertEqual(destination.read_bytes(), payload)
                 self.assertEqual(result["bytes"], len(payload))
                 self.assertFalse(partial.exists())
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+    def test_http_download_verifies_publisher_sha3_256(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            payload = b"official sqlite documentation fixture\n" * 1024
+
+            class Handler(BaseHTTPRequestHandler):
+                def do_GET(self):
+                    self.send_response(200)
+                    self.send_header("Content-Length", str(len(payload)))
+                    self.end_headers()
+                    self.wfile.write(payload)
+
+                def log_message(self, format, *args):
+                    return
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                expected = hashlib.sha3_256(payload).hexdigest()
+                dataset = DatasetDefinition(
+                    dataset_id="sqlite-fixture",
+                    name="SQLite fixture",
+                    description="Fixture",
+                    category="docs",
+                    official_source_url="https://example.invalid",
+                    license="test",
+                    attribution="test",
+                    release="1",
+                    update_frequency="never",
+                    scope="fixture",
+                    formats=("binary",),
+                    acquisition={
+                        "method": "http",
+                        "location": f"http://127.0.0.1:{server.server_port}/docs.bin",
+                        "publisher_checksum_algorithm": "sha3-256",
+                        "publisher_checksum": expected,
+                    },
+                    storage={
+                        "download_min_bytes": len(payload),
+                        "download_max_bytes": len(payload),
+                        "extracted_max_bytes": len(payload),
+                        "indexed_max_bytes": len(payload),
+                    },
+                    paths={"raw": "raw", "processed": "processed", "index": "index"},
+                    status="planned",
+                    notes="",
+                )
+                result = _download_http(dataset, root / "docs.bin")
+                self.assertEqual(result["publisher_checksum"]["algorithm"], "sha3-256")
+                self.assertEqual(result["publisher_checksum"]["value"], expected)
+                self.assertTrue(result["publisher_checksum"]["verified"])
+
+                mismatch = DatasetDefinition(
+                    **{
+                        **dataset.__dict__,
+                        "acquisition": {
+                            **dataset.acquisition,
+                            "publisher_checksum": "0" * 64,
+                        },
+                    }
+                )
+                with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+                    _download_http(mismatch, root / "docs.bin")
             finally:
                 server.shutdown()
                 server.server_close()

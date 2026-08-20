@@ -1,0 +1,100 @@
+{
+  "schema_version": 2,
+  "name": "SQLite 3.53.4 documentation semantic paraphrase gate",
+  "description": "Natural-language questions whose wording differs from SQLite document titles and exact API terminology.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "wal-paraphrase-001",
+      "query": "allow readers to continue while a writer appends changes and later merges them back",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:63f8ce0c43ab602b5ddb5d73": 3}
+    },
+    {
+      "id": "backup-paraphrase-001",
+      "query": "copy a live database safely while other connections keep using it",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "sqlite-docs:6af5365a2c718e2017b892a9": 3,
+        "sqlite-docs:adc31efa83dff12a1956d601": 2
+      }
+    },
+    {
+      "id": "strict-paraphrase-001",
+      "query": "make columns reject values that cannot be converted to their declared conventional types",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:27a3da09da1b3d7c256cdda5": 3}
+    },
+    {
+      "id": "trigram-paraphrase-001",
+      "query": "build a full text index that can find character sequences inside words",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:304d9a7ccabcd11a50df85b8": 3}
+    },
+    {
+      "id": "without-rowid-paraphrase-001",
+      "query": "store table records directly in primary key order without a separate integer identifier",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "sqlite-docs:d5235736d6c14e716aa48faf": 3,
+        "sqlite-docs:b2e492f19d15ccc8b6f2ddec": 1
+      }
+    },
+    {
+      "id": "generated-column-paraphrase-001",
+      "query": "define a column whose value is calculated automatically from other fields",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:b4610aaa2377f712a58c9a69": 3}
+    },
+    {
+      "id": "upsert-paraphrase-001",
+      "query": "insert a row but update the existing row when a uniqueness rule is violated",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:62208ba822ca73bef5cda792": 3}
+    },
+    {
+      "id": "recursive-cte-paraphrase-001",
+      "query": "walk a hierarchy by repeatedly feeding query results back into the same temporary result set",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:b3c4b970136e97814c22a341": 3}
+    },
+    {
+      "id": "partial-index-paraphrase-001",
+      "query": "save index space by including only rows that satisfy a predicate",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"sqlite-docs:0ff5aefc4736a5b64f46909a": 3}
+    },
+    {
+      "id": "immutable-paraphrase-001",
+      "query": "open an unchanging database read only and skip file locking and change detection",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "sqlite-docs:f5ce2e851e10554da24fb641": 3,
+        "sqlite-docs:eb6988c0ea10c522dedb6582": 2
+      }
+    },
+    {
+      "id": "integrity-paraphrase-001",
+      "query": "diagnose corruption such as malformed records missing pages and inconsistent indexes",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "sqlite-docs:0fb6972a8c84eb612b83044b": 3,
+        "sqlite-docs:e493a2bc8223653a29ebec70": 2
+      }
+    },
+    {
+      "id": "file-format-paraphrase-001",
+      "query": "understand how tables indexes records and free space are arranged on disk",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "sqlite-docs:44f6a4aedc79cea4c0c18b1e": 3,
+        "sqlite-docs:3e5be2a9a51addd8c004aa8d": 2
+      }
+    }
+  ]
+}

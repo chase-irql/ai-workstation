@@ -39,6 +39,16 @@ The IANA assignments snapshot dated 2026-08-19 is complete through its corpus-sp
 - field names, nested registry hierarchy, references, timestamps, XML source paths, XHTML citation fragments, and CC0 provenance preserved;
 - six-query exact technical gate: Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0.
 
+SQLite 3.53.4 documentation is complete through the generic HTML documentation path with SQLite-specific parser coverage:
+
+- official 11,820,412-byte static documentation ZIP acquired over HTTPS;
+- publisher SHA3-256 `7ccf86a52e7dd1fb9b31e63edcebe3b553f18f89cd26eef59c7f191a5111836e` verified against SQLite's download page;
+- local archive SHA-256 `a1d0f5de57485d062796ed7e67daff0758b50d00001a0f233a2c15aaf40bbdc8` recorded for reproducibility;
+- 837 HTML source files inspected, producing 765 documents and 4,384 chunks; 72 navigation/index-only pages were empty after filtering and intentionally skipped;
+- optional HTML end tags used by the generated SQLite pages are handled without merging neighboring paragraphs, lists, or code blocks;
+- 20-query lexical gate: Success@1 0.95, Success@5/10 and Recall@5/10/50 1.0, MRR@10 0.975, and nDCG@10 0.966274.
+- all 4,384 chunks have a source-verified 256-dimensional Qwen3-Embedding generation; on 12 paraphrase cases, warm hybrid retrieval achieved Success@10 0.916667 and Recall@50 1.0, while deterministic reranking raised Success@5 from 0.833333 to 0.916667.
+
 The raw Unix archives contain safe internal symbolic links, NTFS-invalid colons, and case-distinct names. Extraction validates that links cannot escape but does not duplicate their targets. NTFS-invalid characters and uppercase ASCII are reversibly percent-encoded on disk, with a versioned marker; the importer decodes the original Unix paths before producing IDs, provenance, and version-pinned kernel.org citations.
 
 ## Data stages
@@ -65,10 +75,22 @@ Validate the plan first:
 .\scripts\validate-dataset-registry.ps1
 ```
 
-The HTTP acquisition wrapper supports resume through `.partial` files, retries with backoff, a free-space reserve, expected-size bounds, optional publisher SHA-256 verification, local SHA-256 calculation, safe ZIP/tar extraction, and atomic publication:
+The HTTP acquisition wrapper supports resume through `.partial` files, retries with backoff, a free-space reserve, expected-size bounds, optional publisher SHA-256 or SHA3-256 verification, local SHA-256 calculation, safe ZIP/tar extraction, and atomic publication:
 
 ```powershell
 .\scripts\acquire-dataset.ps1 -DatasetId python-3.14-docs -Extract
+```
+
+SQLite uses the same command with its publisher-supplied SHA3-256 and version-pinned static HTML archive:
+
+```powershell
+.\scripts\acquire-dataset.ps1 -DatasetId sqlite-docs -Extract
+.\scripts\run-documentation-pilot.ps1 `
+  -DatasetId sqlite-docs `
+  -SourceRoot .\corpora\raw\documentation\sqlite\extracted\sqlite-doc-3530400
+.\scripts\evaluate-documentation.ps1 `
+  -DatasetId sqlite-docs `
+  -Suite rag\eval\sqlite-docs-v1.json
 ```
 
 Versioned rsync snapshots use WSL rsync, resolve the official host before transfer, retain resumable partials, omit alias symlinks, hash every regular file, and publish only after inventory validation:
@@ -148,4 +170,4 @@ Resumable HTTPS archives and versioned rsync snapshots are automated. Git clones
 
 IANA registries use `offline_rag.iana`, not the generic documentation importer. PDFs, JATS, Stack Exchange XML, maps, packages, and disk images likewise need their own handlers.
 
-Documentation and IANA are exposed through the unified knowledge MCP without merging their databases. The corpus-neutral chunk-level semantic builder is active for Python, Git, man-pages, and RFCs; IANA remains exact BM25/structured-first. The rollout results, routing rules, and activation gates are documented in `docs/corpus-semantic-roadmap.md`.
+Documentation and IANA are exposed through the unified knowledge MCP without merging their databases. The corpus-neutral chunk-level semantic builder is active for Python, Git, man-pages, RFCs, and SQLite; IANA remains exact BM25/structured-first. The rollout results, routing rules, and activation gates are documented in `docs/corpus-semantic-roadmap.md`.

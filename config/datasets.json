@@ -173,29 +173,34 @@
       "description": "Official SQLite language, API, architecture, file-format, and operational documentation.",
       "category": "database-documentation",
       "official_source_url": "https://www.sqlite.org/docs.html",
-      "license": "SQLite documentation copyright and blessing; verify release archive notice",
-      "attribution": "SQLite project",
-      "release": "pin-current-release-at-acquisition",
+      "license": "Public domain (SQLite code and documentation)",
+      "attribution": "SQLite authors and project",
+      "release": "3.53.4",
       "update_frequency": "each SQLite release",
       "scope": "complete official generated documentation for one pinned stable release",
       "formats": ["HTML", "ZIP"],
       "acquisition": {
-        "method": "official-export",
-        "location": "https://www.sqlite.org/download.html"
+        "method": "http",
+        "location": "https://www.sqlite.org/2026/sqlite-doc-3530400.zip",
+        "publisher_checksum_algorithm": "sha3-256",
+        "publisher_checksum": "7ccf86a52e7dd1fb9b31e63edcebe3b553f18f89cd26eef59c7f191a5111836e",
+        "checksum_manifest": "https://www.sqlite.org/download.html",
+        "source_url_template": "https://www.sqlite.org/{relative_path}"
       },
       "storage": {
-        "download_min_bytes": 10000000,
-        "download_max_bytes": 200000000,
-        "extracted_max_bytes": 500000000,
-        "indexed_max_bytes": 1500000000
+        "download_min_bytes": 11000000,
+        "download_max_bytes": 13000000,
+        "extracted_max_bytes": 250000000,
+        "indexed_max_bytes": 1000000000
       },
       "paths": {
         "raw": "corpora/raw/documentation/sqlite",
         "processed": "corpora/processed/documentation/sqlite",
-        "index": "indexes/documentation/sqlite.sqlite3"
+        "index": "indexes/documentation/sqlite.sqlite3",
+        "semantic_index": "indexes/semantic/sqlite-docs"
       },
-      "status": "planned",
-      "notes": "Resolve and record the year-qualified release archive URL immediately before acquisition."
+      "status": "evaluated",
+      "notes": "Acquired the official 11,820,412-byte SQLite 3.53.4 documentation archive and verified publisher SHA3-256 7ccf86a52e7dd1fb9b31e63edcebe3b553f18f89cd26eef59c7f191a5111836e. Parsed 837 HTML files into 765 documents and 4,384 chunks, skipping 72 navigation/index-only pages after structure filtering. The 20-query lexical gate achieved Success@1 0.95, Success@5 1.0, MRR@10 0.975, Recall@50 1.0, and nDCG@10 0.966274. A source-verified Qwen3-Embedding 0.6B generation covers every chunk at 256 dimensions. On 12 paraphrase cases, warm hybrid retrieval achieved Success@10 0.916667 and Recall@50 1.0; routed deterministic reranking raised Success@5 from 0.833333 to 0.916667 while preserving the exact-query gate."
     }
   ]
 }

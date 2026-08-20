@@ -34,8 +34,9 @@ These corpora are implemented and verified in the current development installati
 | Linux man-pages | 6.18 | 1,245 documents, 13,155 chunks | BM25 + chunk-level hybrid |
 | RFC Editor | 2026-08-19 snapshot | 9,822 RFCs, 348,831 chunks | BM25 + chunk-level hybrid |
 | IANA protocol registries | 2026-08-19 snapshot | 4,256 registries, 114,590 chunks | Structured BM25 |
+| SQLite documentation | SQLite 3.53.4 | 765 documents, 4,384 chunks | BM25 + chunk-level hybrid |
 
-The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md) and [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md).
+The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md) and [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md).
 
 ## Architecture
 
@@ -265,7 +266,7 @@ Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and re
 
 This is working software under active development, not a turnkey archive download. It is currently optimized for one Windows workstation and has not yet been packaged as a cross-platform installer. The retrieval components are intentionally independent of Ollama, Codex, OpenCode, and any hosted model provider so those integrations can change without invalidating the knowledge library.
 
-The next registered corpus is the official SQLite documentation. Future corpus adapters are expected for Stack Exchange XML, textbooks, manuals/PDFs, JATS scientific literature, and other high-value offline sources.
+The next major corpus adapter is expected to target Stack Exchange XML. Textbooks, manuals/PDFs, JATS scientific literature, and other high-value offline sources require their own structure-preserving importers rather than a generic document loader.
 
 ## License
 
