@@ -42,6 +42,7 @@ These corpora are implemented and verified in the current development installati
 | PostgreSQL documentation | PostgreSQL 18.6 | 1,148 documents, 6,931 chunks | BM25 |
 | systemd documentation | systemd 261.2 | 542 manuals/guides, 9,614 chunks | BM25 |
 | Node.js documentation | Node.js 24.19.0 LTS Krypton | 126 API/guides, 5,732 chunks | BM25 |
+| Apache HTTP Server documentation | Apache httpd 2.4.68 | 232 manuals, 3,055 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |

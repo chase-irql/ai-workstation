@@ -30,6 +30,7 @@ SUPPORTED_SUFFIXES = frozenset(
     {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod", ".xml"}
     | {f".{number}" for number in range(1, 10)}
 )
+SUPPORTED_COMPOUND_SUFFIXES = (".html.en",)
 IGNORED_DIRECTORY_NAMES = frozenset({".git", ".hg", ".svn", "node_modules", "_static", "_sources"})
 IGNORED_FILE_NAMES = frozenset({"search.html", "genindex.html", "py-modindex.html"})
 CORPUS_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
@@ -71,7 +72,12 @@ XI_INCLUDE = "{http://www.w3.org/2001/XInclude}include"
 
 
 def _supported_source(path: Path) -> bool:
-    return path.suffix.casefold() in SUPPORTED_SUFFIXES or path.name.casefold().endswith(".pod.in")
+    name = path.name.casefold()
+    return (
+        path.suffix.casefold() in SUPPORTED_SUFFIXES
+        or name.endswith(".pod.in")
+        or name.endswith(SUPPORTED_COMPOUND_SUFFIXES)
+    )
 
 
 @dataclass(frozen=True)
@@ -102,7 +108,11 @@ class _StructuredHTMLParser(HTMLParser):
         "contents",
         "breadcrumbs",
         "nosearch",
+        "up",
+        "toplang",
+        "bottomlang",
     }
+    ignored_ids = {"page-header", "page-footer", "path", "quickview"}
     void_tags = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
     def __init__(self) -> None:
@@ -126,8 +136,14 @@ class _StructuredHTMLParser(HTMLParser):
             return
         attributes = dict(attrs)
         classes = set((attributes.get("class") or "").casefold().split())
+        element_id = (attributes.get("id") or "").casefold()
         role = (attributes.get("role") or "").casefold()
-        if tag in self.ignored_tags or role in {"navigation", "search"} or classes.intersection(self.ignored_classes):
+        if (
+            tag in self.ignored_tags
+            or role in {"navigation", "search"}
+            or element_id in self.ignored_ids
+            or classes.intersection(self.ignored_classes)
+        ):
             if tag not in self.void_tags:
                 self._ignored_stack = [tag]
             return
@@ -988,7 +1004,7 @@ def parse_rfc(text: str, fallback_title: str) -> ParsedDocument:
 def parse_document(path: Path, text: str) -> ParsedDocument:
     fallback = path.stem.replace("_", " ").replace("-", " ").strip() or path.name
     suffix = path.suffix.casefold()
-    if suffix in {".html", ".htm"}:
+    if suffix in {".html", ".htm"} or path.name.casefold().endswith(SUPPORTED_COMPOUND_SUFFIXES):
         return parse_html(text, fallback)
     if suffix in {".md", ".markdown"}:
         return parse_markdown(text, fallback)

@@ -1097,8 +1097,8 @@
       "storage": {
         "download_min_bytes": 3800000,
         "download_max_bytes": 4000000,
-        "extracted_max_bytes": 150000000,
-        "indexed_max_bytes": 1500000000
+        "extracted_max_bytes": 50000000,
+        "indexed_max_bytes": 100000000
       },
       "paths": {
         "raw": "corpora/raw/documentation/postgresql-18",
@@ -1156,8 +1156,8 @@
       "storage": {
         "download_min_bytes": 10000000,
         "download_max_bytes": 30000000,
-        "extracted_max_bytes": 500000000,
-        "indexed_max_bytes": 2000000000
+        "extracted_max_bytes": 200000000,
+        "indexed_max_bytes": 100000000
       },
       "paths": {
         "raw": "corpora/raw/documentation/systemd-261",
@@ -1197,8 +1197,8 @@
       "storage": {
         "download_min_bytes": 40000000,
         "download_max_bytes": 100000000,
-        "extracted_max_bytes": 1000000000,
-        "indexed_max_bytes": 2000000000
+        "extracted_max_bytes": 700000000,
+        "indexed_max_bytes": 100000000
       },
       "paths": {
         "raw": "corpora/raw/documentation/nodejs-24",
@@ -1208,6 +1208,48 @@
       },
       "status": "evaluated",
       "notes": "Pinned from Node.js's official distribution index to v24.19.0 LTS Krypton. Acquired the 55,505,276-byte source archive and verified publisher SHA-256 f6d95e10a0431ee1067fc6aabe9f762908b4716dd35324e1ddb4b1466b76659f from the adjacent SHASUMS256.txt. All 32,303 archive files / 578,863,312 extracted bytes passed structural validation. The scoped API, guide, and contributor Markdown set excludes noisy historical release changelogs and non-content HTML metadata, producing 126 documents, 5,732 chunks, and a verified 12,177,408-byte BM25 database. Its 26-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50 of 1.0 and nDCG@10 of 0.993615."
+    },
+    {
+      "dataset_id": "apache-httpd-2.4-docs",
+      "name": "Apache HTTP Server 2.4.68 Documentation",
+      "description": "Official Apache HTTP Server administration, configuration, modules, security, TLS, authentication, proxying, logging, virtual hosting, performance, and troubleshooting documentation.",
+      "category": "web-server-documentation",
+      "official_source_url": "https://httpd.apache.org/docs/2.4/",
+      "license": "Apache License 2.0",
+      "attribution": "Apache Software Foundation",
+      "release": "2.4.68",
+      "update_frequency": "each Apache HTTP Server 2.4 release",
+      "scope": "complete generated English manual HTML from the official Apache HTTP Server 2.4.68 source release",
+      "formats": ["HTML", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://downloads.apache.org/httpd/httpd-2.4.68.tar.gz",
+        "publisher_checksum_algorithm": "sha256",
+        "publisher_checksum": "ed9a9d4500fb48bb28eaffb3ba71d06ccf86d498fa13ab9f781da010cc488498",
+        "publisher_checksum_source": "https://downloads.apache.org/httpd/httpd-2.4.68.tar.gz.sha256",
+        "detached_signature": "https://downloads.apache.org/httpd/httpd-2.4.68.tar.gz.asc",
+        "source_tag": "2.4.68",
+        "source_url_template": "https://github.com/apache/httpd/blob/2.4.68/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["docs/manual/*.html.en", "docs/manual/**/*.html.en"],
+        "exclude_globs": ["docs/manual/index.html.en", "docs/manual/**/index.html.en", "docs/manual/sitemap.html.en"],
+        "smoke_query": "ProxyPass reverse proxy"
+      },
+      "storage": {
+        "download_min_bytes": 9000000,
+        "download_max_bytes": 11000000,
+        "extracted_max_bytes": 100000000,
+        "indexed_max_bytes": 100000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/apache-httpd-2.4",
+        "processed": "corpora/processed/documentation/apache-httpd-2.4",
+        "index": "indexes/documentation/apache-httpd-2.4.sqlite3",
+        "semantic_index": "indexes/semantic/apache-httpd-2.4-docs"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to the current release listed by the official Apache distribution directory. Acquired the 10,065,436-byte source archive and verified publisher SHA-256 ed9a9d4500fb48bb28eaffb3ba71d06ccf86d498fa13ab9f781da010cc488498; the detached-signature URL is also retained. All 3,119 archive files / 43,134,994 extracted bytes passed structural validation. The complete English generated manual, excluding navigation-only indexes, produced 232 documents, 3,055 chunks, and a verified 8,142,848-byte BM25 database. Its 30-topic stable-ID lexical gate achieved every metric cutoff at 1.0."
     }
   ]
 }

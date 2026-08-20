@@ -115,6 +115,8 @@
         "systemd-261-docs=indexes\\documentation\\systemd-261.sqlite3",
         "--index",
         "nodejs-24-docs=indexes\\documentation\\nodejs-24.sqlite3",
+        "--index",
+        "apache-httpd-2.4-docs=indexes\\documentation\\apache-httpd-2.4.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
         "--corpus-vector",

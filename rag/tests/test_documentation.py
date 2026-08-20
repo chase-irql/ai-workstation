@@ -71,6 +71,23 @@ class DocumentationParserTests(unittest.TestCase):
         self.assertFalse(any("discard" in text for text in texts))
         self.assertEqual(parsed.blocks[-1].heading_path, ("1. Overview", "Example"))
 
+    def test_apache_compound_html_ignores_generated_navigation(self):
+        parsed = parse_document(
+            Path("mod_proxy.html.en"),
+            """<html><head><title>mod_proxy</title></head><body>
+            <div id="page-header"><p>Apache navigation</p></div>
+            <div id="path"><p>Documentation breadcrumb</p></div>
+            <div class="toplang"><p>Available languages</p></div>
+            <div id="page-content"><h1>Apache Module mod_proxy</h1>
+            <p>Implements reverse proxy and load balancing.</p></div>
+            <div id="quickview"><p>Topics navigation</p></div>
+            </body></html>""",
+        )
+        self.assertEqual(parsed.format, "html")
+        self.assertEqual(parsed.title, "mod_proxy")
+        self.assertTrue(any("reverse proxy" in block.text for block in parsed.blocks))
+        self.assertFalse(any("navigation" in block.text or "languages" in block.text for block in parsed.blocks))
+
     def test_markdown_rst_and_man_structure(self):
         markdown = parse_markdown(
             """# Build Guide

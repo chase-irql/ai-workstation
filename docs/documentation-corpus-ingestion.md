@@ -140,7 +140,7 @@ The importer emits the common records described in `docs/rag-record-schema.md`. 
 
 Supported inputs are:
 
-- HTML, with navigation, search, sidebar, generated-index, script, and static boilerplate filtered;
+- HTML (including compound generated suffixes such as Apache's `.html.en`), with navigation, search, sidebar, generated-index, script, and static boilerplate filtered;
 - Markdown (including YAML front matter), reStructuredText, and AsciiDoc, including code fences/directives;
 - DocBook XML with section/option/list/table/code structure, network-disabled DTD handling, and same-directory ID-based XInclude resolution;
 - roff/man pages with section hierarchy;

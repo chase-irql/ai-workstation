@@ -22,6 +22,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `postgresql-18-docs` | PostgreSQL 18.6 generated HTML documentation | PostgreSQL License | 1,148 documents; 6,931 chunks | BM25 |
 | `systemd-261-docs` | systemd 261.2 DocBook manuals and Markdown guides | LGPL-2.1-or-later; per-file notices retained | 542 documents; 9,614 chunks | BM25 |
 | `nodejs-24-docs` | Node.js 24.19.0 LTS Krypton API and guides | MIT and included third-party licenses | 126 documents; 5,732 chunks | BM25 |
+| `apache-httpd-2.4-docs` | Apache HTTP Server 2.4.68 English manual | Apache-2.0 | 232 documents; 3,055 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -176,6 +177,12 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - The release was resolved from Node.js's official distribution index as the latest v24 LTS Krypton build at acquisition time. The 55,505,276-byte source archive matches publisher SHA-256 `f6d95e10a0431ee1067fc6aabe9f762908b4716dd35324e1ddb4b1466b76659f` from the adjacent official `SHASUMS256.txt`.
 - All 32,303 source-release files and 578,863,312 extracted bytes passed archive validation. Retrieval includes the complete API, guide, and contributor Markdown set while excluding historical release changelogs that caused obsolete behavior to outrank the current API.
 - The published generation contains 126 documents and 5,732 chunks in a verified 12,177,408-byte BM25 database. The Markdown parser removes Node's non-content HTML metadata comments while preserving comments inside code fences. Its 26-topic lexical gate spans workers, filesystem promises, streams, ESM/CommonJS/packages, buffers, cryptography, child processes, clusters, async context, events, HTTP/2/TLS/DNS, testing, permissions, diagnostics, V8, VM modules, Brotli, and WASI; all Success, MRR, and Recall cutoffs are `1.0`, with nDCG@10 `0.993615`.
+
+### Apache HTTP Server 2.4.68 documentation
+
+- Official source archive: `https://downloads.apache.org/httpd/httpd-2.4.68.tar.gz`. Its 10,065,436 bytes match publisher SHA-256 `ed9a9d4500fb48bb28eaffb3ba71d06ccf86d498fa13ab9f781da010cc488498`; the adjacent detached-signature URL is retained as additional provenance.
+- All 3,119 source-release files and 43,134,994 extracted bytes passed archive validation. The source distribution's complete generated English manual uses `.html.en`; compound-suffix support was added to the common HTML path, and Apache header, breadcrumb, language-selector, quick-view, sitemap, and index navigation are filtered rather than embedded.
+- The final generation contains 232 documents and 3,055 chunks in a verified 8,142,848-byte BM25 database. Its 30-topic gate covers proxying and FastCGI, TLS and OCSP, HTTP/2, authorization, password formats, rewrites, virtual hosts, logging, caching, compression, headers, MPM tuning, status, WebSockets, ACME, forwarded addresses, `.htaccess`, request timeouts, Lua hooks, graceful restarts, core dumps, directory indexes, and MIME handling; every metric cutoff is `1.0`.
 
 ### DevOps Stack Exchange
 
