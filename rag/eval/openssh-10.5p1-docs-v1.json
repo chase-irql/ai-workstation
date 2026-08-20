@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "OpenSSH Portable 10.5p1 lexical gate",
+  "description": "Stable-document-ID gate for server/client configuration, key management, file transfer, forwarding, host-key collection, agents, and moduli.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "sshd-pubkey-001", "query": "PubkeyAuthentication AuthorizedKeysFile", "query_type": "server_config", "relevance": {"openssh-10.5p1-docs:62ca29c22e91ae737d192945": 3}},
+    {"id": "ssh-proxy-001", "query": "ProxyJump CanonicalizeHostname", "query_type": "client_config", "relevance": {"openssh-10.5p1-docs:41bc189988f18e04dcb44d07": 3}},
+    {"id": "sftp-batch-001", "query": "sftp batchfile commands", "query_type": "file_transfer", "relevance": {"openssh-10.5p1-docs:014217423cf1ef7fd3174521": 3}},
+    {"id": "sftp-server-001", "query": "sftp-server chroot logging", "query_type": "server_operation", "relevance": {"openssh-10.5p1-docs:9c67eb09568a3a2361ca84c5": 3, "openssh-10.5p1-docs:62ca29c22e91ae737d192945": 1}},
+    {"id": "krl-001", "query": "ssh-keygen KRL revocation", "query_type": "key_management", "relevance": {"openssh-10.5p1-docs:689b9badaf2f886e30477402": 3}},
+    {"id": "scp-001", "query": "scp SFTP protocol", "query_type": "file_transfer", "relevance": {"openssh-10.5p1-docs:b6c2513bd54d1f9dc161c394": 3}},
+    {"id": "keyscan-001", "query": "ssh-keyscan known hosts", "query_type": "host_keys", "relevance": {"openssh-10.5p1-docs:253d8ebdb1243a41ead517a1": 3}},
+    {"id": "authorized-keys-001", "query": "authorized_keys restrict command", "query_type": "server_security", "relevance": {"openssh-10.5p1-docs:74a285b88709826bc2d98c64": 3, "openssh-10.5p1-docs:62ca29c22e91ae737d192945": 1}},
+    {"id": "agent-001", "query": "ssh-agent authentication agent environment variables", "query_type": "agent", "relevance": {"openssh-10.5p1-docs:9b33189092563c544324b21d": 3}},
+    {"id": "forwarding-001", "query": "ssh destination dynamic application-level port forwarding", "query_type": "forwarding", "relevance": {"openssh-10.5p1-docs:18a11bd791863509f32e2c41": 3}},
+    {"id": "moduli-001", "query": "moduli safe primes Diffie Hellman", "query_type": "cryptography", "relevance": {"openssh-10.5p1-docs:2f1c6ba321782dc0e2b8f481": 3, "openssh-10.5p1-docs:689b9badaf2f886e30477402": 1}},
+    {"id": "certificates-001", "query": "ssh-keygen certificate principals validity", "query_type": "key_management", "relevance": {"openssh-10.5p1-docs:689b9badaf2f886e30477402": 3}}
+  ]
+}

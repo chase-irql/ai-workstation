@@ -17,6 +17,8 @@ This catalog is the human-readable inventory of every corpus currently published
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
 | `cmake-4.4-docs` | CMake 4.4.2 `Help/*.rst` source documentation | BSD 3-Clause | 2,144 documents; 4,226 chunks | BM25 |
 | `openssl-4.0-docs` | OpenSSL 4.0.1 POD manuals | Apache-2.0 | 960 manuals; 8,287 chunks | BM25 |
+| `openssh-10.5p1-docs` | OpenSSH Portable 10.5p1 manuals | BSD-style OpenSSH licenses | 19 documents; 195 chunks | BM25 |
+| `ninja-1.13-docs` | Ninja 1.13.2 manual at commit `3441b633…` | Apache-2.0 | 1 manual; 58 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -137,6 +139,20 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Publisher SHA-256: `2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09` from the adjacent OpenSSL checksum asset.
 - The POD importer handles both `.pod` and release-generated `.pod.in` sources. It preserves NAME-derived titles, section hierarchy, command options, inline markup, links, and verbatim examples across 960 manuals and 8,287 chunks.
 - The 13-topic lexical gate covers certificate verification, TLS diagnostics, PKCS#12, key/certificate generation, randomness, BIO, OCSP stapling, FIPS installation, peer verification, digest fetching, and hostname checking; every metric cutoff passed at `1.0`.
+
+### OpenSSH Portable 10.5p1 manuals
+
+- Official archive: `https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.5p1.tar.gz`.
+- Local SHA-256: `d44d28a839ea9daf969cc69150fde59910b2b39361dad81a3bd6cbd19218db11`. The upstream detached signature URL is recorded in the registry, but this run does not claim signature verification because no configured OpenPGP verifier was available.
+- The source archive passed full member/path/size validation. Sixteen section 1/5/8 manuals plus three scoped Markdown documents produced 195 chunks with pinned tag citations.
+- OpenSSH's manuals use OpenBSD `mdoc`; the shared roff parser now preserves `It`, `Cm`, `Fl`, `Ar`, `Pa`, `Xr`, and related semantic macros. This was verified by a failed-before-fix `PubkeyAuthentication` smoke query and passing parser regression.
+- The 12-topic lexical gate covers server/client configuration, key revocation and certificates, SFTP/SCP, host-key scanning, authorized-key restrictions, agents, forwarding, and Diffie-Hellman moduli; all cutoffs pass at `1.0`.
+
+### Ninja 1.13.2 manual
+
+- Source is pinned by immutable commit `3441b633c2fe2c494e958780ba0f4227b1327634`, the object behind v1.13.2. Local source-archive SHA-256 is `bccc6197cd8c3ac2a439e26d6bf41506fe49c430cf3d593269a15379f24266ee`.
+- The one authoritative AsciiDoc manual produces 58 structured chunks covering build syntax, implicit/order-only dependencies, dyndep, depfiles, pools, response files, rule variables, scoping, tools, and default targets.
+- Its 11-topic lexical coverage gate passes every cutoff at `1.0`. This is a single-document coverage check, not an inter-document ranking claim.
 
 ### DevOps Stack Exchange
 

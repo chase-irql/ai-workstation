@@ -115,6 +115,17 @@ Example
         self.assertEqual(man.blocks[-1].heading_path, ("ERRORS",))
         self.assertIn("Permission denied", man.blocks[-1].text)
 
+        mdoc = parse_man(
+            '.Dd August 20, 2026\n.Dt SSHD_CONFIG 5\n.Sh AUTHENTICATION\n.It Cm PubkeyAuthentication\n'
+            'Specifies whether public key authentication is allowed.\n.It Cm AuthorizedKeysFile\n'
+            'Specifies the files containing public keys.\n',
+            "sshd_config",
+        )
+        self.assertEqual(mdoc.title, "SSHD_CONFIG")
+        self.assertEqual(mdoc.blocks[0].heading_path, ("AUTHENTICATION",))
+        self.assertIn("PubkeyAuthentication", mdoc.blocks[0].text)
+        self.assertIn("AuthorizedKeysFile", mdoc.blocks[1].text)
+
         asciidoc = parse_asciidoc(
             """= Git Manual
 

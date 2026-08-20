@@ -464,6 +464,28 @@ def _roff_text(value: str) -> str:
     return _clean_text(value)
 
 
+MDOC_INLINE_MACROS = frozenset(
+    {
+        "Ad", "An", "Ap", "Ar", "At", "Bsx", "Bx", "Cd", "Cm", "Dv", "Dx", "Em", "Er", "Ev",
+        "Fa", "Fd", "Fl", "Fn", "Ft", "Fx", "Ic", "Li", "Lk", "Ms", "Mt", "Nm", "No", "Ns",
+        "Nx", "Ox", "Pa", "Pf", "Ql", "Sm", "St", "Sy", "Tn", "Ux", "Va", "Vt", "Xr",
+    }
+)
+
+
+def _mdoc_text(value: str) -> str:
+    """Remove common semantic mdoc markup while retaining its searchable terms."""
+
+    cleaned = _roff_text(value)
+    tokens = cleaned.split()
+    output: list[str] = []
+    for token in tokens:
+        if token in MDOC_INLINE_MACROS or token in {"Xo", "Xc", "Oo", "Oc", "Do", "Dc", "Po", "Pc"}:
+            continue
+        output.append(token)
+    return _clean_text(" ".join(output))
+
+
 def parse_man(text: str, fallback_title: str) -> ParsedDocument:
     blocks: list[ContentBlock] = []
     headings: list[str] = []
@@ -473,8 +495,8 @@ def parse_man(text: str, fallback_title: str) -> ParsedDocument:
         macro = MAN_MACRO_RE.match(line)
         if macro:
             name = macro.group(1).upper()
-            value = _roff_text(macro.group(2))
-            if name == "TH":
+            value = _mdoc_text(macro.group(2))
+            if name in {"TH", "DT"}:
                 _flush_paragraph(blocks, headings, paragraph)
                 title = value.split()[0] if value else title
             elif name == "SH":
@@ -483,11 +505,15 @@ def parse_man(text: str, fallback_title: str) -> ParsedDocument:
             elif name == "SS":
                 _flush_paragraph(blocks, headings, paragraph)
                 headings = headings[:1] + ([value] if value else [])
-            elif name in {"PP", "P", "LP", "TP", "IP", "HP", "RS", "RE", "BR"}:
+            elif name in {"PP", "P", "LP", "TP", "IP", "HP", "RS", "RE", "BR", "IT"}:
                 _flush_paragraph(blocks, headings, paragraph)
                 if value:
                     paragraph.append(value)
-            elif name in {"B", "I", "BI", "IB", "BR", "RB", "IR", "RI", "SM", "SB"} and value:
+            elif name in {
+                "B", "I", "BI", "IB", "BR", "RB", "IR", "RI", "SM", "SB", "NM", "ND", "CM", "IC",
+                "AR", "PA", "EV", "VA", "DV", "LI", "SY", "EM", "QL", "SQ", "DQ", "PQ", "XR", "SX",
+                "FL", "NO", "PF", "OP", "LK", "MT", "ER", "FN", "FT", "FA",
+            } and value:
                 paragraph.append(value)
             continue
         if line.startswith(".\\\"") or line.startswith(".\""):

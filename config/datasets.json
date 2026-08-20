@@ -998,6 +998,81 @@
       },
       "status": "evaluated",
       "notes": "Acquired the official 55,079,428-byte OpenSSL 4.0.1 archive and verified publisher SHA-256 2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09. The archive contains 6,008 files (134,989,491 extracted bytes). A purpose-built POD/POD.IN parser preserved NAME/SYNOPSIS/section hierarchy, options, links, and verbatim examples across 960 manuals and 8,287 chunks. The verified BM25 database is 17,666,048 bytes. Its 13-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "openssh-10.5p1-docs",
+      "name": "OpenSSH Portable 10.5p1 Manuals",
+      "description": "Official OpenSSH client, server, key, agent, file-transfer, configuration, and operational manual pages.",
+      "category": "security-and-system-documentation",
+      "official_source_url": "https://www.openssh.com/portable.html",
+      "license": "BSD-style OpenSSH licenses; exact notices retained in source archive",
+      "attribution": "OpenBSD Project, OpenSSH authors, and portable contributors",
+      "release": "10.5p1",
+      "update_frequency": "each OpenSSH portable release",
+      "scope": "all shipped section 1, 5, and 8 manual pages plus Markdown overview documentation",
+      "formats": ["roff man pages", "Markdown", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.5p1.tar.gz",
+        "detached_signature": "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.5p1.tar.gz.asc",
+        "source_tag": "V_10_5_P1",
+        "source_url_template": "https://github.com/openssh/openssh-portable/blob/V_10_5_P1/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["*.1", "*.5", "*.8", "*.md"],
+        "smoke_query": "sshd_config public key authentication"
+      },
+      "storage": {
+        "download_min_bytes": 2300000,
+        "download_max_bytes": 2400000,
+        "extracted_max_bytes": 100000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/openssh-10.5p1",
+        "processed": "corpora/processed/documentation/openssh-10.5p1",
+        "index": "indexes/documentation/openssh-10.5p1.sqlite3",
+        "semantic_index": "indexes/semantic/openssh-10.5p1-docs"
+      },
+      "status": "evaluated",
+      "notes": "Acquired the official 2,333,659-byte OpenBSD CDN archive, recorded local SHA-256 d44d28a839ea9daf969cc69150fde59910b2b39361dad81a3bd6cbd19218db11, and structurally validated all 892 members (10,059,047 extracted bytes). The upstream detached signature URL is recorded but not claimed as verified because this environment has no configured OpenPGP verifier. Extended the roff parser for OpenBSD mdoc macros after the first smoke query exposed dropped option names. Published 19 scoped manuals/overview documents and 195 chunks in an 839,680-byte verified BM25 index. The 12-topic lexical gate achieved every metric cutoff at 1.0."
+    },
+    {
+      "dataset_id": "ninja-1.13-docs",
+      "name": "Ninja 1.13.2 Documentation",
+      "description": "Official Ninja build file syntax, command-line behavior, tools, dynamic dependencies, and embedding manual.",
+      "category": "build-system-documentation",
+      "official_source_url": "https://ninja-build.org/manual.html",
+      "license": "Apache License 2.0",
+      "attribution": "Ninja authors and contributors",
+      "release": "1.13.2",
+      "update_frequency": "each Ninja release",
+      "scope": "manual.asciidoc, ninja.1, and documentation files from immutable release commit 3441b633c2fe2c494e958780ba0f4227b1327634",
+      "formats": ["AsciiDoc", "roff man page", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/ninja-build/ninja/archive/3441b633c2fe2c494e958780ba0f4227b1327634.tar.gz",
+        "source_commit": "3441b633c2fe2c494e958780ba0f4227b1327634",
+        "source_url_template": "https://github.com/ninja-build/ninja/blob/v1.13.2/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["doc/*.asciidoc", "doc/*.1"],
+        "smoke_query": "dyndep dynamic dependencies"
+      },
+      "storage": {
+        "download_min_bytes": 200000,
+        "download_max_bytes": 2000000,
+        "extracted_max_bytes": 50000000,
+        "indexed_max_bytes": 250000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/ninja-1.13",
+        "processed": "corpora/processed/documentation/ninja-1.13",
+        "index": "indexes/documentation/ninja-1.13.sqlite3",
+        "semantic_index": "indexes/semantic/ninja-1.13-docs"
+      },
+      "status": "evaluated",
+      "notes": "Pinned by immutable commit 3441b633c2fe2c494e958780ba0f4227b1327634 underlying tag v1.13.2. Acquired the 292,638-byte source archive, recorded local SHA-256 bccc6197cd8c3ac2a439e26d6bf41506fe49c430cf3d593269a15379f24266ee, and validated all 185 archive members (1,268,775 extracted bytes). The authoritative AsciiDoc manual produced 58 chunks and a verified 208,896-byte BM25 index. Its 11-topic coverage gate achieved every metric cutoff at 1.0."
     }
   ]
 }

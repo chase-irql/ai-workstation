@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "name": "Ninja 1.13.2 manual lexical coverage gate",
+  "description": "Single-manual coverage gate for Ninja syntax, dependencies, pools, response files, scoping, tools, and target selection.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "dyndep-001", "query": "dyndep dynamic dependencies", "query_type": "dependencies", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "pool-001", "query": "pool console depth", "query_type": "scheduling", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "depfile-001", "query": "depfile deps gcc msvc", "query_type": "dependencies", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "restat-001", "query": "restat generator command", "query_type": "rules", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "rspfile-001", "query": "rspfile rspfile_content", "query_type": "rules", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "phony-001", "query": "phony rule target", "query_type": "rules", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "variables-001", "query": "rule variables command description", "query_type": "syntax", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "scope-001", "query": "subninja include scope", "query_type": "syntax", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "compdb-001", "query": "tool compdb commands", "query_type": "tools", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "dependencies-001", "query": "build outputs implicit order-only dependencies", "query_type": "syntax", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}},
+    {"id": "default-001", "query": "default target statement", "query_type": "targets", "relevance": {"ninja-1.13-docs:85d191bb9828e8ceb2c15195": 3}}
+  ]
+}

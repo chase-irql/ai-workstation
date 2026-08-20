@@ -65,6 +65,8 @@ The third batch adds glibc 2.44, Gzip 1.14, Wget 1.25.0, and GRUB 2.14: 1,437 do
 
 CMake 4.4.2 and OpenSSL 4.0.1 extend Wave 3 with publisher-verified release artifacts. Together they add 3,104 documents and 12,513 chunks in 29,396,992 bytes of BM25 databases. CMake reuses the structured reStructuredText path; OpenSSL adds a POD/POD.IN parser for command and API manuals. Both exact-term regression suites pass every Success, MRR, and Recall cutoff, so semantic storage is deferred until paraphrase suites demonstrate a need.
 
+OpenSSH Portable 10.5p1 and Ninja 1.13.2 add two compact operational references: 19 OpenSSH documents/195 chunks and the 58-chunk Ninja manual in about 1 MB of indexes. The OpenSSH pilot extended the roff path with OpenBSD `mdoc` semantics after a failed smoke query caught missing option names. Both suites now pass every lexical cutoff. Detached OpenSSH signature metadata is retained, but signature verification remains explicitly pending rather than being inferred from archive integrity.
+
 The first Wave 4/manual pilot is also complete. FAA-H-8083-30B (2023) exercises the page-aware PDF path on a real 92,539,602-byte engineering handbook: 676 of 677 pages have searchable text, one cover is image-only, and 1,837 page-bounded chunks feed a verified 9,388,032-byte BM25 database. The importer retains outline/page citations and rotated labels, demotes front-matter matches, and fails atomically when a scan requires OCR. This makes it safe to expand into selected FAA, DOE, NASA, NIST, USACE, and equipment-specific manuals without pretending an image-only archive is searchable.
 
 ### Wave 3: official programming and systems documentation
