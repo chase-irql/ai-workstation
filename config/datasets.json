@@ -1505,6 +1505,43 @@
       },
       "status": "evaluated",
       "notes": "Pinned to GCC's official 16.2 release documentation page. The 1,226,624-byte archive has local SHA-256 df1b370791d3e00c94b25badb94931d8e21fb4ff654aff1f3a366a4b0ddd08d1; GCC supplied no adjacent archive digest, so tar structure and 527 extracted files / 8,306,309 bytes were validated. Retrieval excludes the duplicate top page and generated option, attribute, and concept indexes. The remaining 523 manual nodes produced 1,695 chunks and a 7,368,704-byte verified BM25 database. The 31-topic lexical gate covers compiler options, diagnostics, optimization, instrumentation, targets, toolchain behavior, extensions, coverage, analysis, compatibility, and security."
+    },
+    {
+      "dataset_id": "cpp-16.2-manual",
+      "name": "GNU C Preprocessor 16.2 Manual",
+      "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
+      "category": "programming-tool-documentation",
+      "official_source_url": "https://gcc.gnu.org/onlinedocs/gcc-16.2.0/cpp/",
+      "license": "GNU Free Documentation License 1.3 or later, with no invariant sections and with stated front- and back-cover texts",
+      "attribution": "Free Software Foundation and GCC contributors",
+      "release": "16.2.0",
+      "update_frequency": "GCC release",
+      "scope": "complete official GNU C Preprocessor 16.2 manual, one HTML page per node",
+      "formats": ["HTML", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://gcc.gnu.org/onlinedocs/gcc-16.2.0/cpp-html.tar.gz",
+        "source_url_template": "https://gcc.gnu.org/onlinedocs/gcc-16.2.0/cpp/{relative_path}"
+      },
+      "ingestion": {
+        "smoke_query": "preprocessor macro arguments stringizing",
+        "include_globs": ["*.html"],
+        "exclude_globs": ["index.html", "Index-of-Directives.html", "Option-Index.html", "Concept-Index.html"]
+      },
+      "storage": {
+        "download_min_bytes": 100000,
+        "download_max_bytes": 120000,
+        "extracted_max_bytes": 700000,
+        "indexed_max_bytes": 1000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/cpp-16.2",
+        "processed": "corpora/processed/documentation/cpp-16.2",
+        "index": "indexes/documentation/cpp-16.2.sqlite3",
+        "semantic_index": "indexes/semantic/cpp-16.2-manual"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to GCC's official 16.2 release documentation page. The 109,792-byte archive has local SHA-256 b96bc25f0a16619a99b91fcc6f3cefdefcc859a1ebff9f99ab804ba560e89dae; GCC supplied no adjacent archive digest, so tar structure and 80 extracted files / 625,629 bytes were validated. Retrieval excludes the duplicate top page and generated directive, option, and concept indexes. The remaining 76 manual nodes produced 183 chunks and a 659,456-byte verified BM25 database. The 30-topic lexical gate covers preprocessing phases, headers, macros, conditionals, directives, output, compatibility, implementation, and invocation, with every metric cutoff at 1.0."
     }
   ]
 }

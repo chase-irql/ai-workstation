@@ -29,6 +29,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `typescript-docs-20260820` | Official TypeScript website commit `90e92beb…`, 2026-08-20 | CC-BY-4.0 | 77 documents; 935 chunks | BM25 |
 | `gdb-17.2-manual` | GNU GDB 17.2 last-release manual | GFDL 1.3 or later with stated invariant and cover texts | 863 documents; 2,225 chunks | BM25 |
 | `gcc-16.2-manual` | GNU Compiler Collection 16.2 user manual | GFDL 1.3 or later with stated invariant and cover texts | 523 documents; 1,695 chunks | BM25 |
+| `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
