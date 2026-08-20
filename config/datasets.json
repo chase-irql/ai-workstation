@@ -2045,8 +2045,8 @@
       },
       "storage": {"download_min_bytes": 100000000, "download_max_bytes": 600000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 500000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-foundational-algebra", "processed": "corpora/processed/textbooks/openstax-foundational-algebra", "index": "indexes/textbooks/openstax-foundational-algebra.sqlite3", "semantic_index": "indexes/semantic/openstax-foundational-algebra"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Repository and all three collection licenses must be validated after extraction."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 38cae454e644abf9f0a623e876994553881597c9. The 527,599,772-byte archive has local SHA-256 46666e6001e2948ad18888a98420bb5a5b2ed21bbd99426b202963e29ab6669d and safely expands to 13,738 files / 956,565,492 bytes with no links; portable filename encoding accounts for 13,447 Windows-hostile source paths. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all three collection manifests confirm CC BY-NC-SA 4.0. All 240 module occurrences have distinct stable IDs and yield 33,138 chunks in a verified 42,508,288-byte index. The 52-topic arithmetic-through-intermediate-algebra stable-ID gate passes Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 at 1.0."
     },
     {
       "dataset_id": "openstax-college-algebra",

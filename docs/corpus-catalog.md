@@ -41,6 +41,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `openstax-chemistry` | OpenStax Chemistry 2e + Atoms First 2e commit `3be4b60…`, 2026-07-08 | CC BY-NC-SA 4.0; per-book attribution retained | 176 unique modules / 298 book occurrences; 4,499 chunks | BM25 |
 | `openstax-biology` | OpenStax Biology 2e + AP Courses + Concepts of Biology commit `63f8b6f…`, 2026-07-22 | CC BY-NC-SA 4.0; per-book attribution retained | 574 unique modules / 575 book occurrences; 10,795 chunks | BM25 |
 | `openstax-anatomy-physiology` | OpenStax Anatomy and Physiology 2e commit `716383a…`, 2026-06-12 | CC BY-NC-SA 4.0; per-book attribution retained | 198 modules; 4,590 chunks | BM25 |
+| `openstax-foundational-algebra` | OpenStax Prealgebra, Elementary Algebra, and Intermediate Algebra 2e commit `38cae454…`, 2026-06-29 | CC BY-NC-SA 4.0; per-book attribution retained | 240 modules; 33,138 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |

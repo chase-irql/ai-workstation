@@ -125,6 +125,68 @@ class AcquisitionTests(unittest.TestCase):
                 server.server_close()
                 thread.join(timeout=5)
 
+    def test_http_download_publishes_complete_partial_when_server_ignores_range(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as bundle:
+                bundle.writestr("docs/readme.txt", b"complete immutable archive\n" * 4096)
+            payload = buffer.getvalue()
+
+            class Handler(BaseHTTPRequestHandler):
+                def do_GET(self):
+                    self.send_response(200)
+                    # Simulate codeload.github.com: Range may be ignored and
+                    # the followed response may omit Content-Length.
+                    self.send_header("Connection", "close")
+                    self.end_headers()
+                    try:
+                        self.wfile.write(payload)
+                    except (BrokenPipeError, ConnectionResetError):
+                        pass
+
+                def log_message(self, format, *args):
+                    return
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                dataset = DatasetDefinition(
+                    dataset_id="complete-fixture",
+                    name="Complete fixture",
+                    description="Fixture",
+                    category="docs",
+                    official_source_url="https://example.invalid",
+                    license="test",
+                    attribution="test",
+                    release="1",
+                    update_frequency="never",
+                    scope="fixture",
+                    formats=("binary",),
+                    acquisition={"method": "http", "location": f"http://127.0.0.1:{server.server_port}/docs.bin"},
+                    storage={
+                        "download_min_bytes": len(payload),
+                        "download_max_bytes": len(payload),
+                        "extracted_max_bytes": len(payload),
+                        "indexed_max_bytes": len(payload),
+                    },
+                    paths={"raw": "raw", "processed": "processed", "index": "index"},
+                    status="planned",
+                    notes="",
+                )
+                destination = root / "docs.bin"
+                partial = destination.with_suffix(".bin.partial")
+                partial.write_bytes(payload)
+                result = _download_http(dataset, destination)
+                self.assertEqual(destination.read_bytes(), payload)
+                self.assertTrue(result["reused"])
+                self.assertFalse(partial.exists())
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
     def test_http_download_verifies_publisher_sha3_256(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -81,7 +81,7 @@ Validate the plan first:
 .\scripts\validate-dataset-registry.ps1
 ```
 
-The HTTP acquisition wrapper supports resume through `.partial` files, retries with backoff, a free-space reserve, expected-size bounds, optional publisher SHA-256 or SHA3-256 verification, local SHA-256 calculation, safe ZIP/tar extraction, and atomic publication:
+The HTTP acquisition wrapper supports resume through `.partial` files, retries with backoff, a free-space reserve, expected-size bounds, optional publisher SHA-256 or SHA3-256 verification, local SHA-256 calculation, safe ZIP/tar extraction, and atomic publication. If an origin ignores a byte-range retry and returns the complete object again, the wrapper validates a preserved complete ZIP/tar partial and publishes it atomically instead of downloading the same archive again; bounds and checksums are still enforced:
 
 ```powershell
 .\scripts\acquire-dataset.ps1 -DatasetId python-3.14-docs -Extract

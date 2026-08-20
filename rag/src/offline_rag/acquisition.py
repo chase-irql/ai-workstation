@@ -104,6 +104,58 @@ def _archive_name(url: str) -> str:
     return name
 
 
+def _publish_http_partial(
+    dataset: DatasetDefinition,
+    partial: Path,
+    destination: Path,
+    publisher: tuple[str, str] | None,
+    *,
+    reused: bool,
+) -> dict[str, object]:
+    """Validate and atomically publish a fully downloaded partial file."""
+
+    actual_size = partial.stat().st_size
+    if actual_size < dataset.storage["download_min_bytes"] or actual_size > dataset.storage["download_max_bytes"]:
+        raise ValueError(
+            f"Downloaded size {actual_size} is outside registry range "
+            f"{dataset.storage['download_min_bytes']}..{dataset.storage['download_max_bytes']}"
+        )
+    algorithms = ("sha256",) if publisher is None else ("sha256", publisher[0])
+    actual = _checksums(partial, algorithms)
+    if publisher and actual[publisher[0]] != publisher[1]:
+        raise ValueError(f"Publisher {publisher[0]} mismatch for {destination.name}")
+    os.replace(partial, destination)
+    return {
+        "path": destination,
+        "sha256": actual["sha256"],
+        "bytes": actual_size,
+        "reused": reused,
+        "publisher_checksum": (
+            {"algorithm": publisher[0], "value": actual[publisher[0]], "verified": True}
+            if publisher
+            else None
+        ),
+    }
+
+
+def _is_complete_archive_payload(path: Path) -> bool:
+    """Return whether a ZIP or tar partial can be read through its archive terminator."""
+
+    try:
+        if zipfile.is_zipfile(path):
+            with zipfile.ZipFile(path) as bundle:
+                return bundle.testzip() is None
+        if tarfile.is_tarfile(path):
+            # getmembers() scans a compressed tar through EOF, which also
+            # verifies the gzip/bzip2/xz stream terminator and checksum.
+            with tarfile.open(path, mode="r:*") as bundle:
+                bundle.getmembers()
+            return True
+    except (OSError, EOFError, tarfile.TarError, zipfile.BadZipFile):
+        return False
+    return False
+
+
 def _download_http(dataset: DatasetDefinition, destination: Path, retries: int = 4) -> dict[str, object]:
     url = str(dataset.acquisition["location"])
     partial = destination.with_suffix(destination.suffix + ".partial")
@@ -134,12 +186,24 @@ def _download_http(dataset: DatasetDefinition, destination: Path, retries: int =
         try:
             with urllib.request.urlopen(request, timeout=120) as response:
                 status = getattr(response, "status", response.getcode())
+                content_length = response.headers.get("Content-Length")
+                remaining = int(content_length) if content_length else None
                 if existing and status != 206:
+                    # Some immutable archive endpoints ignore Range. If their
+                    # advertised complete length exactly matches the preserved
+                    # partial, the prior request finished and only publication
+                    # was withheld (for example, by a conservative size cap).
+                    # Hash and later archive validation still apply.
+                    if status == 200 and (
+                        remaining == existing
+                        or (remaining is None and _is_complete_archive_payload(partial))
+                    ):
+                        return _publish_http_partial(
+                            dataset, partial, destination, publisher, reused=True
+                        )
                     raise RuntimeError(
                         f"Server ignored Range resume for {partial}; preserve it and restart explicitly in a new directory"
                     )
-                content_length = response.headers.get("Content-Length")
-                remaining = int(content_length) if content_length else None
                 expected_total = existing + remaining if remaining is not None else None
                 if expected_total is not None and expected_total > dataset.storage["download_max_bytes"]:
                     raise RuntimeError(
@@ -156,28 +220,7 @@ def _download_http(dataset: DatasetDefinition, destination: Path, retries: int =
                         stream.write(block)
                     stream.flush()
                     os.fsync(stream.fileno())
-            actual_size = partial.stat().st_size
-            if actual_size < dataset.storage["download_min_bytes"] or actual_size > dataset.storage["download_max_bytes"]:
-                raise ValueError(
-                    f"Downloaded size {actual_size} is outside registry range "
-                    f"{dataset.storage['download_min_bytes']}..{dataset.storage['download_max_bytes']}"
-                )
-            algorithms = ("sha256",) if publisher is None else ("sha256", publisher[0])
-            actual = _checksums(partial, algorithms)
-            if publisher and actual[publisher[0]] != publisher[1]:
-                raise ValueError(f"Publisher {publisher[0]} mismatch for {destination.name}")
-            os.replace(partial, destination)
-            return {
-                "path": destination,
-                "sha256": actual["sha256"],
-                "bytes": actual_size,
-                "reused": False,
-                "publisher_checksum": (
-                    {"algorithm": publisher[0], "value": actual[publisher[0]], "verified": True}
-                    if publisher
-                    else None
-                ),
-            }
+            return _publish_http_partial(dataset, partial, destination, publisher, reused=False)
         except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
             if attempt == retries:
                 raise RuntimeError(f"Download failed after {retries} attempts: {url}") from error
