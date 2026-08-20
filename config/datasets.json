@@ -2135,8 +2135,8 @@
       },
       "storage": {"download_min_bytes": 100000000, "download_max_bytes": 800000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 500000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-microbiology", "processed": "corpora/processed/textbooks/openstax-microbiology", "index": "indexes/textbooks/openstax-microbiology.sqlite3", "semantic_index": "indexes/semantic/openstax-microbiology"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. The repository license begins with CC BY-NC-SA 4.0; the collection manifest and extracted license must be revalidated before publication. This is dated educational microbiology, not current clinical guidance."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 633850257fbd3ccf6187b9428c55e80b69236382. The 329,184,733-byte archive has local SHA-256 ba89936e92a84cc964c66df73b805ac8a0a9dfb23057ad57ca40097625cf8ab8 and safely expands to 1,047 files / 362,279,562 bytes with no links; 882 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 159 modules yield 4,115 chunks in a verified 11,165,696-byte index. The 57-topic cell-biology-through-immunity-and-infectious-disease stable-ID gate passes every configured metric at 1.0. This is dated educational microbiology, not current clinical guidance or a substitute for professional medical judgment."
     },
     {
       "dataset_id": "cpp-16.2-manual",
