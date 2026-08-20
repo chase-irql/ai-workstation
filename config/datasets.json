@@ -1628,8 +1628,8 @@
       "ingestion": {
         "content_subdirectory": "go",
         "include_globs": ["doc/*.md", "doc/**/*.md", "doc/*.html", "doc/**/*.html", "src/*.go", "src/**/*.go"],
-        "exclude_globs": ["src/vendor/**", "src/cmd/vendor/**", "src/**/testdata/**", "src/**/*_test.go"],
-        "smoke_query": "Go net http Server timeouts"
+        "exclude_globs": ["doc/initial/**", "src/vendor/**", "src/cmd/vendor/**", "src/internal/**", "src/**/internal/**", "src/**/testdata/**", "src/**/*_test.go"],
+        "smoke_query": "http Server ReadTimeout WriteTimeout"
       },
       "storage": {
         "download_min_bytes": 34000000,
@@ -1643,8 +1643,8 @@
         "index": "indexes/documentation/go-1.26.7.sqlite3",
         "semantic_index": "indexes/semantic/go-1.26.7-docs"
       },
-      "status": "planned",
-      "notes": "Pinned to the current stable Go 1.26.7 source archive listed by go.dev on 2026-08-20. The publisher's download API supplies the exact SHA-256 and byte count. A dedicated deterministic parser will retain package documentation and exported declarations without executing downloaded toolchain binaries or indexing implementation bodies."
+      "status": "evaluated",
+      "notes": "Pinned to the current stable Go 1.26.7 source archive listed by go.dev on 2026-08-20. The 34,150,794-byte archive passed the publisher SHA-256 and byte count from go.dev's download API. Safe extraction validated 15,013 files / 145,137,149 bytes with no links and reversibly encoded 848 Windows-incompatible members. A dedicated deterministic lexer/parser retains package comments, exported generic and non-generic functions, methods, types and their public fields, grouped constants/variables, and declaration signatures without executing downloaded toolchain binaries or indexing function bodies. Tests, testdata, vendored and internal packages are excluded. Of 2,059 scoped source files, 1,320 substantive documents produced 18,647 chunks and a 29,020,160-byte verified BM25 database; 739 implementation-only files were correctly skipped. Its 45-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

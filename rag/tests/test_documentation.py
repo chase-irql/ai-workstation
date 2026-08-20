@@ -14,6 +14,7 @@ from offline_rag.documentation import (
     import_documentation,
     parse_asciidoc,
     parse_html,
+    parse_go,
     parse_man,
     parse_markdown,
     parse_pod,
@@ -26,6 +27,69 @@ from offline_rag.verify import verify_database
 
 
 class DocumentationParserTests(unittest.TestCase):
+    def test_go_extracts_package_docs_and_exported_declarations_without_bodies(self):
+        parsed = parse_go(
+            Path("go/src/net/http/server.go"),
+            '''// Package http provides HTTP client and server implementations.
+package http
+
+// Server defines parameters for running an HTTP server.
+type Server struct {
+    // ReadTimeout limits reading the entire request.
+    ReadTimeout time.Duration
+}
+
+// ListenAndServe listens on the TCP network address.
+func (srv *Server) ListenAndServe() error {
+    panic("implementation must not be indexed")
+}
+
+// AssemblyImplemented is implemented outside Go.
+func AssemblyImplemented(value int) int
+
+// SortFunc sorts a slice using a comparison function.
+func SortFunc[S ~[]E, E any](values S, cmp func(a, b E) int) {
+    panic("generic implementation must not be indexed")
+}
+
+// NextType must remain a separate declaration.
+type NextType struct { Value int }
+
+// Status codes returned by HTTP servers.
+const (
+    StatusOK = 200
+    StatusNotFound = 404
+)
+
+func internalHelper() { panic("skip") }
+''',
+            "server",
+        )
+        self.assertEqual(parsed.title, "package net/http — server")
+        self.assertEqual(parsed.format, "go")
+        self.assertEqual(parsed.blocks[0].heading_path, ("package net/http",))
+        self.assertIn("HTTP client and server", parsed.blocks[0].text)
+        server = next(block for block in parsed.blocks if block.attributes.get("go_name") == "Server")
+        self.assertIn("ReadTimeout", server.text)
+        method = next(block for block in parsed.blocks if block.attributes.get("go_name") == "ListenAndServe")
+        self.assertIn("TCP network address", method.text)
+        self.assertNotIn("implementation must not be indexed", method.text)
+        assembly = next(block for block in parsed.blocks if block.attributes.get("go_name") == "AssemblyImplemented")
+        self.assertNotIn("NextType", assembly.text)
+        generic = next(block for block in parsed.blocks if block.attributes.get("go_name") == "SortFunc")
+        self.assertIn("S ~[]E", generic.text)
+        self.assertNotIn("generic implementation must not be indexed", generic.text)
+        constants = next(block for block in parsed.blocks if block.attributes.get("go_name") == "consts")
+        self.assertIn("StatusNotFound", constants.text)
+        self.assertFalse(any("internalHelper" in block.text for block in parsed.blocks))
+
+    def test_go_language_html_has_canonical_title(self):
+        parsed = parse_document(
+            Path("go/doc/go_spec.html"),
+            "<html><body><h2>Introduction</h2><p>This is the reference manual for Go.</p></body></html>",
+        )
+        self.assertEqual(parsed.title, "The Go Programming Language Specification")
+
     def test_html_preserves_title_hierarchy_code_and_tables(self):
         parsed = parse_html(
             """

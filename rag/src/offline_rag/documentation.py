@@ -28,7 +28,7 @@ from .records import CommonChunk, CommonDocument, make_content_id, normalize_con
 DOCUMENTATION_MANIFEST_SCHEMA_VERSION = 1
 PORTABLE_NAMES_MARKER = ".archive-name-encoding-v1.json"
 SUPPORTED_SUFFIXES = frozenset(
-    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod", ".xml"}
+    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod", ".xml", ".go"}
     | {f".{number}" for number in range(1, 10)}
 )
 SUPPORTED_COMPOUND_SUFFIXES = (".html.en",)
@@ -1035,6 +1035,219 @@ def parse_text(text: str, fallback_title: str) -> ParsedDocument:
     return ParsedDocument(fallback_title, tuple(blocks), "text")
 
 
+def _mask_go_noncode(text: str) -> str:
+    """Mask Go comments and literals while retaining offsets and newlines."""
+
+    output = list(text)
+    state = "code"
+    index = 0
+    while index < len(text):
+        value = text[index]
+        following = text[index + 1] if index + 1 < len(text) else ""
+        if state == "code":
+            if value == "/" and following == "/":
+                output[index] = output[index + 1] = " "
+                state = "line-comment"
+                index += 2
+                continue
+            if value == "/" and following == "*":
+                output[index] = output[index + 1] = " "
+                state = "block-comment"
+                index += 2
+                continue
+            if value == '"':
+                output[index] = " "
+                state = "string"
+            elif value == "'":
+                output[index] = " "
+                state = "rune"
+            elif value == "`":
+                output[index] = " "
+                state = "raw-string"
+        elif state == "line-comment":
+            if value == "\n":
+                state = "code"
+            else:
+                output[index] = " "
+        elif state == "block-comment":
+            if value == "*" and following == "/":
+                output[index] = output[index + 1] = " "
+                state = "code"
+                index += 2
+                continue
+            if value != "\n":
+                output[index] = " "
+        elif state == "raw-string":
+            if value == "`":
+                output[index] = " "
+                state = "code"
+            elif value != "\n":
+                output[index] = " "
+        else:
+            output[index] = " " if value != "\n" else value
+            if value == "\\" and index + 1 < len(text):
+                if text[index + 1] != "\n":
+                    output[index + 1] = " "
+                index += 2
+                continue
+            if (state == "string" and value == '"') or (state == "rune" and value == "'"):
+                state = "code"
+        index += 1
+    return "".join(output)
+
+
+def _go_doc_before(lines: Sequence[str], declaration_line: int) -> str:
+    index = declaration_line - 1
+    if index < 0 or not lines[index].strip():
+        return ""
+    selected: list[str] = []
+    if lines[index].lstrip().startswith("//"):
+        while index >= 0 and lines[index].lstrip().startswith("//"):
+            selected.append(re.sub(r"^\s*//\s?", "", lines[index]))
+            index -= 1
+        selected.reverse()
+    elif lines[index].rstrip().endswith("*/"):
+        while index >= 0:
+            selected.append(lines[index])
+            if "/*" in lines[index]:
+                break
+            index -= 1
+        if not selected or "/*" not in selected[-1]:
+            return ""
+        selected.reverse()
+        selected[0] = selected[0].split("/*", 1)[1]
+        selected[-1] = selected[-1].rsplit("*/", 1)[0]
+        selected = [re.sub(r"^\s*\*\s?", "", line) for line in selected]
+    return _clean_text("\n".join(selected))
+
+
+def _go_balanced_end(masked: str, start: int, opening: str, closing: str) -> int | None:
+    position = masked.find(opening, start)
+    if position < 0:
+        return None
+    depth = 0
+    for index in range(position, len(masked)):
+        if masked[index] == opening:
+            depth += 1
+        elif masked[index] == closing:
+            depth -= 1
+            if depth == 0:
+                return index + 1
+    return None
+
+
+def _go_function_signature_end(masked: str, start: int) -> int:
+    """Return the end of a function signature without consuming its body."""
+
+    parentheses = 0
+    brackets = 0
+    saw_parameters = False
+    for index in range(start, len(masked)):
+        value = masked[index]
+        if value == "(":
+            parentheses += 1
+            if brackets == 0:
+                saw_parameters = True
+        elif value == ")":
+            parentheses = max(0, parentheses - 1)
+        elif value == "[":
+            brackets += 1
+        elif value == "]":
+            brackets = max(0, brackets - 1)
+        elif value == "{" and saw_parameters and parentheses == 0 and brackets == 0:
+            return index
+        elif value == "\n" and saw_parameters and parentheses == 0 and brackets == 0:
+            return index
+    return len(masked)
+
+
+def parse_go(path: Path, text: str, fallback_title: str) -> ParsedDocument:
+    """Extract package prose and exported Go API declarations without bodies."""
+
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    masked = _mask_go_noncode(normalized)
+    lines = normalized.splitlines()
+    line_starts = [0]
+    for match in re.finditer("\n", normalized):
+        line_starts.append(match.end())
+
+    package_match = re.search(r"(?m)^[ \t]*package\s+([A-Za-z_]\w*)", masked)
+    package = package_match.group(1) if package_match else "unknown"
+    path_parts = list(path.parts)
+    try:
+        source_index = next(index for index, part in enumerate(path_parts) if part.casefold() == "src")
+        import_path = "/".join(path_parts[source_index + 1 : -1]) or package
+    except StopIteration:
+        import_path = package
+    title = f"package {import_path} — {path.stem}"
+    blocks: list[ContentBlock] = []
+    if package_match:
+        package_line = normalized.count("\n", 0, package_match.start())
+        package_doc = _go_doc_before(lines, package_line)
+        if package_doc:
+            blocks.append(ContentBlock((f"package {import_path}",), package_doc, "paragraph", {"go_kind": "package"}))
+
+    declaration_re = re.compile(
+        r"(?m)^[ \t]*(?:"
+        r"func\s+(?:\((?P<receiver>[^)]+)\)\s*)?(?P<func>[A-Z]\w*)\b|"
+        r"type\s+(?P<type>[A-Z]\w*)\b|"
+        r"(?P<value_kind>var|const)\s+(?:(?P<value>[A-Z]\w*)\b|(?P<group>\())"
+        r")"
+    )
+    depth = 0
+    depth_by_line: dict[int, int] = {}
+    for line_number, line in enumerate(masked.splitlines()):
+        depth_by_line[line_number] = depth
+        depth += line.count("{") - line.count("}")
+
+    for match in declaration_re.finditer(masked):
+        line_number = normalized.count("\n", 0, match.start())
+        if depth_by_line.get(line_number, 0) != 0:
+            continue
+        kind: str
+        name: str
+        heading: str
+        end = normalized.find("\n", match.start())
+        end = len(normalized) if end < 0 else end
+        if match.group("func"):
+            kind = "method" if match.group("receiver") else "function"
+            name = match.group("func")
+            receiver = _collapse_whitespace(match.group("receiver") or "")
+            heading = f"method ({receiver}) {name}" if receiver else f"func {name}"
+            end = _go_function_signature_end(masked, match.end())
+        elif match.group("type"):
+            kind = "type"
+            name = match.group("type")
+            heading = f"type {name}"
+            brace_end = _go_balanced_end(masked, match.end(), "{", "}")
+            if brace_end is not None:
+                end = brace_end
+        elif match.group("group"):
+            kind = match.group("value_kind")
+            name = f"{kind}s"
+            heading = name.capitalize()
+            group_end = _go_balanced_end(masked, match.end() - 1, "(", ")")
+            if group_end is not None:
+                end = group_end
+        else:
+            kind = match.group("value_kind")
+            name = match.group("value")
+            heading = f"{kind} {name}"
+        declaration = _clean_text(normalized[match.start() : end], preserve=True)
+        documentation = _go_doc_before(lines, line_number)
+        value = "\n\n".join(part for part in (documentation, declaration) if part)
+        if value:
+            blocks.append(
+                ContentBlock(
+                    (f"package {import_path}", heading),
+                    value,
+                    "go-declaration",
+                    {"go_kind": kind, "go_name": name},
+                )
+            )
+    return ParsedDocument(title or fallback_title, tuple(blocks), "go")
+
+
 def _rfc_title(lines: Sequence[str], fallback_title: str) -> str:
     """Extract an RFC title from either early field-style or modern front matter."""
 
@@ -1175,7 +1388,15 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
     fallback = path.stem.replace("_", " ").replace("-", " ").strip() or path.name
     suffix = path.suffix.casefold()
     if suffix in {".html", ".htm"} or path.name.casefold().endswith(SUPPORTED_COMPOUND_SUFFIXES):
-        return parse_html(text, fallback)
+        parsed = parse_html(text, fallback)
+        go_titles = {
+            "asm.html": "A Quick Guide to Go's Assembler",
+            "go_mem.html": "The Go Memory Model",
+            "go_spec.html": "The Go Programming Language Specification",
+        }
+        if path.name.casefold() in go_titles and path.parent.name.casefold() == "doc":
+            return ParsedDocument(go_titles[path.name.casefold()], parsed.blocks, parsed.format)
+        return parsed
     if suffix in {".md", ".markdown"}:
         return parse_markdown(text, fallback)
     if suffix == ".rst":
@@ -1188,6 +1409,8 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
         return parse_pod(text, fallback)
     if suffix == ".xml":
         return parse_docbook(text, fallback, path)
+    if suffix == ".go":
+        return parse_go(path, text, fallback)
     if MAN_MACRO_RE.match(text.lstrip().splitlines()[0] if text.strip() else ""):
         return parse_man(text, fallback)
     if suffix == ".txt" and RFC_MARKER_RE.search(text[:12000]):

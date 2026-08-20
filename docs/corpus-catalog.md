@@ -31,6 +31,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `gcc-16.2-manual` | GNU Compiler Collection 16.2 user manual | GFDL 1.3 or later with stated invariant and cover texts | 523 documents; 1,695 chunks | BM25 |
 | `linux-kernel-7.2-docs` | Linux 7.2 official source documentation | GPL-2.0-only and per-file SPDX licenses retained | 4,154 documents; 29,142 chunks | BM25 |
 | `llvm-project-22.1.8-docs` | LLVM Project 22.1.8 coordinated source release | Apache-2.0 with LLVM Exceptions; per-file notices retained | 2,352 documents; 18,655 chunks | BM25 |
+| `go-1.26.7-docs` | Go 1.26.7 stable source release | BSD 3-Clause; per-file notices retained | 1,320 documents; 18,647 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
@@ -123,6 +124,15 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Safe extraction validated 169,010 regular files / 2,023,722,863 bytes, skipped 19 archive links, and reversibly encoded 152,079 Windows-incompatible members.
 - The common-record generation contains 2,352 documents and 18,655 chunks. Its 51,531,776-byte database passes source-manifest, row-count, foreign-key, FTS, integrity, smoke-query, and citation verification.
 - Its 44-topic stable-ID gate covers LLVM IR/tools, optimization, JIT, profiling, sanitizers, Clang tooling and analysis, linking, debugging, libc++, MLIR, Flang, OpenMP, compiler-rt, Polly, and testing; every lexical metric cutoff is `1.0`.
+
+### Go documentation and standard library
+
+- Official archive: Go 1.26.7 stable source release from go.dev.
+- Publisher SHA-256: `0ed24eac755105085b89fe9cabc2742b91a0ad7b94b59d3ad364918ebc8956ad`, verified against go.dev's download API together with the exact 34,150,794-byte size.
+- Safe extraction validated 15,013 regular files / 145,137,149 bytes, contained no archive links, and reversibly encoded 848 Windows-incompatible members.
+- A deterministic Go lexer/parser extracts package prose, exported generic and non-generic functions, methods, types and public type bodies, grouped constants and variables, and declaration signatures. It strips implementation bodies and does not execute downloaded toolchain programs.
+- Internal packages, vendored dependencies, tests, testdata, and the initial-development history are excluded. Of 2,059 scoped source files, 1,320 contained public documentation and produced 18,647 chunks; 739 implementation-only files were skipped.
+- The 29,020,160-byte FTS5 database passes source-manifest, row-count, foreign-key, FTS, integrity, smoke-query, and citation verification. Its 45-topic stable-ID gate covers language rules, the toolchain, generics, concurrency, networking, HTTP, cryptography, encodings, databases, runtime, testing, filesystems, templates, compression, and archives with every metric cutoff at `1.0`.
 
 ### Linux man-pages
 
