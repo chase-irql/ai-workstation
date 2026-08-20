@@ -1507,6 +1507,49 @@
       "notes": "Pinned to GCC's official 16.2 release documentation page. The 1,226,624-byte archive has local SHA-256 df1b370791d3e00c94b25badb94931d8e21fb4ff654aff1f3a366a4b0ddd08d1; GCC supplied no adjacent archive digest, so tar structure and 527 extracted files / 8,306,309 bytes were validated. Retrieval excludes the duplicate top page and generated option, attribute, and concept indexes. The remaining 523 manual nodes produced 1,695 chunks and a 7,368,704-byte verified BM25 database. The 31-topic lexical gate covers compiler options, diagnostics, optimization, instrumentation, targets, toolchain behavior, extensions, coverage, analysis, compatibility, and security."
     },
     {
+      "dataset_id": "linux-kernel-7.2-docs",
+      "name": "Linux Kernel 7.2 Documentation",
+      "description": "Official Linux kernel documentation covering administration, APIs, drivers, filesystems, networking, memory management, scheduling, security, tracing, BPF, build systems, and kernel development.",
+      "category": "operating-system-documentation",
+      "official_source_url": "https://docs.kernel.org/7.2/",
+      "license": "GPL-2.0-only and per-file SPDX licenses retained in the source archive",
+      "attribution": "The Linux Kernel Organization, Linux kernel maintainers, and contributors",
+      "release": "7.2",
+      "update_frequency": "each stable Linux kernel release",
+      "scope": "complete English Documentation tree from the official Linux 7.2 source archive; translations, generated build output, source code, and binary assets excluded from text retrieval but retained raw",
+      "formats": ["reStructuredText", "Markdown", "plain text", "tar.xz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.2.tar.xz",
+        "publisher_checksum_algorithm": "sha256",
+        "publisher_checksum": "f9fef3d14c0df53819026f4be74459835c2a0b0dcbf5b5bbd9ea19f0829402b3",
+        "publisher_checksum_source": "https://cdn.kernel.org/pub/linux/kernel/v7.x/sha256sums.asc",
+        "detached_signature": "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.2.tar.sign",
+        "source_tag": "v7.2",
+        "source_url_template": "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/{relative_path}?h=v7.2"
+      },
+      "ingestion": {
+        "content_subdirectory": "linux-7.2/Documentation",
+        "include_globs": ["*.rst", "**/*.rst", "*.md", "**/*.md", "*.txt", "**/*.txt"],
+        "exclude_globs": ["translations/**", "output/**"],
+        "smoke_query": "Linux kernel RCU synchronization"
+      },
+      "storage": {
+        "download_min_bytes": 150000000,
+        "download_max_bytes": 170000000,
+        "extracted_max_bytes": 2000000000,
+        "indexed_max_bytes": 200000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/linux-kernel-7.2",
+        "processed": "corpora/processed/documentation/linux-kernel-7.2",
+        "index": "indexes/documentation/linux-kernel-7.2.sqlite3",
+        "semantic_index": "indexes/semantic/linux-kernel-7.2-docs"
+      },
+      "status": "planned",
+      "notes": "Selected from kernel.org's official releases feed as the current release on 2026-08-20. The publisher SHA-256 is pinned from kernel.org's signed v7.x checksum manifest. Full source retention preserves license, build context, code examples, and provenance while retrieval remains scoped to structured English documentation."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

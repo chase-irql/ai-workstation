@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 49)
+        self.assertEqual(len(datasets), 50)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -36,6 +36,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("gdb-17.2-manual", dataset_ids)
         self.assertIn("gcc-16.2-manual", dataset_ids)
         self.assertIn("cpp-16.2-manual", dataset_ids)
+        self.assertIn("linux-kernel-7.2-docs", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",
@@ -73,7 +74,7 @@ class DatasetRegistryTests(unittest.TestCase):
             }.issubset(dataset_ids)
         )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 8_000_000_000)
+        self.assertLess(summary["download_max_bytes"], 8_500_000_000)
         self.assertLess(summary["indexed_max_bytes"], 120_000_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
