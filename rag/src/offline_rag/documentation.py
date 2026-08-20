@@ -25,7 +25,7 @@ from .records import CommonChunk, CommonDocument, make_content_id, normalize_con
 DOCUMENTATION_MANIFEST_SCHEMA_VERSION = 1
 PORTABLE_NAMES_MARKER = ".archive-name-encoding-v1.json"
 SUPPORTED_SUFFIXES = frozenset(
-    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff"}
+    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod"}
     | {f".{number}" for number in range(1, 10)}
 )
 IGNORED_DIRECTORY_NAMES = frozenset({".git", ".hg", ".svn", "node_modules", "_static", "_sources"})
@@ -62,6 +62,10 @@ RFC_UNNUMBERED_HEADINGS = frozenset(
         "table of contents",
     }
 )
+
+
+def _supported_source(path: Path) -> bool:
+    return path.suffix.casefold() in SUPPORTED_SUFFIXES or path.name.casefold().endswith(".pod.in")
 
 
 @dataclass(frozen=True)
@@ -497,6 +501,93 @@ def parse_man(text: str, fallback_title: str) -> ParsedDocument:
     return ParsedDocument(title or fallback_title, tuple(blocks), "man")
 
 
+def _pod_text(value: str) -> str:
+    entities = {"lt": "<", "gt": ">", "sol": "/", "verbar": "|", "amp": "&", "quot": '"'}
+    value = re.sub(r"E<([^<>]+)>", lambda match: entities.get(match.group(1), match.group(0)), value)
+    # POD formatting codes can be nested. Repeating the innermost substitution
+    # handles ordinary OpenSSL manual markup without pretending to implement a
+    # complete Perl POD renderer.
+    pattern = re.compile(r"([BICFSLXZ])<([^<>]*)>")
+    while pattern.search(value):
+        value = pattern.sub(
+            lambda match: (
+                match.group(2).split("|", 1)[0]
+                if match.group(1) == "L" and "|" in match.group(2)
+                else match.group(2)
+            ),
+            value,
+        )
+    return _clean_text(value)
+
+
+def parse_pod(text: str, fallback_title: str) -> ParsedDocument:
+    """Parse the structural subset of Perl POD used by OpenSSL manuals."""
+
+    blocks: list[ContentBlock] = []
+    headings: list[str] = []
+    paragraph: list[str] = []
+    code: list[str] = []
+    title = ""
+    active = True
+
+    def flush_code() -> None:
+        nonlocal code
+        value = _clean_text("\n".join(line[1:] if line.startswith((" ", "\t")) else line for line in code), preserve=True)
+        if value:
+            blocks.append(ContentBlock(tuple(headings), value, "code", {}))
+        code = []
+
+    for raw_line in text.replace("\r\n", "\n").replace("\r", "\n").splitlines():
+        stripped = raw_line.strip()
+        directive = re.match(r"^=(\w+)\s*(.*)$", stripped)
+        if directive:
+            flush_code()
+            _flush_paragraph(blocks, headings, paragraph)
+            name = directive.group(1).casefold()
+            value = _pod_text(directive.group(2))
+            if name == "cut":
+                active = False
+            elif name == "pod":
+                active = True
+            elif not active:
+                continue
+            elif name.startswith("head") and name[4:].isdigit():
+                level = max(1, int(name[4:]))
+                headings = headings[: level - 1]
+                headings.append(value)
+            elif name == "item" and value:
+                paragraph.append(value)
+            continue
+        if not active:
+            continue
+        if raw_line.startswith((" ", "\t")) and stripped:
+            _flush_paragraph(blocks, headings, paragraph)
+            code.append(raw_line)
+            continue
+        flush_code()
+        if not stripped:
+            before = len(blocks)
+            _flush_paragraph(blocks, headings, paragraph)
+            if not title and headings and headings[-1].casefold() == "name" and len(blocks) > before:
+                candidate = blocks[-1].text.split(" - ", 1)[0].strip()
+                if candidate:
+                    title = candidate
+        else:
+            paragraph.append(_pod_text(raw_line))
+    flush_code()
+    _flush_paragraph(blocks, headings, paragraph)
+    if not title:
+        name_block = next(
+            (block for block in blocks if block.heading_path and block.heading_path[-1].casefold() == "name"),
+            None,
+        )
+        if name_block is not None:
+            candidate = name_block.text.split(" - ", 1)[0].strip()
+            if candidate:
+                title = candidate
+    return ParsedDocument(title or fallback_title, tuple(blocks), "pod")
+
+
 def parse_text(text: str, fallback_title: str) -> ParsedDocument:
     blocks: list[ContentBlock] = []
     paragraph: list[str] = []
@@ -667,6 +758,8 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
         return parse_asciidoc(text, fallback)
     if suffix in {".man", ".roff"} or suffix in {f".{number}" for number in range(1, 10)}:
         return parse_man(text, fallback)
+    if suffix == ".pod" or path.name.casefold().endswith(".pod.in"):
+        return parse_pod(text, fallback)
     if MAN_MACRO_RE.match(text.lstrip().splitlines()[0] if text.strip() else ""):
         return parse_man(text, fallback)
     if suffix == ".txt" and RFC_MARKER_RE.search(text[:12000]):
@@ -738,6 +831,7 @@ def _source_files(
     max_files: int | None,
     include_globs: Sequence[str] = (),
     exclude_globs: Sequence[str] = (),
+    decode_portable_names: bool = False,
 ) -> list[Path]:
     files: list[Path] = []
     for path in root.rglob("*"):
@@ -745,16 +839,22 @@ def _source_files(
             continue
         relative = path.relative_to(root)
         relative_name = relative.as_posix()
+        if decode_portable_names:
+            relative_name = "/".join(unquote(part) for part in relative_name.split("/"))
         if any(part in IGNORED_DIRECTORY_NAMES for part in relative.parts[:-1]):
             continue
-        if path.name.casefold() in IGNORED_FILE_NAMES or path.suffix.casefold() not in SUPPORTED_SUFFIXES:
+        if path.name.casefold() in IGNORED_FILE_NAMES or not _supported_source(path):
             continue
         if include_globs and not any(fnmatch.fnmatchcase(relative_name, pattern) for pattern in include_globs):
             continue
         if any(fnmatch.fnmatchcase(relative_name, pattern) for pattern in exclude_globs):
             continue
         files.append(path)
-    files.sort(key=lambda item: (item.relative_to(root).as_posix().casefold(), item.relative_to(root).as_posix()))
+    def sort_name(item: Path) -> str:
+        value = item.relative_to(root).as_posix()
+        return "/".join(unquote(part) for part in value.split("/")) if decode_portable_names else value
+
+    files.sort(key=lambda item: (sort_name(item).casefold(), sort_name(item)))
     return files[:max_files] if max_files is not None else files
 
 
@@ -769,7 +869,7 @@ def _content_root(root: Path) -> Path:
             if path.is_file()
             and not path.is_symlink()
             and path.name.casefold() not in IGNORED_FILE_NAMES
-            and path.suffix.casefold() in SUPPORTED_SUFFIXES
+            and _supported_source(path)
         ]
         child_directories = [
             path
@@ -889,7 +989,13 @@ def import_documentation(
         raise FileExistsError(f"Output already exists: {output}; use --force to replace recognized importer output")
     portable_names_encoded = (source_root / PORTABLE_NAMES_MARKER).is_file()
     content_root = _content_root(source_root)
-    all_files = _source_files(content_root, None, include_globs, exclude_globs)
+    all_files = _source_files(
+        content_root,
+        None,
+        include_globs,
+        exclude_globs,
+        decode_portable_names=portable_names_encoded,
+    )
     files = all_files[:max_files] if max_files is not None else all_files
     if not files:
         raise ValueError(f"No supported documentation files found under {source_root}")

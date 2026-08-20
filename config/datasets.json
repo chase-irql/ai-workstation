@@ -922,6 +922,82 @@
       },
       "status": "evaluated",
       "notes": "Acquired the official 92,539,602-byte FAA-H-8083-30B (2023) PDF and pinned local SHA-256 0a39c01bbc454e77a49813cf27e2ef291756fa7111d9308bc290cd0eb71616fd; the FAA page exposes no adjacent publisher digest. Structurally parsed all 677 pages: 676 contain searchable text and one image-only cover page. Page- and outline-aware import produced 1,837 chunks and a verified 9,388,032-byte BM25 database. Rotated table and diagram labels are retained with degraded layout spacing rather than dropped. The 14-topic single-document coverage gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0; it validates topic coverage, while page citations were separately inspected. Front-matter matches are deterministically demoted behind body evidence."
+    },
+    {
+      "dataset_id": "cmake-4.4-docs",
+      "name": "CMake 4.4 Documentation Source",
+      "description": "Official CMake command, variable, property, module, policy, generator, manual, and release documentation.",
+      "category": "build-system-documentation",
+      "official_source_url": "https://cmake.org/cmake/help/v4.4/",
+      "license": "BSD 3-Clause License",
+      "attribution": "Kitware, Inc. and CMake contributors",
+      "release": "4.4.2",
+      "update_frequency": "each stable CMake patch release",
+      "scope": "complete Help/*.rst documentation tree from the pinned source release",
+      "formats": ["reStructuredText", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/Kitware/CMake/releases/download/v4.4.2/cmake-4.4.2.tar.gz",
+        "publisher_checksum": "1db9e61e60b6e0874c86386340b910382f3c5e75b9fbfb44d122063129a2789d",
+        "checksum_manifest": "https://github.com/Kitware/CMake/releases/download/v4.4.2/cmake-4.4.2-SHA-256.txt",
+        "source_url_template": "https://github.com/Kitware/CMake/blob/v4.4.2/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["Help/*.rst", "Help/**/*.rst"],
+        "smoke_query": "target_link_libraries transitive interface"
+      },
+      "storage": {
+        "download_min_bytes": 13000000,
+        "download_max_bytes": 14000000,
+        "extracted_max_bytes": 300000000,
+        "indexed_max_bytes": 1500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/cmake-4.4",
+        "processed": "corpora/processed/documentation/cmake-4.4",
+        "index": "indexes/documentation/cmake-4.4.sqlite3",
+        "semantic_index": "indexes/semantic/cmake-4.4-docs"
+      },
+      "status": "evaluated",
+      "notes": "Acquired the official 13,283,673-byte CMake 4.4.2 source archive and verified publisher SHA-256 1db9e61e60b6e0874c86386340b910382f3c5e75b9fbfb44d122063129a2789d. The archive contains 30,259 files (59,734,601 extracted bytes); the scoped importer examined 2,408 Help/*.rst sources, retained 2,144 structured documents and 4,226 chunks, and skipped 264 navigation/empty pages. The verified BM25 database is 11,730,944 bytes. Its 12-topic lexical gate achieved Success@1/5/10, MRR@10, and Recall@5/10/50 of 1.0 with nDCG@10 0.996621."
+    },
+    {
+      "dataset_id": "openssl-4.0-docs",
+      "name": "OpenSSL 4.0 Documentation",
+      "description": "Official OpenSSL command, library API, configuration, provider, protocol, certificate, and cryptography manuals.",
+      "category": "security-and-api-documentation",
+      "official_source_url": "https://docs.openssl.org/4.0/",
+      "license": "Apache License 2.0",
+      "attribution": "OpenSSL Project Authors",
+      "release": "4.0.1",
+      "update_frequency": "each supported OpenSSL patch release",
+      "scope": "complete doc/**/*.pod manual source from the pinned OpenSSL release",
+      "formats": ["Perl POD", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openssl/openssl/releases/download/openssl-4.0.1/openssl-4.0.1.tar.gz",
+        "publisher_checksum": "2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09",
+        "checksum_manifest": "https://github.com/openssl/openssl/releases/download/openssl-4.0.1/openssl-4.0.1.tar.gz.sha256",
+        "source_url_template": "https://github.com/openssl/openssl/blob/openssl-4.0.1/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["doc/*.pod", "doc/**/*.pod", "doc/*.pod.in", "doc/**/*.pod.in"],
+        "smoke_query": "certificate verification trusted CAfile"
+      },
+      "storage": {
+        "download_min_bytes": 55000000,
+        "download_max_bytes": 56000000,
+        "extracted_max_bytes": 500000000,
+        "indexed_max_bytes": 2000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/openssl-4.0",
+        "processed": "corpora/processed/documentation/openssl-4.0",
+        "index": "indexes/documentation/openssl-4.0.sqlite3",
+        "semantic_index": "indexes/semantic/openssl-4.0-docs"
+      },
+      "status": "evaluated",
+      "notes": "Acquired the official 55,079,428-byte OpenSSL 4.0.1 archive and verified publisher SHA-256 2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09. The archive contains 6,008 files (134,989,491 extracted bytes). A purpose-built POD/POD.IN parser preserved NAME/SYNOPSIS/section hierarchy, options, links, and verbatim examples across 960 manuals and 8,287 chunks. The verified BM25 database is 17,666,048 bytes. Its 13-topic lexical gate achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0."
     }
   ]
 }

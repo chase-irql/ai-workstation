@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "name": "OpenSSL 4.0.1 documentation lexical gate",
+  "description": "Stable-document-ID gate for certificate verification, TLS diagnostics, key and certificate commands, providers, randomness, BIO, OCSP, FIPS, and EVP APIs.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "verify-001", "query": "certificate verification trusted CAfile", "query_type": "certificate", "relevance": {"openssl-4.0-docs:7c61ad18e76872e1f37a7874": 3}},
+    {"id": "s-client-001", "query": "s_client connect servername", "query_type": "tls_diagnostics", "relevance": {"openssl-4.0-docs:d34880fbddd6eaf5ea27f6a6": 3}},
+    {"id": "pkcs12-001", "query": "pkcs12 export certfile name", "query_type": "command", "relevance": {"openssl-4.0-docs:465db56f4477c86cec411600": 3}},
+    {"id": "genpkey-001", "query": "genpkey algorithm RSA pkeyopt", "query_type": "command", "relevance": {"openssl-4.0-docs:1aa4b790a2e1f9db809542fa": 3}},
+    {"id": "req-001", "query": "openssl req newkey nodes subj", "query_type": "command", "relevance": {"openssl-4.0-docs:f81571e7b5cdbffa14c85aef": 3}},
+    {"id": "speed-001", "query": "openssl speed elapsed multi", "query_type": "command", "relevance": {"openssl-4.0-docs:132bf6c3e6f775cbefccbfea": 3}},
+    {"id": "rand-001", "query": "RAND_bytes strength CSPRNG", "query_type": "api", "relevance": {"openssl-4.0-docs:22137151ab1eea95e9e37430": 3}},
+    {"id": "bio-file-001", "query": "BIO_new_file filename mode", "query_type": "api", "relevance": {"openssl-4.0-docs:ac366ffbf209f0b18a93e4e5": 3}},
+    {"id": "ocsp-stapling-001", "query": "OCSP stapling status response", "query_type": "tls_api", "relevance": {"openssl-4.0-docs:5a22cda558fb0639b47f965a": 3}},
+    {"id": "fips-install-001", "query": "fipsinstall module-mac self_test_onload", "query_type": "fips", "relevance": {"openssl-4.0-docs:74e7fea4190ba6958625140b": 3}},
+    {"id": "ssl-verify-001", "query": "SSL_CTX_set_verify verify_callback mode", "query_type": "tls_api", "relevance": {"openssl-4.0-docs:e8901922ead6feb8053a167f": 3}},
+    {"id": "evp-digest-001", "query": "EVP_MD_fetch EVP_MD_free EVP_Q_digest", "query_type": "api", "relevance": {"openssl-4.0-docs:c2caf0b94e42dbe86acbdfe3": 3}},
+    {"id": "x509-host-001", "query": "X509_check_host peername flags", "query_type": "certificate_api", "relevance": {"openssl-4.0-docs:fb4bbebdbe2090c3ff3cb9bf": 3}}
+  ]
+}

@@ -16,6 +16,8 @@ from offline_rag.documentation import (
     parse_html,
     parse_man,
     parse_markdown,
+    parse_pod,
+    parse_document,
     parse_rfc,
     parse_rst,
 )
@@ -160,6 +162,43 @@ Transplant commits onto another base.
         )
         self.assertEqual(diagram.blocks[-1].kind, "code")
         self.assertEqual(diagram.blocks[-1].heading_path, ("Example",))
+
+    def test_perl_pod_preserves_open_ssl_manual_structure_and_code(self):
+        parsed = parse_pod(
+            """=pod
+
+=head1 NAME
+
+openssl-verify - certificate verification utility
+
+=head1 SYNOPSIS
+
+ B<openssl verify> [B<-CAfile> I<file>] I<certificate.pem>
+
+=head1 DESCRIPTION
+
+The B<verify> command verifies certificate chains. See L<openssl-verification-options(1)>.
+
+=over 4
+
+=item B<-CAfile> I<file>
+
+Load trusted certificates from C<file>.
+
+=back
+
+=cut
+""",
+            "verify",
+        )
+        self.assertEqual(parsed.title, "openssl-verify")
+        self.assertEqual(parsed.format, "pod")
+        self.assertTrue(any(block.kind == "code" and "openssl verify" in block.text for block in parsed.blocks))
+        self.assertTrue(any(block.heading_path == ("DESCRIPTION",) for block in parsed.blocks))
+        self.assertTrue(any("openssl-verification-options(1)" in block.text for block in parsed.blocks))
+        templated = parse_document(Path("openssl-s_client.pod.in"), "=head1 NAME\n\nopenssl-s_client - TLS client\n")
+        self.assertEqual(templated.format, "pod")
+        self.assertEqual(templated.title, "openssl-s_client")
 
     def test_oversized_content_and_short_trailing_chunks(self):
         from offline_rag.documentation import ContentBlock
@@ -453,6 +492,7 @@ Protocol text.
                 source_version="1",
                 license_name="test",
                 source_url_template="https://example.test/{relative_path}?h=v1",
+                include_globs=("_Exit.2",),
             )
             document = json.loads((output / "documents.jsonl").read_text(encoding="utf-8").splitlines()[0])
             self.assertEqual(document["attributes"]["relative_path"], "_Exit.2")

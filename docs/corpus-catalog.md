@@ -15,6 +15,8 @@ This catalog is the human-readable inventory of every corpus currently published
 | `rfc-editor-text` | RFC Editor snapshot 2026-08-19 | IETF Trust Legal Provisions | 9,822 RFCs; 348,831 chunks | BM25 + chunk-level semantic/hybrid |
 | `iana-protocol-registries` | IANA assignments snapshot 2026-08-19 | CC0 1.0 Universal | 4,256 registries; 110,423 table records; 114,590 chunks | Structured BM25 |
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
+| `cmake-4.4-docs` | CMake 4.4.2 `Help/*.rst` source documentation | BSD 3-Clause | 2,144 documents; 4,226 chunks | BM25 |
+| `openssl-4.0-docs` | OpenSSL 4.0.1 POD manuals | Apache-2.0 | 960 manuals; 8,287 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -121,6 +123,20 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - PDF title/author metadata, outline hierarchy, page labels, source digest, release, license, and canonical URL are retained. Rotated table and diagram text is included even where spacing is degraded.
 - The 14-topic lexical suite passes every cutoff. Because the pilot contains one document, this is a coverage gate rather than a claim about inter-document ranking; sampled citations correctly resolve topics including Ohm's law (page 12-17), eddy-current inspection (page 10-20), corrosion (page 8-10), and torque-wrench calibration (page 11-6).
 - Table-of-contents/front-matter chunks remain searchable but rank behind matching body evidence. OCR remains an explicit future preprocessing step for low-text scans.
+
+### CMake 4.4 documentation
+
+- Official source archive: `https://github.com/Kitware/CMake/releases/download/v4.4.2/cmake-4.4.2.tar.gz`.
+- Publisher SHA-256: `1db9e61e60b6e0874c86386340b910382f3c5e75b9fbfb44d122063129a2789d` from Kitware's signed release checksum asset.
+- The scope is the complete `Help/*.rst` tree: 2,408 candidate files, 2,144 nonempty structured documents, and 4,226 chunks. Commands, variables, properties, policies, generators, modules, manuals, and release notes retain version-pinned source citations.
+- The 12-topic lexical gate achieved Success@1/5/10, MRR@10, and Recall@5/10/50 of `1.0`; nDCG@10 is `0.996621` due to equivalent relevant install/interface documentation.
+
+### OpenSSL 4.0 documentation
+
+- Official source archive: `https://github.com/openssl/openssl/releases/download/openssl-4.0.1/openssl-4.0.1.tar.gz`.
+- Publisher SHA-256: `2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09` from the adjacent OpenSSL checksum asset.
+- The POD importer handles both `.pod` and release-generated `.pod.in` sources. It preserves NAME-derived titles, section hierarchy, command options, inline markup, links, and verbatim examples across 960 manuals and 8,287 chunks.
+- The 13-topic lexical gate covers certificate verification, TLS diagnostics, PKCS#12, key/certificate generation, randomness, BIO, OCSP stapling, FIPS installation, peer verification, digest fetching, and hostname checking; every metric cutoff passed at `1.0`.
 
 ### DevOps Stack Exchange
 

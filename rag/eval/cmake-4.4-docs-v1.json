@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "CMake 4.4.2 documentation lexical gate",
+  "description": "Stable-document-ID gate for core target, dependency, install, toolchain, testing, policy, and file-generation documentation.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "add-executable-001", "query": "add_executable imported target alias", "query_type": "command", "relevance": {"cmake-4.4-docs:37bb23ba90a5dcf1805d7f42": 3}},
+    {"id": "target-link-001", "query": "target_link_libraries transitive interface", "query_type": "target_usage", "relevance": {"cmake-4.4-docs:38133b01a4e54e5cbcda9547": 3}},
+    {"id": "install-export-001", "query": "install EXPORT NAMESPACE FILE DESTINATION", "query_type": "install", "relevance": {"cmake-4.4-docs:7b0c9c0c908bf04e57f1404e": 3, "cmake-4.4-docs:26891f698392a9137d66486b": 2, "cmake-4.4-docs:c13e3545a75c53428fda94f4": 2}},
+    {"id": "include-interface-001", "query": "BUILD_INTERFACE INSTALL_INTERFACE target_include_directories", "query_type": "target_usage", "relevance": {"cmake-4.4-docs:9ee626380b7282bb594767a4": 3, "cmake-4.4-docs:faac4ce07ba989ae386ea8b2": 3, "cmake-4.4-docs:e8a9f223eb98e73d14c280b2": 2}},
+    {"id": "custom-command-001", "query": "add_custom_command OUTPUT DEPFILE DEPENDS", "query_type": "command", "relevance": {"cmake-4.4-docs:64fea99c362b78b0efc5b7df": 3}},
+    {"id": "file-glob-001", "query": "file GLOB CONFIGURE_DEPENDS LIST_DIRECTORIES", "query_type": "command", "relevance": {"cmake-4.4-docs:5ef2c84888b0d8abaa4928de": 3}},
+    {"id": "minimum-version-001", "query": "cmake_minimum_required VERSION policy", "query_type": "policy", "relevance": {"cmake-4.4-docs:86c24373e9371655e71d945d": 3}},
+    {"id": "toolchain-001", "query": "CMAKE_TOOLCHAIN_FILE project toolchain", "query_type": "cross_compiling", "relevance": {"cmake-4.4-docs:6d508292dfe4f5877c93db8a": 3}},
+    {"id": "add-library-001", "query": "add_library STATIC SHARED MODULE EXCLUDE_FROM_ALL", "query_type": "command", "relevance": {"cmake-4.4-docs:2dabf61e3b398453ea39225a": 3}},
+    {"id": "ctest-001", "query": "ctest test preset output failure", "query_type": "testing", "relevance": {"cmake-4.4-docs:6e35747cd9231dbcbe579547": 3}},
+    {"id": "include-guard-001", "query": "include_guard GLOBAL DIRECTORY", "query_type": "command", "relevance": {"cmake-4.4-docs:90b44ec65d800fc45ab41f54": 3}},
+    {"id": "configure-file-001", "query": "configure_file COPYONLY NEWLINE_STYLE", "query_type": "command", "relevance": {"cmake-4.4-docs:bf866706ca8afbbd4cafe917": 3}}
+  ]
+}
