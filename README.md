@@ -48,6 +48,7 @@ These corpora are implemented and verified in the current development installati
 | Rust documentation | Rust 1.97.1 stable | 7,570 documents, 57,178 chunks | BM25 |
 | TypeScript documentation | Official snapshot at `90e92beb…` (2026-08-20) | 77 documents, 935 chunks | BM25 |
 | GNU GDB manual | GDB 17.2 last-release documentation | 863 documents, 2,225 chunks | BM25 |
+| GNU GCC manual | GCC 16.2 release documentation | 523 documents, 1,695 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |

@@ -127,6 +127,8 @@
         "typescript-docs-20260820=indexes\\documentation\\typescript-docs-20260820.sqlite3",
         "--index",
         "gdb-17.2-manual=indexes\\documentation\\gdb-17.2.sqlite3",
+        "--index",
+        "gcc-16.2-manual=indexes\\documentation\\gcc-16.2.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
         "--corpus-vector",

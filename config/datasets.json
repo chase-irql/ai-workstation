@@ -1468,6 +1468,43 @@
       },
       "status": "evaluated",
       "notes": "Pinned to Sourceware's official last-release documentation page for GDB 17.2. The 1,040,741-byte archive has local SHA-256 485224e760a2d6d5891edb3a7ae3f07b0337d9c9351c640cedc75696ba9f9253; Sourceware supplied no adjacent digest, so tar structure and 866 extracted files / 7,309,202 bytes were validated. Retrieval excludes only the duplicate top page and the two generated term indexes. The remaining 863 manual nodes produced 2,225 chunks and a 6,328,320-byte verified BM25 database. The 37-topic lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
+    },
+    {
+      "dataset_id": "gcc-16.2-manual",
+      "name": "GNU Compiler Collection 16.2 Manual",
+      "description": "Official GCC user manual covering compiler options, C and C++ extensions, target features, diagnostics, optimization, sanitizers, instrumentation, coverage, LTO, and compatibility.",
+      "category": "programming-tool-documentation",
+      "official_source_url": "https://gcc.gnu.org/onlinedocs/gcc-16.2.0/gcc/",
+      "license": "GNU Free Documentation License 1.3 or later with the invariant and cover texts stated in the manual",
+      "attribution": "Free Software Foundation and GCC contributors",
+      "release": "16.2.0",
+      "update_frequency": "GCC release",
+      "scope": "complete official GCC 16.2 user manual, one HTML page per node",
+      "formats": ["HTML", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://gcc.gnu.org/onlinedocs/gcc-16.2.0/gcc-html.tar.gz",
+        "source_url_template": "https://gcc.gnu.org/onlinedocs/gcc-16.2.0/gcc/{relative_path}"
+      },
+      "ingestion": {
+        "smoke_query": "optimization options O2 O3",
+        "include_globs": ["*.html"],
+        "exclude_globs": ["index.html", "Option-Index.html", "Attribute-Index.html", "Concept-and-Symbol-Index.html"]
+      },
+      "storage": {
+        "download_min_bytes": 1200000,
+        "download_max_bytes": 1300000,
+        "extracted_max_bytes": 9000000,
+        "indexed_max_bytes": 8000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/gcc-16.2",
+        "processed": "corpora/processed/documentation/gcc-16.2",
+        "index": "indexes/documentation/gcc-16.2.sqlite3",
+        "semantic_index": "indexes/semantic/gcc-16.2-manual"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to GCC's official 16.2 release documentation page. The 1,226,624-byte archive has local SHA-256 df1b370791d3e00c94b25badb94931d8e21fb4ff654aff1f3a366a4b0ddd08d1; GCC supplied no adjacent archive digest, so tar structure and 527 extracted files / 8,306,309 bytes were validated. Retrieval excludes the duplicate top page and generated option, attribute, and concept indexes. The remaining 523 manual nodes produced 1,695 chunks and a 7,368,704-byte verified BM25 database. The 31-topic lexical gate covers compiler options, diagnostics, optimization, instrumentation, targets, toolchain behavior, extensions, coverage, analysis, compatibility, and security."
     }
   ]
 }
