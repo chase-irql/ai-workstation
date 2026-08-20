@@ -1294,6 +1294,45 @@
       },
       "status": "evaluated",
       "notes": "Pinned to GitHub-verified immutable commit 510f85c26eeb055817763a14ac2338e20fc0d913 in Docker's official documentation repository. Acquired the 29,837,619-byte commit archive, recorded local SHA-256 d66329e2e51d454f94ae1714de22594dee703d792a7133c4e593664402d8983d, and structurally validated 2,541 files / 53,237,754 extracted bytes. The scoped site and vendored official Docker/Moby Markdown set excludes release-note/changelog and prior-Desktop-version trees after pilot ranking exposed obsolete evidence; 1,293 candidates produced 1,174 documents and 11,190 chunks, with 119 navigation/front-matter-only files skipped. Standalone Hugo presentation shortcodes are removed while inline parameter placeholders inside examples remain. The verified BM25 database is 26,365,952 bytes and its 40-topic lexical gate achieved every metric cutoff at 1.0. GitHub does not publish an adjacent digest for commit archives, so the archive SHA-256 is explicitly local."
+    },
+    {
+      "dataset_id": "kubernetes-docs-20260820",
+      "name": "Kubernetes Documentation Snapshot 2026-08-20",
+      "description": "Official Kubernetes concepts, tasks, tutorials, reference, administration, security, networking, storage, scheduling, and troubleshooting documentation.",
+      "category": "container-orchestration-documentation",
+      "official_source_url": "https://kubernetes.io/docs/",
+      "license": "CC-BY-4.0",
+      "attribution": "The Kubernetes Authors and contributors",
+      "release": "2026-08-20 commit 5184b9b24b288709ed36b4003f53dc1530eda2f3",
+      "update_frequency": "monthly snapshot or after a material Kubernetes release",
+      "scope": "complete English content/en/docs Markdown tree from immutable commit 5184b9b24b288709ed36b4003f53dc1530eda2f3; blog, translations, website machinery, and generated assets excluded from ingestion",
+      "formats": ["Markdown", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/kubernetes/website/archive/5184b9b24b288709ed36b4003f53dc1530eda2f3.tar.gz",
+        "source_commit": "5184b9b24b288709ed36b4003f53dc1530eda2f3",
+        "source_commit_verified": true,
+        "source_url_template": "https://github.com/kubernetes/website/blob/5184b9b24b288709ed36b4003f53dc1530eda2f3/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["content/en/docs/*.md", "content/en/docs/**/*.md"],
+        "exclude_globs": [],
+        "smoke_query": "Kubernetes liveness readiness startup probes"
+      },
+      "storage": {
+        "download_min_bytes": 300000000,
+        "download_max_bytes": 350000000,
+        "extracted_max_bytes": 600000000,
+        "indexed_max_bytes": 50000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/kubernetes-docs-20260820",
+        "processed": "corpora/processed/documentation/kubernetes-docs-20260820",
+        "index": "indexes/documentation/kubernetes-docs-20260820.sqlite3",
+        "semantic_index": "indexes/semantic/kubernetes-docs-20260820"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to GitHub-verified immutable commit 5184b9b24b288709ed36b4003f53dc1530eda2f3 in the official Kubernetes website repository. Acquired the 334,649,805-byte commit archive, recorded local SHA-256 0d3ad8084ff076547993670e0c1a14a3d2965d96b3c992307da28481a9d27752, and structurally validated 13,179 files / 502,091,769 extracted bytes. The complete English documentation tree produced 1,605 searchable documents and 14,164 chunks, with 67 navigation/front-matter-only files skipped. The importer resolves human-visible Hugo glossary, link, feature-state, include, and heading semantics while preserving fenced literal examples, and reverses NTFS-safe archive-name encoding before stable-ID and citation generation. The 37,912,576-byte BM25 database passed row-count, foreign-key, integrity, citation, and smoke-query validation; its 50-topic lexical gate achieved Success@1/5/10, MRR@10, and Recall@5/10/50 of 1.0 with nDCG@10 0.999117. GitHub does not publish an adjacent digest for commit archives, so the archive SHA-256 is explicitly local."
     }
   ]
 }

@@ -2,6 +2,8 @@
 
 The documentation pipeline is the first corpus-neutral path beside Wikipedia. It keeps acquisition, parsing, indexing, and evaluation separate so a failed update cannot replace a working corpus or database.
 
+The same pipeline now handles the pinned official Docker and Kubernetes Markdown sites. Hugo presentation wrappers are removed without discarding their enclosed prose; human-visible glossary labels, links, feature-state markers, includes, and generated headings are converted to deterministic text. Literal shortcode examples inside fenced code blocks remain untouched. When safe archive extraction has encoded Windows-incompatible or case-sensitive member names, ingestion reverses that encoding before computing stable document IDs and source citations.
+
 ## Current pilots
 
 Python 3.14.7 is the first completed dataset:

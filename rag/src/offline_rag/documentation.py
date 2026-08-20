@@ -8,6 +8,7 @@ import html
 import json
 import os
 import re
+import shlex
 import shutil
 import tempfile
 import unicodedata
@@ -41,6 +42,11 @@ ASCIIDOC_HEADING_RE = re.compile(r"^(={1,6})\s+(.+?)\s*$")
 ASCIIDOC_SETEXT_RE = re.compile(r"^\s*([=\-~^+])\1{2,}\s*$")
 ASCIIDOC_DELIMITER_RE = re.compile(r"^(?:-{4,}|\.{4,})$")
 HUGO_SHORTCODE_LINE_RE = re.compile(r"^\s*\{\{[<%].*[>%]\}\}\s*$")
+HUGO_SHORTCODE_RE = re.compile(r"\{\{[<%]\s*(.*?)\s*[>%]\}\}")
+HUGO_HEADING_RE = re.compile(r'^\s*\{\{[<%]\s*heading\s+["\']([^"\']+)["\']\s*[>%]\}\}\s*$')
+HUGO_COMMENT_OPEN_RE = re.compile(r"^\s*\{\{[<%]\s*comment(?:\s+.*?)?\s*[>%]\}\}\s*$")
+HUGO_COMMENT_CLOSE_RE = re.compile(r"^\s*\{\{[<%]\s*/\s*comment\s*[>%]\}\}\s*$")
+MARKDOWN_HEADING_ATTRIBUTE_RE = re.compile(r"\s+\{#[A-Za-z0-9_.:-]+\}\s*$")
 MAN_MACRO_RE = re.compile(r"^\.([A-Za-z]{1,4})\s*(.*)$")
 RFC_MARKER_RE = re.compile(r"(?im)^\s*(?:Request for Comments|RFC)\s*:\s*\d+")
 RFC_HEADING_RE = re.compile(r"^\s{0,3}((?:[1-9]\d*)(?:\.\d+)*)\.\s{2,}(\S(?:.*\S)?)\s*$")
@@ -252,6 +258,122 @@ def _clean_text(value: str, *, preserve: bool = False) -> str:
     return _collapse_whitespace(value)
 
 
+def _hugo_arguments(expression: str) -> tuple[str, bool, list[str], dict[str, str]]:
+    """Parse the useful, deterministic subset of a Hugo shortcode invocation."""
+
+    escaped = expression.strip()
+    if escaped.startswith("/*") and escaped.endswith("*/"):
+        escaped = escaped[2:-2].strip()
+    try:
+        tokens = shlex.split(escaped, posix=True)
+    except ValueError:
+        tokens = escaped.split()
+    if not tokens:
+        return "", False, [], {}
+    closing = tokens[0] == "/" or tokens[0].startswith("/")
+    name = (tokens[1] if tokens[0] == "/" and len(tokens) > 1 else tokens[0].lstrip("/")).casefold()
+    values: list[str] = []
+    attributes: dict[str, str] = {}
+    start = 2 if tokens[0] == "/" else 1
+    for token in tokens[start:]:
+        key, separator, value = token.partition("=")
+        if separator and key:
+            attributes[key.casefold()] = value
+        else:
+            values.append(token)
+    return name, closing, values, attributes
+
+
+def _render_hugo_shortcode(match: re.Match[str]) -> str:
+    name, closing, values, attributes = _hugo_arguments(match.group(1))
+    if closing or not name:
+        return ""
+    if name == "glossary_tooltip":
+        return attributes.get("text") or attributes.get("term_id", "")
+    if name == "glossary_definition":
+        return f"{attributes.get('prepend', '')}{attributes.get('text') or attributes.get('term_id', '')}".strip()
+    if name in {"ref", "relref"}:
+        return values[0] if values else attributes.get("path", "")
+    if name == "link":
+        return attributes.get("text") or attributes.get("url", "")
+    if name == "figure":
+        return attributes.get("caption") or attributes.get("title") or attributes.get("alt") or attributes.get("src", "")
+    if name == "feature-state":
+        feature = attributes.get("feature_gate_name") or attributes.get("for_k8s_version", "")
+        return f"Feature state: {feature}".rstrip()
+    if name in {"param", "skew"}:
+        value = values[0] if values else attributes.get("name", name)
+        return f"[{value}]"
+    if name in {"code_sample", "include", "example"}:
+        value = attributes.get("file") or (values[0] if values else "")
+        return f"{name.replace('_', ' ').title()}: {value}".rstrip(": ")
+    if name in {"api-reference", "page-api-reference"}:
+        value = attributes.get("page") or attributes.get("kind", "")
+        return f"API reference: {value}".rstrip()
+    if name in {"latest-version", "latest-semver", "latest-release-notes", "release-branch"}:
+        return f"[{name.replace('-', ' ')}]"
+    # These shortcodes are presentation wrappers or dynamically generated
+    # navigation. Their enclosed Markdown remains available to the parser.
+    if name in {
+        "alert", "caution", "comment", "details", "highlight", "mermaid", "note", "pageinfo",
+        "tab", "table", "tabs", "thirdparty-content", "warning", "version-check",
+    } or name.startswith("tutorials/"):
+        return ""
+    label = attributes.get("text") or attributes.get("title") or attributes.get("name")
+    if label:
+        return label
+    return values[0] if values else name.replace("-", " ")
+
+
+def _clean_markdown_content(value: str) -> str:
+    """Remove Hugo rendering syntax while retaining its human-visible meaning."""
+
+    previous = None
+    while previous != value:
+        previous = value
+        value = HUGO_SHORTCODE_RE.sub(_render_hugo_shortcode, value)
+    return value
+
+
+def _clean_markdown_heading(value: str) -> str:
+    value = _clean_markdown_content(value)
+    return MARKDOWN_HEADING_ATTRIBUTE_RE.sub("", value).strip()
+
+
+def _join_multiline_hugo_shortcodes(text: str) -> str:
+    """Join template invocations split for source readability, excluding code fences."""
+
+    output: list[str] = []
+    pending: list[str] = []
+    fence: str | None = None
+    for line in text.replace("\r\n", "\n").replace("\r", "\n").splitlines():
+        stripped = line.strip()
+        fence_match = re.match(r"^\s*(```+|~~~+)", line)
+        if fence_match and not pending:
+            marker = fence_match.group(1)
+            if fence is None:
+                fence = marker
+            elif stripped.startswith(fence[0] * len(fence)):
+                fence = None
+            output.append(line)
+            continue
+        if pending:
+            pending.append(stripped)
+            joined = " ".join(pending)
+            if len(re.findall(r"\{\{[<%]", joined)) <= len(re.findall(r"[>%]\}\}", joined)):
+                output.append(joined)
+                pending = []
+            continue
+        if fence is None and ("{{<" in line or "{{%" in line):
+            if len(re.findall(r"\{\{[<%]", line)) > len(re.findall(r"[>%]\}\}", line)):
+                pending = [line.rstrip()]
+                continue
+        output.append(line)
+    if pending:
+        output.extend(pending)
+    return "\n".join(output)
+
+
 def parse_html(text: str, fallback_title: str) -> ParsedDocument:
     parser = _StructuredHTMLParser()
     parser.feed(text)
@@ -272,7 +394,7 @@ def _flush_paragraph(
 
 
 def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
-    lines = text.replace("\r\n", "\n").replace("\r", "\n").splitlines()
+    lines = _join_multiline_hugo_shortcodes(text).splitlines()
     blocks: list[ContentBlock] = []
     headings: list[str] = []
     paragraph: list[str] = []
@@ -281,6 +403,7 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
     fence_language: str | None = None
     html_comment = False
     shortcode_block = False
+    shortcode_comment = False
     title = ""
     index = 0
     if lines and lines[0].strip() == "---":
@@ -314,6 +437,16 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
                 html_comment = False
             index += 1
             continue
+        if shortcode_comment:
+            if HUGO_COMMENT_CLOSE_RE.fullmatch(line):
+                shortcode_comment = False
+            index += 1
+            continue
+        if HUGO_COMMENT_OPEN_RE.fullmatch(line) and not HUGO_COMMENT_CLOSE_RE.fullmatch(line):
+            _flush_paragraph(blocks, headings, paragraph)
+            shortcode_comment = True
+            index += 1
+            continue
         if shortcode_block:
             if ">}}" in line or "%}}" in line:
                 shortcode_block = False
@@ -324,8 +457,19 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
             html_comment = "-->" not in stripped
             index += 1
             continue
+        hugo_heading = HUGO_HEADING_RE.fullmatch(line)
+        if hugo_heading:
+            _flush_paragraph(blocks, headings, paragraph)
+            heading = "What's next" if hugo_heading.group(1).casefold() == "whatsnext" else hugo_heading.group(1)
+            headings = headings[:1]
+            headings.append(heading)
+            index += 1
+            continue
         if HUGO_SHORTCODE_LINE_RE.fullmatch(line):
             _flush_paragraph(blocks, headings, paragraph)
+            rendered = _clean_markdown_content(line).strip()
+            if rendered:
+                paragraph.append(rendered)
             index += 1
             continue
         if stripped.startswith(("{{<", "{{%")) and ">}}" not in line and "%}}" not in line:
@@ -343,7 +487,7 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
         if heading_match:
             _flush_paragraph(blocks, headings, paragraph)
             level = len(heading_match.group(1))
-            heading = _clean_text(heading_match.group(2))
+            heading = _clean_text(_clean_markdown_heading(heading_match.group(2)))
             headings = headings[: level - 1]
             headings.append(heading)
             title = title or heading
@@ -352,7 +496,7 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
         if index + 1 < len(lines) and stripped and SETEXT_RE.match(lines[index + 1]):
             _flush_paragraph(blocks, headings, paragraph)
             level = 1 if lines[index + 1].lstrip().startswith("=") else 2
-            heading = _clean_text(line)
+            heading = _clean_text(_clean_markdown_heading(line))
             headings = headings[: level - 1]
             headings.append(heading)
             title = title or heading
@@ -363,14 +507,15 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
         elif line.startswith("    ") and not paragraph:
             indented: list[str] = []
             while index < len(lines) and (lines[index].startswith("    ") or not lines[index].strip()):
-                indented.append(lines[index][4:] if lines[index].startswith("    ") else "")
+                value = lines[index][4:] if lines[index].startswith("    ") else ""
+                indented.append(_clean_markdown_content(value))
                 index += 1
             value = _clean_text("\n".join(indented), preserve=True)
             if value:
                 blocks.append(ContentBlock(tuple(headings), value, "code", {}))
             continue
         else:
-            paragraph.append(line)
+            paragraph.append(_clean_markdown_content(line))
         index += 1
     if fence is not None:
         value = _clean_text("\n".join(code), preserve=True)

@@ -119,6 +119,8 @@
         "apache-httpd-2.4-docs=indexes\\documentation\\apache-httpd-2.4.sqlite3",
         "--index",
         "docker-docs-20260820=indexes\\documentation\\docker-docs-20260820.sqlite3",
+        "--index",
+        "kubernetes-docs-20260820=indexes\\documentation\\kubernetes-docs-20260820.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
         "--corpus-vector",

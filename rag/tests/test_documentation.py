@@ -174,6 +174,39 @@ uses: action@{{% param "action_version" %}}
         self.assertTrue(any("action_version" in block.text for block in frontmatter.blocks if block.kind == "code"))
         self.assertEqual(frontmatter.blocks[0].heading_path, ("System and Service Credentials",))
 
+        kubernetes = parse_markdown(
+            '''---
+title: Probes
+---
+
+{{< comment >}}
+This template-only note must not be indexed.
+{{< /comment >}}
+
+The {{< glossary_tooltip
+text="kubelet" term_id="kubelet" >}} runs probes.
+
+{{< note >}}
+Readiness failures remove a Pod from Service endpoints.
+{{< /note >}}
+
+## Configure probes {#configure-probes}
+
+{{% heading "whatsnext" %}}
+
+See {{< link text="Services" url="/docs/concepts/services-networking/service/" >}}.
+''',
+            "fallback",
+        )
+        kubernetes_text = "\n".join(block.text for block in kubernetes.blocks)
+        self.assertIn("The kubelet runs probes", kubernetes_text)
+        self.assertIn("Readiness failures", kubernetes_text)
+        self.assertIn("See Services", kubernetes_text)
+        self.assertNotIn("template-only", kubernetes_text)
+        self.assertNotIn("{{", kubernetes_text)
+        self.assertTrue(any(block.heading_path[-1:] == ("What's next",) for block in kubernetes.blocks))
+        self.assertFalse(any("{#" in heading for block in kubernetes.blocks for heading in block.heading_path))
+
         asciidoc = parse_asciidoc(
             """= Git Manual
 
