@@ -1899,6 +1899,46 @@
       "notes": "Pinned to immutable official commit d0ed34a5851119a42e3d972dfc0ff49e4663977c. The 180,736,830-byte archive has local SHA-256 42c5e22b21fe50ea9897910cc7370b6c57f21a0ef99af32a29b1cc7647598c7d; safe extraction produced 2,311 files / 250,916,936 bytes with no links. GitHub provides no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all three collection manifests confirm CC BY-NC-SA 4.0. The importer preserves hierarchy, examples, exercises, solutions, MathML text, tables, figure captions and standalone media alternative text. Sixteen shared modules are stored once while all 338 book occurrences remain in provenance. The verified index contains 322 documents / 8,870 chunks in 21,135,360 bytes. The 46-topic stable-ID lexical gate passes Success@1/5/10, Recall@5/10/50, MRR@10, and nDCG@10 at 1.0."
     },
     {
+      "dataset_id": "openstax-chemistry",
+      "name": "OpenStax Chemistry 2e and Chemistry: Atoms First 2e",
+      "description": "Complete OpenStax general chemistry sequences covering atoms, bonding, composition, reactions, stoichiometry, gases, thermochemistry, electronic structure, periodic properties, kinetics, equilibrium, acids and bases, thermodynamics, electrochemistry, nuclear chemistry, organic chemistry, and coordination chemistry.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/chemistry-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-chemistry-bundle main commit 3be4b60ff501f29a445f0cacf003e5f5cc16244d, 2026-07-08",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Chemistry 2e and Chemistry: Atoms First 2e collection manifests and referenced CNXML modules from the immutable official source snapshot; media retained raw but excluded from text indexing",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-chemistry-bundle/archive/3be4b60ff501f29a445f0cacf003e5f5cc16244d.tar.gz",
+        "source_commit": "3be4b60ff501f29a445f0cacf003e5f5cc16244d",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-chemistry-bundle/blob/3be4b60ff501f29a445f0cacf003e5f5cc16244d/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-chemistry-bundle-3be4b60ff501f29a445f0cacf003e5f5cc16244d",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "chemical equilibrium Le Chatelier principle"
+      },
+      "storage": {
+        "download_min_bytes": 150000000,
+        "download_max_bytes": 500000000,
+        "extracted_max_bytes": 2500000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/textbooks/openstax-chemistry",
+        "processed": "corpora/processed/textbooks/openstax-chemistry",
+        "index": "indexes/textbooks/openstax-chemistry.sqlite3",
+        "semantic_index": "indexes/semantic/openstax-chemistry"
+      },
+      "status": "planned",
+      "notes": "Pinned to current official commit 3be4b60ff501f29a445f0cacf003e5f5cc16244d before acquisition. GitHub reports it unsigned and provides no adjacent archive digest, so publisher verification will not be claimed. Repository license is CC BY-NC-SA 4.0 and both collection manifests must be revalidated after extraction. The importer will deduplicate the extensive shared module set between the conventional and atoms-first sequences while retaining both curriculum occurrences."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
