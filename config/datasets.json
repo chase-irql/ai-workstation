@@ -1979,6 +1979,46 @@
       "notes": "Pinned to immutable official commit 63f8b6f8d129dd1582989bb755011e9a6d523471. The 687,639,648-byte archive has local SHA-256 20ce209a097b576a3121eb98f7e656fd04e4d91e8895139bb9568e25a0f0c33d; safe extraction produced 3,043 files / 749,160,433 bytes with no links. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all three collection manifests confirm CC BY-NC-SA 4.0. The collections contain 259, 209, and 107 modules respectively; only one stable module ID is literally shared, producing 575 occurrences and 574 documents. Related curricula frequently use different IDs, which are correctly preserved as distinct cited documents while content IDs support downstream embedding caching/evidence deduplication. The verified index contains 10,795 chunks in 30,928,896 bytes. The 52-topic stable-ID lexical gate passes every configured metric at 1.0, including explicitly multi-relevant alternate pages where appropriate."
     },
     {
+      "dataset_id": "openstax-anatomy-physiology",
+      "name": "OpenStax Anatomy and Physiology 2e",
+      "description": "Complete OpenStax Anatomy and Physiology 2e sequence covering cellular organization, tissues, integumentary, skeletal, muscular, nervous, endocrine, cardiovascular, lymphatic, respiratory, digestive, urinary, reproductive systems, and human development.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/anatomy-and-physiology-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-anatomy-physiology main commit 716383a4c6c16037b14d75a156c65145e75e895e, 2026-06-12",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Anatomy and Physiology 2e collection manifest and referenced CNXML modules from the immutable official source snapshot; media retained raw but excluded from text indexing",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-anatomy-physiology/archive/716383a4c6c16037b14d75a156c65145e75e895e.tar.gz",
+        "source_commit": "716383a4c6c16037b14d75a156c65145e75e895e",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-anatomy-physiology/blob/716383a4c6c16037b14d75a156c65145e75e895e/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-anatomy-physiology-716383a4c6c16037b14d75a156c65145e75e895e",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "cardiac cycle electrical conduction heart"
+      },
+      "storage": {
+        "download_min_bytes": 200000000,
+        "download_max_bytes": 800000000,
+        "extracted_max_bytes": 2500000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/textbooks/openstax-anatomy-physiology",
+        "processed": "corpora/processed/textbooks/openstax-anatomy-physiology",
+        "index": "indexes/textbooks/openstax-anatomy-physiology.sqlite3",
+        "semantic_index": "indexes/semantic/openstax-anatomy-physiology"
+      },
+      "status": "planned",
+      "notes": "Pinned to current official commit 716383a4c6c16037b14d75a156c65145e75e895e before acquisition. GitHub reports it unsigned and provides no adjacent archive digest, so publisher verification will not be claimed. Repository license is CC BY-NC-SA 4.0 and the collection manifest must be revalidated after extraction. Medical-foundation content is version-sensitive; source dates, stable module IDs, and explicit limitations will be retained."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
