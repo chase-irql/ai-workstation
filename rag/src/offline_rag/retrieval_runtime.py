@@ -160,6 +160,7 @@ class RetrievalRuntime:
         query_mode: str,
         retrieval_mode: str | None = None,
         candidate_limit: int = 100,
+        allow_relaxation: bool = True,
     ) -> dict[str, Any]:
         selected = retrieval_mode or self.default_mode
         if selected not in RETRIEVAL_MODES:
@@ -172,6 +173,7 @@ class RetrievalRuntime:
                 limit=limit,
                 mode=query_mode,
                 candidate_limit=candidate_limit,
+                allow_relaxation=allow_relaxation,
             )
             response.setdefault("retriever", "sqlite_fts5_bm25")
         else:

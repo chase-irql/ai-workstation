@@ -62,11 +62,13 @@ def search_documents(
     limit: int = 8,
     mode: str = "and",
     candidate_limit: int = 160,
+    allow_relaxation: bool = True,
 ) -> dict[str, Any]:
     """Return distinct documents with bounded query relaxation when needed.
 
-    Strict AND remains the primary retrieval. If a query of four or more terms
-    has no exact-title hit, leave-one-term-out variants are fused using RRF.
+    Strict AND remains the primary retrieval. When ``allow_relaxation`` is true
+    and a query of four or more terms has no exact-title hit, leave-one-term-out
+    variants are fused using RRF.
     A candidate whose title terms are contained in the original query is then
     resolved through exact-title search so agents receive its lead passage.
     This recovers from one guessed or overly specific term without degrading
@@ -82,7 +84,8 @@ def search_documents(
     variants: list[tuple[str, list[dict[str, object]], float]] = [(query, primary, 1.0)]
     relaxed = False
     if (
-        mode == "and"
+        allow_relaxation
+        and mode == "and"
         and len(original_plan.normalized_terms) >= 4
         and not any(item.get("ranking_reason") == "exact_title" for item in primary)
     ):

@@ -16,6 +16,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `iana-protocol-registries` | IANA assignments snapshot 2026-08-19 | CC0 1.0 Universal | 4,256 registries; 110,423 table records; 114,590 chunks | Structured BM25 |
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
 | `devops-stackexchange` | DevOps Stack Exchange 2026-06-30 community dump | CC BY-SA 3.0 or 4.0 per retained post | 11,877 retained posts; 13,531 chunks | BM25 + experimental 1,024-dim semantic/hybrid |
+| `security-stackexchange` | Information Security Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 171,041 retained posts; 188,770 chunks | BM25 + 256-dim semantic/hybrid |
 
 Counts describe the pinned local generations, not upstream projects in perpetuity. Evaluation suites are small, versioned regression gates rather than broad claims about corpus completeness or answer accuracy.
 
@@ -75,6 +76,16 @@ Counts describe the pinned local generations, not upstream projects in perpetuit
 - The importer retains every question, every accepted answer regardless of score, and other answers only when their score is positive. It excluded 1,503 answers under that policy.
 - Each retained post is a separate document with a direct question or answer URL. Parent-question relationships, accepted status, title, tags, score, dates, contributor attribution, exact `ContentLicense`, HTML headings, lists, and code blocks are preserved.
 - The 19-case exact-term suite passes every Success, MRR, and Recall cutoff. The 1,024-dimensional paraphrase gate reaches Success@10 `0.571429` and Recall@50 `0.642857`; semantic retrieval is published for experimentation, not presented as a solved quality problem.
+- Acquisition and update procedure: [stack-exchange-ingestion.md](stack-exchange-ingestion.md).
+
+### Information Security Stack Exchange
+
+- Archive: June 30, 2026 coordinated community release hosted by Internet Archive; 271,298,857 bytes compressed and 1,313,984,676 bytes extracted.
+- Publisher/coordinated SHA-256: `401a0d754eb2a981922ddb0494648b4be57ac2cc5bad545b1fe609118df0e6df`.
+- The shared Stack Exchange importer retained 70,265 questions, 32,426 accepted answers, and 68,350 other positively scored answers. It excluded 19,964 answers under the documented quality policy.
+- The published common-record generation contains 171,041 post documents and 188,770 chunks. Each question or answer retains its stable post ID, direct URL, parent relationship, score, tags, contributor attribution, dates, and exact `ContentLicense`.
+- The initial 18-topic lexical gate and final automatically routed exact-query gate both achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of `1.0`. Automatic routing preserves strict BM25 ordering for terse technical phrases.
+- A verified 256-dimensional generation binds all 188,770 vectors to the BM25 source build and occupies 287,344,685 bytes for FAISS plus metadata. On 14 pooled paraphrase judgments, hybrid retrieval achieved Success@10 `0.928571` and Recall@50 `0.704762`, while strict-AND BM25 found none. Reranking preserved Success@10 but lowered Success@5 from `0.857143` to `0.785714`; exact terms therefore remain BM25-first.
 - Acquisition and update procedure: [stack-exchange-ingestion.md](stack-exchange-ingestion.md).
 
 ## Lifecycle and publication rules

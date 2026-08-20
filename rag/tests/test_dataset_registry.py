@@ -15,8 +15,9 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 7)
+        self.assertEqual(len(datasets), 8)
         self.assertIn("devops-stackexchange", {dataset.dataset_id for dataset in datasets})
+        self.assertIn("security-stackexchange", {dataset.dataset_id for dataset in datasets})
         summary = storage_summary(datasets)
         self.assertLess(summary["download_max_bytes"], 4_000_000_000)
         self.assertLess(summary["indexed_max_bytes"], 15_000_000_000)

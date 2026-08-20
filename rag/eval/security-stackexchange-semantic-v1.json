@@ -1,0 +1,161 @@
+{
+  "schema_version": 2,
+  "name": "Information Security Stack Exchange June 2026 semantic paraphrase gate",
+  "description": "Natural-language security questions that deliberately avoid copying source titles and exact terminology where practical.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "password-salt-paraphrase-001",
+      "query": "why each stored password needs its own random value before applying a slow one-way function",
+      "query_type": "authentication_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:23520": 3,
+        "security-stackexchange:post:54082": 3,
+        "security-stackexchange:post:10905": 2
+      }
+    },
+    {
+      "id": "tls-hostname-paraphrase-001",
+      "query": "danger of trusting a valid server certificate without checking that it belongs to the destination name",
+      "query_type": "transport_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:276093": 3,
+        "security-stackexchange:post:276525": 3,
+        "security-stackexchange:post:61703": 3,
+        "security-stackexchange:post:61708": 2,
+        "security-stackexchange:post:38602": 2
+      }
+    },
+    {
+      "id": "sql-injection-paraphrase-001",
+      "query": "keep untrusted database input separate from executable query syntax",
+      "query_type": "application_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:230211": 3,
+        "security-stackexchange:post:235408": 2,
+        "security-stackexchange:post:94756": 2
+      }
+    },
+    {
+      "id": "csrf-paraphrase-001",
+      "query": "stop another website from submitting an authenticated action through a victim's browser",
+      "query_type": "application_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:166495": 3,
+        "security-stackexchange:post:79317": 3,
+        "security-stackexchange:post:46346": 2
+      }
+    },
+    {
+      "id": "disk-encryption-paraphrase-001",
+      "query": "protect every operating system file when a powered-off laptop is stolen",
+      "query_type": "data_protection_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:185029": 3,
+        "security-stackexchange:post:269333": 3,
+        "security-stackexchange:post:166032": 2,
+        "security-stackexchange:post:53334": 2
+      }
+    },
+    {
+      "id": "totp-paraphrase-001",
+      "query": "security of short codes generated from a shared secret and the current time",
+      "query_type": "authentication_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:94959": 3,
+        "security-stackexchange:post:87403": 3,
+        "security-stackexchange:post:139727": 3,
+        "security-stackexchange:post:74393": 2,
+        "security-stackexchange:post:211203": 2
+      }
+    },
+    {
+      "id": "csprng-paraphrase-001",
+      "query": "why ordinary pseudo-random output is unsafe when creating secret encryption keys",
+      "query_type": "cryptography_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:268548": 3,
+        "security-stackexchange:post:209089": 3,
+        "security-stackexchange:post:209053": 3,
+        "security-stackexchange:post:4896": 2,
+        "security-stackexchange:post:127054": 2
+      }
+    },
+    {
+      "id": "oauth-storage-paraphrase-001",
+      "query": "where a browser application can keep bearer credentials without exposing them to injected scripts",
+      "query_type": "application_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:140058": 3,
+        "security-stackexchange:post:136481": 3,
+        "security-stackexchange:post:227299": 2,
+        "security-stackexchange:post:254923": 2,
+        "security-stackexchange:post:254932": 2
+      }
+    },
+    {
+      "id": "public-wifi-paraphrase-001",
+      "query": "can someone at an untrusted hotspot intercept or alter traffic between my device and a website",
+      "query_type": "network_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:63894": 3,
+        "security-stackexchange:post:118271": 3,
+        "security-stackexchange:post:122161": 3,
+        "security-stackexchange:post:86629": 2,
+        "security-stackexchange:post:54326": 2
+      }
+    },
+    {
+      "id": "dnssec-paraphrase-001",
+      "query": "why clients do not normally verify cryptographic signatures on domain name records themselves",
+      "query_type": "network_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:126583": 3,
+        "security-stackexchange:post:11571": 3,
+        "security-stackexchange:post:120414": 2,
+        "security-stackexchange:post:226899": 2
+      }
+    },
+    {
+      "id": "ransomware-backup-paraphrase-001",
+      "query": "keep recovery copies from being encrypted or deleted by malware that compromises production systems",
+      "query_type": "resilience_paraphrase",
+      "relevance": {"security-stackexchange:post:279901": 3}
+    },
+    {
+      "id": "password-manager-paraphrase-001",
+      "query": "does learning several vault entries make it easier to discover the one secret that unlocks the vault",
+      "query_type": "authentication_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:213318": 3,
+        "security-stackexchange:post:213320": 3
+      }
+    },
+    {
+      "id": "aes-gcm-paraphrase-001",
+      "query": "what breaks when authenticated counter-mode encryption repeats its per-message unique value",
+      "query_type": "cryptography_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:189797": 3,
+        "security-stackexchange:post:171383": 3,
+        "security-stackexchange:post:89904": 3,
+        "security-stackexchange:post:273767": 2
+      }
+    },
+    {
+      "id": "certificate-pinning-paraphrase-001",
+      "query": "restrict a phone app to a known server identity even when another public authority is trusted",
+      "query_type": "transport_security_paraphrase",
+      "relevance": {
+        "security-stackexchange:post:272590": 3,
+        "security-stackexchange:post:245547": 3,
+        "security-stackexchange:post:209382": 2
+      }
+    }
+  ]
+}

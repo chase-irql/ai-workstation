@@ -4,6 +4,7 @@ param(
     [Parameter(Mandatory)][string]$Suite,
     [string]$Output,
     [string]$ModelId,
+    [ValidateSet('auto', 'bm25', 'semantic', 'hybrid')][string]$Retrieval = 'auto',
     [switch]$Unload
 )
 
@@ -34,6 +35,7 @@ $arguments = @(
     '--suite', $suitePath,
     '--output', $outputPath,
     '--models', $models
+    '--retrieval', $Retrieval
 )
 if ($ModelId) { $arguments += @('--model-id', $ModelId) }
 try {

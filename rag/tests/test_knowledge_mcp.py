@@ -273,6 +273,7 @@ Connection migration allows an endpoint to move to a new network path.
                 )
                 self.assertEqual(exact["retrieval_by_corpus"]["test-docs"]["used"], "bm25")
                 self.assertIn("technical identifiers", exact["retrieval_by_corpus"]["test-docs"]["route_reason"])
+                self.assertIsNone(exact["reranker"])
                 status = runtime.status()
                 self.assertEqual(status["corpora"]["wikipedia"]["retrieval"]["available_modes"], ["bm25", "semantic", "hybrid"])
                 self.assertEqual(status["corpora"]["test-docs"]["retrieval"]["available_modes"], ["bm25", "semantic", "hybrid"])

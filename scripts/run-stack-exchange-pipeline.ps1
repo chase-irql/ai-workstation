@@ -3,6 +3,7 @@ param(
     [string]$DatasetId = 'devops-stackexchange',
     [ValidateRange(128, 20000)][int]$MaxChars = 3200,
     [ValidateRange(0, 20000)][int]$MinChars = 300,
+    [string]$SmokeQuery,
     [switch]$Force
 )
 
@@ -14,6 +15,13 @@ $registry = Get-Content -LiteralPath (Join-Path $root 'config\datasets.json') -R
 $matches = @($registry.datasets | Where-Object { $_.dataset_id -eq $DatasetId })
 if ($matches.Count -ne 1) { throw "Unknown or duplicate dataset ID '$DatasetId'." }
 $dataset = $matches[0]
+if ([string]::IsNullOrWhiteSpace($SmokeQuery)) {
+    if ($dataset.ingestion -and $dataset.ingestion.smoke_query) {
+        $SmokeQuery = [string]$dataset.ingestion.smoke_query
+    } else {
+        $SmokeQuery = [string]$dataset.name
+    }
+}
 $source = [System.IO.Path]::GetFullPath((Join-Path $root (Join-Path ([string]$dataset.paths.raw) 'extracted')))
 $processed = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.processed)))
 $database = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.index)))
@@ -42,7 +50,7 @@ $indexArguments = @('-m', 'offline_rag.bm25', 'build', '--input', $processed, '-
 if ($Force) { $indexArguments += '--overwrite' }
 & $python @indexArguments 2>&1 | Tee-Object -FilePath (Join-Path $runtime 'index.log')
 if ($LASTEXITCODE -ne 0) { throw 'Stack Exchange BM25 indexing failed.' }
-& $python -m offline_rag.verify --database $database --input $processed --smoke-query 'Docker Kubernetes deployment'
+& $python -m offline_rag.verify --database $database --input $processed --smoke-query $SmokeQuery
 if ($LASTEXITCODE -ne 0) { throw 'Stack Exchange BM25 verification failed.' }
 
 Write-Output "Processed corpus: $processed"

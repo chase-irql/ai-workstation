@@ -35,6 +35,7 @@ def evaluate_reranked_corpus(
     *,
     model_id: str | None = None,
     ollama_url: str = "http://127.0.0.1:11434",
+    retrieval: str = "auto",
 ) -> dict[str, object]:
     """Evaluate the same routed, hybrid, reranked path served through MCP."""
 
@@ -59,12 +60,12 @@ def evaluate_reranked_corpus(
                 limit=limit,
                 mode=mode,
                 corpus_ids=["evaluation-corpus"],
-                retrieval="hybrid",
+                retrieval=retrieval,
                 rerank=True,
                 deduplicate=True,
             )["results"],
             retrieval_identity={
-                "retriever": "knowledge_hybrid_reranked",
+                "retriever": f"knowledge_{retrieval}_reranked",
                 "reranker": "deterministic-evidence-v2",
                 "database": str(database.resolve()),
                 "vector_directory": str(vector_directory.resolve()),
@@ -83,6 +84,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--models", type=Path, default=Path("config/models.json"))
     parser.add_argument("--model-id")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
+    parser.add_argument("--retrieval", choices=("auto", "bm25", "semantic", "hybrid"), default="auto")
     parser.add_argument("--output", type=Path)
     return parser
 
@@ -96,6 +98,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         args.models,
         model_id=args.model_id,
         ollama_url=args.ollama_url,
+        retrieval=args.retrieval,
     )
     if args.output:
         _atomic_write_json(args.output, result)

@@ -36,6 +36,43 @@
       "notes": "Pinned June 2026 coordinated community release; publisher SHA-256 verified. Parsed 5,589 questions, 2,509 accepted answers, and 3,779 other positively scored answers into 11,877 post documents and 13,531 chunks with exact per-post citations. The 19-case lexical gate achieved Success@1/5/10, MRR@10, and Recall@5/10/50 of 1.0. A verified 1,024-dimensional semantic generation improves the 14-case paraphrase gate over 256 dimensions, but hybrid Success@10 remains 0.571429, so BM25 is the strong baseline and semantic retrieval remains experimental for this corpus."
     },
     {
+      "dataset_id": "security-stackexchange",
+      "name": "Information Security Stack Exchange",
+      "description": "Questions and answers about applied information security, cryptography, authentication, network defense, privacy, and secure software engineering.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://security.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "Information Security Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete Information Security Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/security.stackexchange.com.7z",
+        "publisher_checksum": "401a0d754eb2a981922ddb0494648b4be57ac2cc5bad545b1fe609118df0e6df",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://security.stackexchange.com/{post_type}/{post_id}"
+      },
+      "ingestion": {
+        "smoke_query": "password security"
+      },
+      "storage": {
+        "download_min_bytes": 271000000,
+        "download_max_bytes": 272000000,
+        "extracted_max_bytes": 4000000000,
+        "indexed_max_bytes": 4000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/security",
+        "processed": "corpora/processed/stack-exchange/security",
+        "index": "indexes/stack-exchange/security.sqlite3",
+        "semantic_index": "indexes/semantic/security-stackexchange"
+      },
+      "status": "evaluated",
+      "notes": "Pinned June 2026 coordinated community release; publisher SHA-256 verified. The 271,298,857-byte archive expanded to 1,313,984,676 bytes. Parsed 70,265 questions, 32,426 accepted answers, and 68,350 other positively scored answers into 171,041 post documents and 188,770 chunks. The 18-topic lexical and final routed exact-query gates achieved Success@1/5/10, MRR@10, Recall@5/10/50, and nDCG@10 of 1.0. A verified 256-dimensional Qwen3-Embedding generation covers every chunk in 287,344,685 bytes of vector and metadata files. On 14 pooled paraphrase judgments, strict-AND BM25 found no relevant evidence while hybrid retrieval achieved Success@1 0.357143, Success@5 0.857143, Success@10 0.928571, Recall@50 0.704762, and MRR@10 0.53869. Reranking preserved Success@10 but slightly lowered Success@5, so automatic routing keeps terse technical phrases on strict BM25 while broader questions use hybrid retrieval."
+    },
+    {
       "dataset_id": "python-3.14-docs",
       "name": "Python 3.14 Documentation",
       "description": "Official Python language, standard-library, tutorial, HOWTO, and C API documentation.",

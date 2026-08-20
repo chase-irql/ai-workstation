@@ -87,6 +87,14 @@ class RetrievalRuntimeTests(unittest.TestCase):
             try:
                 result = runtime.search("Apollo Guidance Computer", limit=2, query_mode="and")
                 self.assertEqual(result["retrieval_mode"], "bm25")
+                strict = runtime.search(
+                    "Apollo Guidance Computer IBM",
+                    limit=2,
+                    query_mode="and",
+                    allow_relaxation=False,
+                )
+                self.assertFalse(strict["query_relaxed"])
+                self.assertEqual(strict["variants_searched"], 1)
                 self.assertEqual(runtime.status()["available_modes"], ["bm25"])
                 with self.assertRaisesRegex(RetrievalUnavailableError, "no verified published generation"):
                     runtime.search(

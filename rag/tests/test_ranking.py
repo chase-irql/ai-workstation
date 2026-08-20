@@ -24,6 +24,19 @@ class RankingTests(unittest.TestCase):
             available_modes=available,
         )
         self.assertEqual(conceptual.retrieval, "hybrid")
+        terse = route_query(
+            "password hashing salt",
+            corpus_id="security-stackexchange",
+            available_modes=available,
+        )
+        self.assertEqual(terse.retrieval, "bm25")
+        self.assertIn("terse technical phrase", terse.reason)
+        short_question = route_query(
+            "what is password salting",
+            corpus_id="security-stackexchange",
+            available_modes=available,
+        )
+        self.assertEqual(short_question.retrieval, "hybrid")
         acronym_concept = route_query(
             "how does CPU scheduling distribute work across processor cores",
             corpus_id="linux-man-pages",

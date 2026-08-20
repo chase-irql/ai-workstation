@@ -1,0 +1,121 @@
+{
+  "schema_version": 2,
+  "name": "Information Security Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering authentication, web and network security, cryptography, privacy, backups, and threat modeling.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "password-salt-001",
+      "query": "password hashing salt",
+      "query_type": "authentication",
+      "relevance": {"security-stackexchange:post:23520": 3}
+    },
+    {
+      "id": "tls-hostname-001",
+      "query": "TLS certificate validation hostname",
+      "query_type": "transport_security",
+      "relevance": {"security-stackexchange:post:276093": 3}
+    },
+    {
+      "id": "sql-injection-001",
+      "query": "SQL injection prepared statements",
+      "query_type": "application_security",
+      "relevance": {"security-stackexchange:post:230211": 3}
+    },
+    {
+      "id": "csrf-token-001",
+      "query": "cross site request forgery token",
+      "query_type": "application_security",
+      "relevance": {"security-stackexchange:post:166495": 3}
+    },
+    {
+      "id": "xss-encoding-001",
+      "query": "cross site scripting output encoding",
+      "query_type": "application_security",
+      "relevance": {"security-stackexchange:post:48451": 3}
+    },
+    {
+      "id": "ssh-public-key-001",
+      "query": "SSH public key authentication",
+      "query_type": "authentication",
+      "relevance": {"security-stackexchange:post:130116": 3}
+    },
+    {
+      "id": "full-disk-encryption-001",
+      "query": "full disk encryption",
+      "query_type": "data_protection",
+      "relevance": {"security-stackexchange:post:185029": 3}
+    },
+    {
+      "id": "totp-001",
+      "query": "two factor authentication TOTP",
+      "query_type": "authentication",
+      "relevance": {"security-stackexchange:post:94959": 3}
+    },
+    {
+      "id": "csprng-001",
+      "query": "cryptographically secure random number generator",
+      "query_type": "cryptography",
+      "relevance": {"security-stackexchange:post:268548": 3}
+    },
+    {
+      "id": "oauth-token-storage-001",
+      "query": "OAuth access token storage",
+      "query_type": "application_security",
+      "relevance": {"security-stackexchange:post:140058": 3}
+    },
+    {
+      "id": "public-wifi-mitm-001",
+      "query": "public WiFi man in the middle",
+      "query_type": "network_security",
+      "relevance": {"security-stackexchange:post:63894": 3}
+    },
+    {
+      "id": "dnssec-validation-001",
+      "query": "DNSSEC validation",
+      "query_type": "network_security",
+      "relevance": {"security-stackexchange:post:126583": 3}
+    },
+    {
+      "id": "ransomware-backups-001",
+      "query": "ransomware offline backups",
+      "query_type": "resilience",
+      "relevance": {"security-stackexchange:post:279901": 3}
+    },
+    {
+      "id": "threat-modeling-001",
+      "query": "threat modeling STRIDE",
+      "query_type": "risk_management",
+      "relevance": {"security-stackexchange:post:99550": 3}
+    },
+    {
+      "id": "password-manager-001",
+      "query": "password manager master password",
+      "query_type": "authentication",
+      "relevance": {"security-stackexchange:post:213318": 3}
+    },
+    {
+      "id": "session-cookie-001",
+      "query": "session cookie HttpOnly Secure SameSite",
+      "query_type": "application_security",
+      "relevance": {"security-stackexchange:post:254596": 3}
+    },
+    {
+      "id": "aes-gcm-nonce-001",
+      "query": "AES GCM nonce reuse",
+      "query_type": "cryptography",
+      "relevance": {"security-stackexchange:post:189797": 3}
+    },
+    {
+      "id": "certificate-pinning-001",
+      "query": "certificate pinning mobile application",
+      "query_type": "transport_security",
+      "relevance": {"security-stackexchange:post:272590": 3}
+    }
+  ]
+}

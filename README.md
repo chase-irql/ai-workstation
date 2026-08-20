@@ -36,6 +36,7 @@ These corpora are implemented and verified in the current development installati
 | IANA protocol registries | 2026-08-19 snapshot | 4,256 registries, 114,590 chunks | Structured BM25 |
 | SQLite documentation | SQLite 3.53.4 | 765 documents, 4,384 chunks | BM25 + chunk-level hybrid |
 | DevOps Stack Exchange | 2026-06-30 community dump | 11,877 retained posts, 13,531 chunks | BM25 + experimental chunk-level hybrid |
+| Information Security Stack Exchange | 2026-06-30 community dump | 171,041 retained posts, 188,770 chunks | BM25 + chunk-level hybrid |
 
 The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md) and [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md).
 

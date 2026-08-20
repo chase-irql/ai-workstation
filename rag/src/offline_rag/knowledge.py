@@ -123,6 +123,7 @@ class KnowledgeRuntime:
                     query_mode=mode,
                     retrieval_mode=selected_mode,
                     candidate_limit=min(400, max(80, per_corpus_limit * 20)),
+                    allow_relaxation=selected_mode != "bm25",
                 )
             except RetrievalUnavailableError as error:
                 if selected_mode == "bm25":
@@ -135,6 +136,7 @@ class KnowledgeRuntime:
                     query_mode=mode,
                     retrieval_mode="bm25",
                     candidate_limit=min(400, max(80, per_corpus_limit * 20)),
+                    allow_relaxation=False,
                 )
             results = list(response.get("results", []))
             candidate_documents[corpus_id] = len(results)
@@ -164,7 +166,14 @@ class KnowledgeRuntime:
                 str(item["document_id"]),
             )
         )
-        ranked = rerank_results(query, fused) if rerank else fused
+        # A single-corpus BM25 ranking already compares candidates on one
+        # calibrated scale. Semantic-oriented evidence bonuses can only
+        # disturb that strong exact-search order; reserve reranking for hybrid,
+        # semantic, or cross-corpus fusion where it adds a real second signal.
+        apply_rerank = rerank and not (
+            len(selected) == 1 and retrieval_state[selected[0]]["used"] == "bm25"
+        )
+        ranked = rerank_results(query, fused) if apply_rerank else fused
         removed_duplicates: list[dict[str, Any]] = []
         if deduplicate:
             ranked, removed_duplicates = deduplicate_results(ranked)
@@ -176,7 +185,7 @@ class KnowledgeRuntime:
             "corpora_searched": selected,
             "candidate_documents": candidate_documents,
             "retrieval_by_corpus": retrieval_state,
-            "reranker": "deterministic-evidence-v2" if rerank else None,
+            "reranker": "deterministic-evidence-v2" if apply_rerank else None,
             "deduplication": {
                 "enabled": deduplicate,
                 "removed_count": len(removed_duplicates),

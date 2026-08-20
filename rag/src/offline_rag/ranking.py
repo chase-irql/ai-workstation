@@ -52,6 +52,26 @@ QUERY_STOPWORDS = frozenset(
         "with",
     }
 )
+QUESTION_PREFIXES = frozenset(
+    {
+        "are",
+        "can",
+        "could",
+        "did",
+        "do",
+        "does",
+        "how",
+        "is",
+        "should",
+        "what",
+        "when",
+        "where",
+        "which",
+        "who",
+        "why",
+        "would",
+    }
+)
 EXACT_IDENTIFIER_RE = re.compile(
     r"(?:\b[A-Z][A-Z0-9_]{2,}\b|\b[A-Za-z][A-Za-z0-9]*_[A-Za-z0-9_]+\b|"
     r"\b\w+::\w+\b|--[a-z0-9][\w-]*|(?i:\bRFC\s*)?\d{2,5}\b|\b\w+\.\w+\b|"
@@ -98,6 +118,9 @@ def route_query(
     identifier_ratio = len({value.casefold() for value in identifiers}) / max(1, len(tokens))
     if identifiers and len(tokens) <= 8 and identifier_ratio >= 0.4:
         return QueryRoute("bm25", "the query is dominated by technical identifiers")
+    meaningful = meaningful_query_tokens(query)
+    if tokens and tokens[0] not in QUESTION_PREFIXES and len(tokens) <= 7 and len(meaningful) <= 5:
+        return QueryRoute("bm25", "the query is a terse technical phrase")
     return QueryRoute("hybrid", "natural-language concepts benefit from lexical and semantic candidates")
 
 
