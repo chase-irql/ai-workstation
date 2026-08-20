@@ -1887,7 +1887,7 @@
         "download_min_bytes": 100000000,
         "download_max_bytes": 400000000,
         "extracted_max_bytes": 2000000000,
-        "indexed_max_bytes": 1200000000
+        "indexed_max_bytes": 1000000000
       },
       "paths": {
         "raw": "corpora/raw/textbooks/openstax-university-physics",
