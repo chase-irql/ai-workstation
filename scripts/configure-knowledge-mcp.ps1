@@ -127,6 +127,7 @@ if ($Harness -in @('opencode', 'all')) {
     }
     $configuration = Get-Content -LiteralPath $openCodeConfig -Raw | ConvertFrom-Json
     if (-not $configuration.mcp) { $configuration | Add-Member -NotePropertyName mcp -NotePropertyValue ([pscustomobject]@{}) }
+    $configurationChanged = $false
     $entry = $configuration.mcp.'offline-knowledge'
     if ($entry -and -not (Test-CommandEqual @($entry.command) $openCodeMcpCommand) -and -not $Force) {
         throw 'OpenCode offline-knowledge settings differ. Re-run with -Force to replace them.'
@@ -145,6 +146,19 @@ if ($Harness -in @('opencode', 'all')) {
         else {
             $configuration.mcp | Add-Member -NotePropertyName 'offline-knowledge' -NotePropertyValue $newEntry
         }
+        $configurationChanged = $true
+    }
+    $legacyEntry = $configuration.mcp.'offline-wikipedia'
+    if ($legacyEntry -and (-not $legacyEntry.PSObject.Properties['enabled'] -or $legacyEntry.enabled -ne $false)) {
+        if ($legacyEntry.PSObject.Properties['enabled']) {
+            $legacyEntry.enabled = $false
+        }
+        else {
+            $legacyEntry | Add-Member -NotePropertyName enabled -NotePropertyValue $false
+        }
+        $configurationChanged = $true
+    }
+    if ($configurationChanged) {
         $temporary = "$openCodeConfig.tmp"
         $configuration | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $temporary -Encoding utf8
         Move-Item -LiteralPath $temporary -Destination $openCodeConfig -Force

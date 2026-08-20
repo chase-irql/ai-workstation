@@ -53,9 +53,12 @@ From the repository root:
 .\scripts\start-opencode.ps1
 ```
 
-Restart an already-open OpenCode session so it discovers the new tools and the
-project-local `.agents/skills/search-offline-knowledge` skill. The existing
-`offline-wikipedia` entry is deliberately retained for compatibility.
+Restart an already-open OpenCode session so it discovers the unified tools and
+the project-local `.agents/skills/search-offline-knowledge` skill. The legacy
+`offline-wikipedia` entry remains in the project configuration only as a disabled
+compatibility reference; agents use `offline-knowledge` for Wikipedia too. The
+project `instructions` array loads the retrieval skill for every OpenCode session,
+which avoids relying on smaller local models to invoke it voluntarily.
 
 Example prompt:
 

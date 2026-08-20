@@ -1,6 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "share": "disabled",
+  "instructions": [
+    ".agents/skills/search-offline-knowledge/SKILL.md"
+  ],
   "mcp": {
     "offline-wikipedia": {
       "type": "local",
@@ -22,7 +25,7 @@
       "environment": {
         "PYTHONPATH": "rag\\src"
       },
-      "enabled": true,
+      "enabled": false,
       "timeout": 30000
     },
     "offline-knowledge": {
@@ -106,7 +109,7 @@
         "--index",
         "faa-amt-airframe-powerplant-2023=indexes\\manuals\\faa-amt-airframe-powerplant-2023.sqlite3",
         "--index",
-        "hesperian-english-health-guides-20260820=indexes\\health\\hesperian-english-health-guides-20260820.sqlite3",
+        "hesperian-english-health-guides-20260820=indexes\\health\\hesperian-english-health-guides-20260820-plain-v2.sqlite3",
         "--index",
         "cmake-4.4-docs=indexes\\documentation\\cmake-4.4.sqlite3",
         "--index",

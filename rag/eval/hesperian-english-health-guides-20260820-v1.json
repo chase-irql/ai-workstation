@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "Hesperian English health guides 2026-08-20 lexical coverage gate",
-  "description": "Stable-document-ID gate spanning three distinct topics from each of the 16 official English guide collections. This tests lexical retrieval and inter-chapter discrimination; it does not validate medical correctness or replace current professional guidance.",
+  "description": "Stable-document-ID gate spanning three distinct topics from each of the 16 official English guide collections plus a safety-sensitive recipe-retrieval case. This tests lexical retrieval and inter-chapter discrimination; it does not validate medical correctness or replace current professional guidance.",
   "candidate_chunks": 50,
   "success_cutoffs": [1, 5, 10],
   "recall_cutoffs": [5, 10, 50],
@@ -56,6 +56,7 @@
     {"id":"wwd-sign-language-001","query":"sign language health women disabilities","query_type":"women-disability","relevance":{"hesperian-english-health-guides-20260820:facc3575a7309175516e357d":3}},
     {"id":"wwhnd-pregnancy-001","query":"women pregnancy birth health","query_type":"womens-health-reference","relevance":{"hesperian-english-health-guides-20260820:bd10b0a63204942e5e195d46":3}},
     {"id":"wwhnd-sti-001","query":"STI infections genitals women","query_type":"womens-health-reference","relevance":{"hesperian-english-health-guides-20260820:e13eceb6134cb2ad3a067a85":3}},
-    {"id":"wwhnd-cancer-001","query":"cancer growths women","query_type":"womens-health-reference","relevance":{"hesperian-english-health-guides-20260820:6d868bb765b244100ed133e5":3}}
+    {"id":"wwhnd-cancer-001","query":"cancer growths women","query_type":"womens-health-reference","relevance":{"hesperian-english-health-guides-20260820:6d868bb765b244100ed133e5":3}},
+    {"id":"nwtnd-rehydration-recipe-001","query":"rehydration drink cereal sugar salt","query_type":"practical-procedure","relevance":{"hesperian-english-health-guides-20260820:33acea83242df7317834a139":3,"hesperian-english-health-guides-20260820:da2cb77d4cbebe4a9180fc45":2}}
   ]
 }

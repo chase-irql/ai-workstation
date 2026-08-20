@@ -12,7 +12,7 @@ import uuid
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import quote, urljoin
 
 from pypdf import PdfReader
@@ -156,17 +156,35 @@ class _PdfWarningCollector(logging.Handler):
         self.messages.append(record.getMessage())
 
 
-def _extract_page_text(page: Any) -> tuple[str, tuple[str, ...]]:
+PdfTextExtractionMode = Literal["layout", "plain"]
+
+
+def _extract_page_text(
+    page: Any,
+    extraction_mode: PdfTextExtractionMode = "layout",
+) -> tuple[str, tuple[str, ...]]:
+    """Extract page text while preserving warnings for corpus-level QA.
+
+    Layout mode retains spatial labels and remains the default for technical
+    manuals. Plain mode follows PDF content-stream reading order and is safer
+    for publications whose adjacent visual columns otherwise become merged.
+    """
+
+    if extraction_mode not in {"layout", "plain"}:
+        raise ValueError("extraction_mode must be 'layout' or 'plain'")
     logger = logging.getLogger("pypdf")
     collector = _PdfWarningCollector()
     prior_propagate = logger.propagate
     logger.addHandler(collector)
     logger.propagate = False
     try:
-        # Layout mode otherwise drops rotated table labels and diagram text.
-        # Including them may slightly degrade spacing on those pages, but losing
-        # searchable error labels and callouts is worse for technical manuals.
-        value = page.extract_text(extraction_mode="layout", layout_mode_strip_rotated=False) or ""
+        if extraction_mode == "layout":
+            # Layout mode otherwise drops rotated table labels and diagram text.
+            # Including them may slightly degrade spacing on those pages, but losing
+            # searchable error labels and callouts is worse for technical manuals.
+            value = page.extract_text(extraction_mode="layout", layout_mode_strip_rotated=False) or ""
+        else:
+            value = page.extract_text() or ""
     except (TypeError, ValueError, KeyError):
         value = page.extract_text() or ""
     finally:
@@ -208,6 +226,7 @@ def import_pdf_manuals(
     max_chars: int = 3200,
     min_chars: int = 300,
     min_searchable_ratio: float = 0.5,
+    extraction_mode: PdfTextExtractionMode = "layout",
     max_files: int | None = None,
     force: bool = False,
 ) -> dict[str, object]:
@@ -230,6 +249,8 @@ def import_pdf_manuals(
         raise ValueError("min_chars must be between zero and max_chars")
     if not 0.0 <= min_searchable_ratio <= 1.0:
         raise ValueError("min_searchable_ratio must be between zero and one")
+    if extraction_mode not in {"layout", "plain"}:
+        raise ValueError("extraction_mode must be 'layout' or 'plain'")
     if max_files is not None and max_files < 1:
         raise ValueError("max_files must be positive")
     if output.exists() and not force:
@@ -304,7 +325,7 @@ def import_pdf_manuals(
                 text_pages = image_only_pages = blank_pages = 0
                 warning_pages = uninterpretable_font_pages = rotated_text_pages = 0
                 for page_index, page in enumerate(reader.pages):
-                    text, warnings = _extract_page_text(page)
+                    text, warnings = _extract_page_text(page, extraction_mode)
                     if warnings:
                         warning_pages += 1
                     if any("uninterpretable font" in warning.casefold() for warning in warnings):
@@ -473,6 +494,7 @@ def import_pdf_manuals(
                 "max_chars": max_chars,
                 "min_chars": min_chars,
                 "min_searchable_ratio": min_searchable_ratio,
+                "text_extraction_mode": extraction_mode,
                 "max_files": max_files,
                 "ocr": False,
                 "title_overrides": len(normalized_title_overrides),
@@ -519,6 +541,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-chars", type=int, default=3200)
     parser.add_argument("--min-chars", type=int, default=300)
     parser.add_argument("--min-searchable-ratio", type=float, default=0.5)
+    parser.add_argument("--extraction-mode", choices=("layout", "plain"), default="layout")
     parser.add_argument("--max-files", type=int)
     parser.add_argument("--force", action="store_true")
     return parser
@@ -545,6 +568,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         max_chars=args.max_chars,
         min_chars=args.min_chars,
         min_searchable_ratio=args.min_searchable_ratio,
+        extraction_mode=args.extraction_mode,
         max_files=args.max_files,
         force=args.force,
     )

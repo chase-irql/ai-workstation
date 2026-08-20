@@ -5,6 +5,7 @@ param(
     [ValidateRange(128, 20000)][int]$MaxChars = 3200,
     [ValidateRange(0, 20000)][int]$MinChars = 300,
     [ValidateRange(0.0, 1.0)][double]$MinSearchableRatio = 0.5,
+    [ValidateSet('layout', 'plain')][string]$ExtractionMode,
     [ValidateRange(1, 1000000)][int]$MaxFiles,
     [switch]$Force
 )
@@ -31,6 +32,13 @@ $database = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.pat
 $runtime = Join-Path $root "runtime\pdf-manual-$DatasetId"
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $processed), (Split-Path -Parent $database), $runtime | Out-Null
 $env:PYTHONPATH = Join-Path $root 'rag\src'
+$resolvedExtractionMode = if ($ExtractionMode) {
+    $ExtractionMode
+} elseif ($dataset.ingestion -and $dataset.ingestion.PSObject.Properties.Name -contains 'pdf_text_extraction_mode') {
+    [string]$dataset.ingestion.pdf_text_extraction_mode
+} else {
+    'layout'
+}
 
 $importArguments = @(
     '-m', 'offline_rag.pdf_manuals',
@@ -43,6 +51,7 @@ $importArguments = @(
     '--max-chars', $MaxChars,
     '--min-chars', $MinChars,
     '--min-searchable-ratio', $MinSearchableRatio.ToString([Globalization.CultureInfo]::InvariantCulture)
+    '--extraction-mode', $resolvedExtractionMode
 )
 if ($dataset.acquisition.PSObject.Properties.Name -contains 'source_url_template') {
     $importArguments += @('--source-url-template', ([string]$dataset.acquisition.source_url_template))

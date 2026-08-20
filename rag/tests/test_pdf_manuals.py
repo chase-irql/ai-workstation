@@ -70,6 +70,26 @@ class PdfManualImportTests(unittest.TestCase):
         self.assertTrue(any("uninterpretable font" in warning for warning in warnings))
         self.assertTrue(any("Rotated text" in warning for warning in warnings))
 
+    def test_plain_mode_uses_content_stream_order_for_multicolumn_pages(self):
+        class TwoColumnPage:
+            calls: list[dict[str, object]] = []
+
+            def extract_text(self, **kwargs: object) -> str:
+                self.calls.append(kwargs)
+                if kwargs.get("extraction_mode") == "layout":
+                    return "half teaspoon SUGAR eight teaspoons SALT"
+                return "half teaspoon SALT\neight teaspoons SUGAR"
+
+        page = TwoColumnPage()
+        layout_text, _ = _extract_page_text(page, "layout")
+        plain_text, _ = _extract_page_text(page, "plain")
+        self.assertEqual(layout_text, "half teaspoon SUGAR eight teaspoons SALT")
+        self.assertEqual(plain_text, "half teaspoon SALT\neight teaspoons SUGAR")
+        self.assertEqual(page.calls[1], {})
+
+        with self.assertRaisesRegex(ValueError, "layout.*plain"):
+            _extract_page_text(page, "columns")  # type: ignore[arg-type]
+
     def test_page_aware_common_records_bm25_and_citations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -102,6 +122,7 @@ class PdfManualImportTests(unittest.TestCase):
             chunks = [json.loads(line) for line in (output / "chunks.jsonl").read_text(encoding="utf-8").splitlines()]
             self.assertEqual(manifest["importer"], "pdf-manuals-v1")
             self.assertFalse(manifest["configuration"]["ocr"])
+            self.assertEqual(manifest["configuration"]["text_extraction_mode"], "layout")
             self.assertTrue(stats["completed"])
             self.assertEqual(stats["stop_reason"], "source_complete")
             self.assertEqual(document["title"], "Pump Controller Manual — Corrected Title")
