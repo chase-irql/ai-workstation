@@ -2169,6 +2169,36 @@
       "notes": "Pinned to immutable official commit dff6acf8df597ceda73985308f838ed38417a606. The 190,331,982-byte archive has local SHA-256 0183f9e4955320c0b3fb34c75107cc521536afc0aef3de5fef15fa410a342868 and safely expands to 945 files / 208,705,787 bytes with no links; 733 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 199 modules yield 2,095 chunks in a verified 9,064,448-byte index. The 54-topic observation-through-cosmology-and-astrobiology stable-ID gate passes every configured metric at 1.0."
     },
     {
+      "dataset_id": "openstax-principles-economics",
+      "name": "OpenStax Principles of Economics 3e bundle",
+      "description": "Complete OpenStax Principles of Economics 3e, Principles of Microeconomics 3e, Principles of Macroeconomics 3e, and AP micro/macro economics sequences covering markets, firms, labor, public finance, money and banking, growth, inflation, unemployment, trade, policy, inequality, and environmental economics.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/principles-economics-3e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-principles-economics-bundle main commit d5cadb403718ff88078259a300eddc20d38563d5, 2026-07-09",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Principles of Economics 3e, Principles of Microeconomics 3e, Principles of Macroeconomics 3e, and AP micro/macro manifests and referenced CNXML modules from the immutable official snapshot",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-principles-economics-bundle/archive/d5cadb403718ff88078259a300eddc20d38563d5.tar.gz",
+        "source_commit": "d5cadb403718ff88078259a300eddc20d38563d5",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-principles-economics-bundle/blob/d5cadb403718ff88078259a300eddc20d38563d5/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-principles-economics-bundle-d5cadb403718ff88078259a300eddc20d38563d5",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "monetary policy central bank interest rates"
+      },
+      "storage": {"download_min_bytes": 25000000, "download_max_bytes": 300000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 400000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-principles-economics", "processed": "corpora/processed/textbooks/openstax-principles-economics", "index": "indexes/textbooks/openstax-principles-economics.sqlite3", "semantic_index": "indexes/semantic/openstax-principles-economics"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. Repository LICENSE and all five collection paths were checked before registration; collection licenses and shared module identities will be revalidated after extraction."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

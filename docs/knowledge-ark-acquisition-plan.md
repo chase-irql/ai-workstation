@@ -33,6 +33,10 @@ The complete official OpenStax Microbiology source at immutable main commit `633
 
 The complete official OpenStax Astronomy 2e source at immutable main commit `dff6acf8…` (2026-07-21) is acquired and evaluated. It adds a coherent path from naked-eye observation and orbital mechanics through stellar evolution, galaxies, cosmology, and astrobiology. Its locally pinned 190,331,982-byte archive safely expands to 945 files / 208,705,787 bytes; repository and collection notices confirm CC BY-NC-SA 4.0. All 199 modules yield 2,095 chunks in a verified 9,064,448-byte database, and a 54-topic stable-ID gate passes every configured metric. GitHub reports the source commit unsigned and supplies no adjacent archive digest, so only local integrity is claimed.
 
+### Active textbook extension: economics
+
+The next registered textbook is the official OpenStax Principles of Economics bundle at immutable main commit `d5cadb40…` (2026-07-09). Five collection manifests provide full Principles of Economics 3e, microeconomics, macroeconomics, and AP curricular paths, with substantial expected module reuse. It adds structured practical coverage of markets, firms, labor, money and banking, public policy, growth, inflation, unemployment, trade, inequality, and environmental economics. Acquisition is bounded to 300 MB compressed and 1 GB extracted, records a local SHA-256, validates archive structure and all collection licenses, and preserves every curricular occurrence while deduplicating only identical stable module IDs.
+
 ### Wave 1: operational Stack Exchange sites
 
 These reuse the bounded-memory Stack Exchange importer and therefore have the lowest implementation risk.
