@@ -19,6 +19,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `openssl-4.0-docs` | OpenSSL 4.0.1 POD manuals | Apache-2.0 | 960 manuals; 8,287 chunks | BM25 |
 | `openssh-10.5p1-docs` | OpenSSH Portable 10.5p1 manuals | BSD-style OpenSSH licenses | 19 documents; 195 chunks | BM25 |
 | `ninja-1.13-docs` | Ninja 1.13.2 manual at commit `3441b633…` | Apache-2.0 | 1 manual; 58 chunks | BM25 |
+| `postgresql-18-docs` | PostgreSQL 18.6 generated HTML documentation | PostgreSQL License | 1,148 documents; 6,931 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
@@ -153,6 +154,13 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Source is pinned by immutable commit `3441b633c2fe2c494e958780ba0f4227b1327634`, the object behind v1.13.2. Local source-archive SHA-256 is `bccc6197cd8c3ac2a439e26d6bf41506fe49c430cf3d593269a15379f24266ee`.
 - The one authoritative AsciiDoc manual produces 58 structured chunks covering build syntax, implicit/order-only dependencies, dyndep, depfiles, pools, response files, rule variables, scoping, tools, and default targets.
 - Its 11-topic lexical coverage gate passes every cutoff at `1.0`. This is a single-document coverage check, not an inter-document ranking claim.
+
+### PostgreSQL 18.6 documentation
+
+- Official archive: `https://ftp.postgresql.org/pub/source/v18.6/postgresql-18.6-docs.tar.gz`.
+- The 3,906,887-byte artifact is pinned by local SHA-256 `0419dec0d3b7ca55a80c0519a1dd88a8d172019ef9841288889f0281ea1f97ed`. PostgreSQL does not publish an adjacent digest for this docs-only archive, so the acquisition record explicitly distinguishes the local digest from a publisher checksum.
+- All 1,449 archive members and 19,416,147 extracted bytes passed path, size, and format validation. The complete generated HTML set produced 1,148 documents, 6,931 chunks, and a verified 22,126,592-byte BM25 database.
+- The 18-topic stable-ID gate exercises recovery, routine vacuuming, MVCC, concurrent indexes, query analysis, statistics, physical and logical replication, row security, JSONB indexes, deadlocks, partition pruning, backup, SCRAM authentication, full-text search, and generated/identity columns. Success@1/5/10, MRR@10, and Recall@10/50 are `1.0`; Recall@5 is `0.972222` and nDCG@10 is `0.985629` because some queries have multiple graded relevant references.
 
 ### DevOps Stack Exchange
 

@@ -67,6 +67,8 @@ CMake 4.4.2 and OpenSSL 4.0.1 extend Wave 3 with publisher-verified release arti
 
 OpenSSH Portable 10.5p1 and Ninja 1.13.2 add two compact operational references: 19 OpenSSH documents/195 chunks and the 58-chunk Ninja manual in about 1 MB of indexes. The OpenSSH pilot extended the roff path with OpenBSD `mdoc` semantics after a failed smoke query caught missing option names. Both suites now pass every lexical cutoff. Detached OpenSSH signature metadata is retained, but signature verification remains explicitly pending rather than being inferred from archive integrity.
 
+PostgreSQL 18.6 adds the complete generated HTML reference: 1,148 documents and 6,931 chunks in a 22,126,592-byte verified BM25 database. Its regression gate spans SQL features, administration, performance, recovery, replication, and security. The docs-only archive has no adjacent publisher digest, so the manifest records a local SHA-256 and complete validated member inventory without overstating publisher verification.
+
 The first Wave 4/manual pilot is also complete. FAA-H-8083-30B (2023) exercises the page-aware PDF path on a real 92,539,602-byte engineering handbook: 676 of 677 pages have searchable text, one cover is image-only, and 1,837 page-bounded chunks feed a verified 9,388,032-byte BM25 database. The importer retains outline/page citations and rotated labels, demotes front-matter matches, and fails atomically when a scan requires OCR. This makes it safe to expand into selected FAA, DOE, NASA, NIST, USACE, and equipment-specific manuals without pretending an image-only archive is searchable.
 
 ### Wave 3: official programming and systems documentation

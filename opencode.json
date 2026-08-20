@@ -109,6 +109,8 @@
         "openssh-10.5p1-docs=indexes\\documentation\\openssh-10.5p1.sqlite3",
         "--index",
         "ninja-1.13-docs=indexes\\documentation\\ninja-1.13.sqlite3",
+        "--index",
+        "postgresql-18-docs=indexes\\documentation\\postgresql-18.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
         "--corpus-vector",

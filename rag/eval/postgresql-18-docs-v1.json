@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "name": "PostgreSQL 18.6 documentation lexical gate",
+  "description": "Stable-document-ID gate for recovery, vacuuming, concurrency, query analysis, replication, security, JSON, partitioning, backup, authentication, and text search.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "pitr-001", "query": "continuous archiving recovery", "query_type": "backup_recovery", "relevance": {"postgresql-18-docs:6875edf686f5cde3d956cb90": 3}},
+    {"id": "vacuum-001", "query": "routine vacuuming autovacuum freeze relfrozenxid wraparound", "query_type": "maintenance", "relevance": {"postgresql-18-docs:8c0045edb4fbd191b4fe5b8d": 3}},
+    {"id": "mvcc-001", "query": "MVCC concurrent transactions snapshot", "query_type": "concurrency", "relevance": {"postgresql-18-docs:53aa4a0d3269c60718bee04c": 3}},
+    {"id": "index-concurrently-001", "query": "create index concurrently invalid index", "query_type": "indexing", "relevance": {"postgresql-18-docs:0ff0b9ff4c45510542b08d16": 3, "postgresql-18-docs:1aa2434f98a73a806467c42e": 2}},
+    {"id": "explain-001", "query": "EXPLAIN ANALYZE BUFFERS", "query_type": "performance", "relevance": {"postgresql-18-docs:c169a3e396a877e01c5d358b": 3}},
+    {"id": "stat-statements-001", "query": "pg_stat_statements planning execution statistics queryid", "query_type": "performance", "relevance": {"postgresql-18-docs:074ed516bdcb059c8fd0e59b": 3}},
+    {"id": "streaming-replication-001", "query": "streaming replication standby slots", "query_type": "replication", "relevance": {"postgresql-18-docs:07a88145fccc982b1a586cf8": 3, "postgresql-18-docs:2e4369eaf34096b937dbd720": 2, "postgresql-18-docs:2dc416ed0b6a2788ad9f5451": 1}},
+    {"id": "logical-replication-001", "query": "logical replication subscription", "query_type": "replication", "relevance": {"postgresql-18-docs:fc3bd780145ff5bfcead88b4": 3, "postgresql-18-docs:26fd68a0fcf6e0907627c7fb": 2}},
+    {"id": "basebackup-001", "query": "pg_basebackup incremental backup", "query_type": "backup_recovery", "relevance": {"postgresql-18-docs:a28f083f473080d2d654b129": 3}},
+    {"id": "row-security-001", "query": "row security policies enable row level security", "query_type": "security", "relevance": {"postgresql-18-docs:746821a39bbec988f02d20ca": 3}},
+    {"id": "jsonb-gin-001", "query": "jsonb GIN containment jsonb_path_ops", "query_type": "indexing", "relevance": {"postgresql-18-docs:9c77969dbfd90a8dd49d1362": 3}},
+    {"id": "deadlock-001", "query": "deadlocks explicit locking detected automatically", "query_type": "concurrency", "relevance": {"postgresql-18-docs:55983e24a67cc5a6e3649d11": 3}},
+    {"id": "partition-pruning-001", "query": "partition pruning execution initialization", "query_type": "performance", "relevance": {"postgresql-18-docs:c0e0946c353a197972dbfb6e": 3}},
+    {"id": "pg-dump-001", "query": "pg_dump parallel jobs directory format", "query_type": "backup_recovery", "relevance": {"postgresql-18-docs:364a9e14a5a55fa6d8368c94": 3}},
+    {"id": "hba-scram-001", "query": "pg_hba.conf SCRAM authentication", "query_type": "security", "relevance": {"postgresql-18-docs:3c53305502494d669ba55dc4": 3}},
+    {"id": "full-text-001", "query": "full text search tsvector tsquery", "query_type": "sql_feature", "relevance": {"postgresql-18-docs:492ee5658b9aae938278c0b4": 3}},
+    {"id": "generated-columns-001", "query": "generated columns virtual stored", "query_type": "sql_feature", "relevance": {"postgresql-18-docs:5d16ab30b82083000193e94a": 3}},
+    {"id": "identity-columns-001", "query": "identity columns generated always by default", "query_type": "sql_feature", "relevance": {"postgresql-18-docs:e322033ff820a242026b705e": 3}}
+  ]
+}
