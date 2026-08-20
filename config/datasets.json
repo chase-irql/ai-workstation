@@ -1550,6 +1550,61 @@
       "notes": "Selected from kernel.org's official releases feed as the current release on 2026-08-20. The 160,068,116-byte archive passed the publisher SHA-256 pinned from kernel.org's signed v7.x checksum manifest. Safe extraction validated 94,757 files / 1,615,609,096 bytes while skipping 99 archive links and portably encoding 19,753 Windows-incompatible members. Full source retention preserves license, build context, code examples, and provenance; retrieval is scoped to the English Documentation tree. Its 4,154 documents and 29,142 chunks produced an 80,310,272-byte verified BM25 database. A 44-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
+      "dataset_id": "llvm-project-22.1.8-docs",
+      "name": "LLVM Project 22.1.8 Documentation",
+      "description": "Official LLVM, Clang, clang-tools-extra, LLD, LLDB, libc++, Flang, MLIR, Polly, OpenMP, and compiler-rt documentation from the coordinated LLVM 22.1.8 release.",
+      "category": "compiler-toolchain-documentation",
+      "official_source_url": "https://llvm.org/docs/",
+      "license": "Apache License 2.0 with LLVM Exceptions; per-file notices retained",
+      "attribution": "LLVM Project contributors",
+      "release": "22.1.8",
+      "update_frequency": "each LLVM maintenance release",
+      "scope": "documentation source trees for the major LLVM 22.1.8 subprojects; source code, tests, generated artifacts, historical release notes, and non-documentation assets excluded from text retrieval but retained raw",
+      "formats": ["reStructuredText", "Markdown", "plain text", "tar.xz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/llvm-project-22.1.8.src.tar.xz",
+        "publisher_checksum_algorithm": "sha256",
+        "publisher_checksum": "922f1817a0df7b1489272d18134ee0087a8b068828f87ac63b9861b1a9965888",
+        "publisher_checksum_source": "https://api.github.com/repos/llvm/llvm-project/releases/tags/llvmorg-22.1.8",
+        "attestation": "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/llvm-project-22.1.8.src.tar.xz.jsonl",
+        "source_tag": "llvmorg-22.1.8",
+        "source_url_template": "https://github.com/llvm/llvm-project/blob/llvmorg-22.1.8/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "llvm-project-22.1.8.src",
+        "include_globs": [
+          "llvm/docs/*.rst", "llvm/docs/**/*.rst", "llvm/docs/*.md", "llvm/docs/**/*.md",
+          "clang/docs/*.rst", "clang/docs/**/*.rst", "clang/docs/*.md", "clang/docs/**/*.md",
+          "clang-tools-extra/docs/*.rst", "clang-tools-extra/docs/**/*.rst",
+          "lld/docs/*.rst", "lld/docs/**/*.rst",
+          "lldb/docs/*.rst", "lldb/docs/**/*.rst", "lldb/docs/*.md", "lldb/docs/**/*.md",
+          "libcxx/docs/*.rst", "libcxx/docs/**/*.rst",
+          "flang/docs/*.md", "flang/docs/**/*.md", "flang/docs/*.rst", "flang/docs/**/*.rst",
+          "mlir/docs/*.md", "mlir/docs/**/*.md", "mlir/docs/*.rst", "mlir/docs/**/*.rst",
+          "polly/docs/*.rst", "polly/docs/**/*.rst",
+          "openmp/docs/*.rst", "openmp/docs/**/*.rst",
+          "compiler-rt/docs/*.rst", "compiler-rt/docs/**/*.rst"
+        ],
+        "exclude_globs": ["**/ReleaseNotes.rst", "**/ReleaseNotes/**", "**/releases/**"],
+        "smoke_query": "Clang AddressSanitizer instrumentation"
+      },
+      "storage": {
+        "download_min_bytes": 160000000,
+        "download_max_bytes": 175000000,
+        "extracted_max_bytes": 2500000000,
+        "indexed_max_bytes": 300000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/llvm-project-22.1.8",
+        "processed": "corpora/processed/documentation/llvm-project-22.1.8",
+        "index": "indexes/documentation/llvm-project-22.1.8.sqlite3",
+        "semantic_index": "indexes/semantic/llvm-project-22.1.8-docs"
+      },
+      "status": "planned",
+      "notes": "Pinned to the official LLVM 22.1.8 GitHub release asset. GitHub's release API publishes the SHA-256 and the release supplies a Sigstore attestation bundle. The complete source archive is retained while ordinary retrieval is restricted to current documentation source trees."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

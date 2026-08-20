@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 50)
+        self.assertEqual(len(datasets), 51)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -37,6 +37,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("gcc-16.2-manual", dataset_ids)
         self.assertIn("cpp-16.2-manual", dataset_ids)
         self.assertIn("linux-kernel-7.2-docs", dataset_ids)
+        self.assertIn("llvm-project-22.1.8-docs", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",
