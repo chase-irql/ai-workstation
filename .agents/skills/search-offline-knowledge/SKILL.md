@@ -35,6 +35,8 @@ retry the query, not permission to bypass it.
 
 ## Identifier and citation integrity
 
+- Cite claims with each result's `citation_reference` (for example, `[S1]`). At the end, copy the corresponding `copy_ready_citations.sources[].citation_markdown` value verbatim into a Sources list.
+- Treat `citation_markdown` as an opaque, server-generated artifact. Do not regenerate its label, URL, underscores, punctuation, or path from any other field.
 - Copy `knowledge_corpus`, `document_id`, `chunk_id`, `title`, `source_url`, page/heading, and `citation` exactly as returned.
 - Never shorten, reconstruct, normalize, or manually retype an identifier or URL.
 - Never remove underscores or the corpus prefix from an identifier.
@@ -63,4 +65,4 @@ retry the query, not permission to bypass it.
 - `retrieve_knowledge_document`: bounded reading only when context expansion is insufficient.
 - `knowledge_index_status`: diagnostics and corpus discovery, not a required prelude to every search.
 
-Return a concise answer followed by the exact citation strings and source URLs returned by the tools unless the user requests another format. A document ID alone is not a citation.
+Return a concise answer with `[S#]` references followed by the server-generated `citation_markdown` source lines unless the user requests another format. A document ID alone is not a citation.

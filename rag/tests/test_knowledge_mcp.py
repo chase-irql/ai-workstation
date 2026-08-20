@@ -98,7 +98,7 @@ The guidance computer exchanged telemetry with mission systems.
 """,
             encoding="utf-8",
         )
-        (source / "protocol.md").write_text(
+        (source / "protocol_reference.md").write_text(
             """# Test Transport Protocol
 
 Connection migration allows an endpoint to move to a new network path.
@@ -145,6 +145,14 @@ Connection migration allows an endpoint to move to a new network path.
                 results = search.structured_content["results"]
                 self.assertEqual({item["knowledge_corpus"] for item in results}, {"wikipedia", "test-docs"})
                 wikipedia_result = next(item for item in results if item["knowledge_corpus"] == "wikipedia")
+                self.assertEqual(wikipedia_result["citation_reference"], "S1")
+                self.assertIn("citation_markdown", wikipedia_result)
+                copy_ready = search.structured_content["copy_ready_citations"]
+                self.assertEqual(copy_ready["sources"][0]["reference"], "S1")
+                self.assertEqual(
+                    copy_ready["sources"][0]["source_url"],
+                    wikipedia_result["source_url"],
+                )
                 context = asyncio.run(
                     server.call_tool(
                         "retrieve_knowledge_context",
@@ -158,6 +166,7 @@ Connection migration allows an endpoint to move to a new network path.
                 self.assertFalse(context.is_error)
                 self.assertTrue(context.structured_content["context"]["clamped"])
                 self.assertEqual(context.structured_content["knowledge_corpus"], "wikipedia")
+                self.assertTrue(context.structured_content["copy_ready_citations"]["sources"])
 
                 filtered = asyncio.run(
                     server.call_tool(
@@ -185,6 +194,24 @@ Connection migration allows an endpoint to move to a new network path.
                     asyncio.run(
                         server.call_tool("search_knowledge", {"query": "test", "corpora": ["missing"]})
                     )
+            finally:
+                close_knowledge_mcp_server(server)
+
+    def test_copy_ready_citation_preserves_url_verbatim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            _, documentation = self.prepare(Path(directory))
+            server = create_knowledge_mcp_server([KnowledgeCorpus("test-docs", documentation)])
+            try:
+                result = asyncio.run(
+                    server.call_tool(
+                        "search_knowledge",
+                        {"query": "connection migration", "corpora": ["test-docs"], "limit": 1},
+                    )
+                ).structured_content
+                source = result["copy_ready_citations"]["sources"][0]
+                self.assertEqual(source["source_url"], "https://example.test/docs/protocol_reference.md")
+                self.assertIn("(<https://example.test/docs/protocol_reference.md>)", source["citation_markdown"])
+                self.assertEqual(result["results"][0]["citation_markdown"], source["citation_markdown"])
             finally:
                 close_knowledge_mcp_server(server)
 

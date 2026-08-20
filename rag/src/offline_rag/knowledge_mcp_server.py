@@ -8,6 +8,7 @@ from typing import Annotated, Any, Literal
 from mcp.server import MCPServer
 from pydantic import Field
 
+from .citations import add_copy_ready_citations
 from .embeddings import OllamaEmbeddingClient, load_embedding_model_config
 from .knowledge import KnowledgeCorpus, KnowledgeRuntime
 from .retrieval_runtime import RETRIEVAL_MODES, CachedEmbeddingProvider
@@ -34,7 +35,8 @@ def create_knowledge_mcp_server(
             "Use search_knowledge to find cited evidence across local corpora. Pass a corpus filter "
             "when the source type is known. Search results include the knowledge_corpus and chunk_id; "
             "pass both to retrieve_knowledge_context for focused neighboring evidence. Use "
-            "retrieve_knowledge_document only for small paginated reads. Preserve returned citations."
+            "retrieve_knowledge_document only for small paginated reads. Cite with the returned "
+            "citation_reference and copy citation_markdown verbatim; never reconstruct a source URL."
         ),
         version="0.1.0",
     )
@@ -68,7 +70,7 @@ def create_knowledge_mcp_server(
             "effective_limit": limit,
             "clamped": requested_limit != limit,
         }
-        return result
+        return add_copy_ready_citations(result, result["results"])
 
     @server.tool(structured_output=True)
     def retrieve_knowledge_document(
@@ -96,7 +98,9 @@ def create_knowledge_mcp_server(
             "effective_limit": chunk_limit,
             "clamped": requested_offset != chunk_offset or requested_limit != chunk_limit,
         }
-        return result
+        for chunk in result["chunks"]:
+            chunk.setdefault("source_url", result["document"].get("source_url"))
+        return add_copy_ready_citations(result, result["chunks"])
 
     @server.tool(structured_output=True)
     def retrieve_knowledge_context(
@@ -115,7 +119,9 @@ def create_knowledge_mcp_server(
         result["context"]["requested_before"] = requested_before
         result["context"]["requested_after"] = requested_after
         result["context"]["clamped"] = requested_before != before or requested_after != after
-        return result
+        for chunk in result["chunks"]:
+            chunk.setdefault("source_url", result["document"].get("source_url"))
+        return add_copy_ready_citations(result, result["chunks"])
 
     @server.tool(structured_output=True)
     def knowledge_index_status() -> dict[str, Any]:

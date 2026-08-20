@@ -275,7 +275,7 @@ Update planning is side-by-side and reuse-aware; it does not require blindly rec
 - Dataset manifests record releases, source URLs, hashes, licenses, paths, and processing status.
 - Partial downloads and interrupted vector generations are resumable.
 - Stable document IDs and content-derived IDs support comparisons and embedding reuse across updates.
-- Retrieval results retain source URLs, versions, headings, timestamps, and ready-to-use citations.
+- Retrieval results retain source URLs, versions, headings, timestamps, stable source references, and server-generated copy-ready Markdown citations.
 - MCP and HTTP retrieval interfaces are read-only by default.
 
 The common lifecycle is:
