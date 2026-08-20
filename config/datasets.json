@@ -1546,8 +1546,8 @@
         "index": "indexes/documentation/linux-kernel-7.2.sqlite3",
         "semantic_index": "indexes/semantic/linux-kernel-7.2-docs"
       },
-      "status": "planned",
-      "notes": "Selected from kernel.org's official releases feed as the current release on 2026-08-20. The publisher SHA-256 is pinned from kernel.org's signed v7.x checksum manifest. Full source retention preserves license, build context, code examples, and provenance while retrieval remains scoped to structured English documentation."
+      "status": "evaluated",
+      "notes": "Selected from kernel.org's official releases feed as the current release on 2026-08-20. The 160,068,116-byte archive passed the publisher SHA-256 pinned from kernel.org's signed v7.x checksum manifest. Safe extraction validated 94,757 files / 1,615,609,096 bytes while skipping 99 archive links and portably encoding 19,753 Windows-incompatible members. Full source retention preserves license, build context, code examples, and provenance; retrieval is scoped to the English Documentation tree. Its 4,154 documents and 29,142 chunks produced an 80,310,272-byte verified BM25 database. A 44-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

@@ -29,6 +29,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `typescript-docs-20260820` | Official TypeScript website commit `90e92beb…`, 2026-08-20 | CC-BY-4.0 | 77 documents; 935 chunks | BM25 |
 | `gdb-17.2-manual` | GNU GDB 17.2 last-release manual | GFDL 1.3 or later with stated invariant and cover texts | 863 documents; 2,225 chunks | BM25 |
 | `gcc-16.2-manual` | GNU Compiler Collection 16.2 user manual | GFDL 1.3 or later with stated invariant and cover texts | 523 documents; 1,695 chunks | BM25 |
+| `linux-kernel-7.2-docs` | Linux 7.2 official source documentation | GPL-2.0-only and per-file SPDX licenses retained | 4,154 documents; 29,142 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
@@ -99,9 +100,19 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Coreutils 9.11, Gawk 5.4, Grep 3.12, and Make 4.4.1 use the same official generated split-HTML publication format and canonical per-node URLs.
 - GNU does not provide adjacent cryptographic digests for these generated documentation archives. Each acquisition manifest pins a local SHA-256 and records the exact download URL, generation label, tar member inventory, extracted byte count, and validation result.
 - The four archives produced 959 documents and 2,497 chunks. Each six-topic stable-ID lexical gate passes every ranking cutoff.
+
 - Gawk includes two pairs of upstream paths distinguished only by case. The importer preserves both with deterministic collision IDs while leaving all ordinary path-derived IDs unchanged.
 - Sed, Tar, Findutils, and Diffutils use the same validated publication path. Their 738 documents and 1,490 chunks cover stream editing, archives and recovery, safe file traversal, command batching, comparisons, patches, and merging.
 - glibc 2.44, Gzip 1.14, Wget 1.25.0, and GRUB 2.14 add 1,437 documents and 3,623 chunks covering C/POSIX interfaces, compression integrity, resilient downloads, and boot recovery. The glibc archive is pinned directly from the official Sourceware publication rather than the insecure redirect on the legacy GNU URL.
+
+### Linux kernel documentation
+
+- Official archive: Linux 7.2 source from kernel.org, released 2026-08-16.
+- Publisher SHA-256: `f9fef3d14c0df53819026f4be74459835c2a0b0dcbf5b5bbd9ea19f0829402b3`, verified against kernel.org's signed v7.x manifest.
+- The full 160,068,116-byte source archive is retained for provenance, licenses, examples, and future code-aware ingestion. Text retrieval is restricted to the English `Documentation` tree and excludes translations, build output, source code, and binary assets.
+- Safe extraction validated 94,757 regular files / 1,615,609,096 bytes, skipped 99 archive links, and reversibly encoded 19,753 Windows-incompatible member names.
+- The common-record generation contains 4,154 documents and 29,142 chunks. The 80,310,272-byte FTS5 database passes checksum, manifest, row-count, foreign-key, integrity, smoke-query, and citation verification.
+- Its 44-topic stable-ID gate covers administration, troubleshooting, builds, synchronization, scheduling, memory, filesystems, networking, BPF, tracing, security, drivers, firmware, power management, isolation, ABI stability, and development; every lexical metric cutoff is `1.0`.
 
 ### Linux man-pages
 
