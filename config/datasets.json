@@ -1015,7 +1015,7 @@
         ]
       },
       "ingestion": {
-        "smoke_query": "turbine engine compressor combustion section maintenance"
+        "smoke_query": "gas turbine compressor combustion turbine"
       },
       "storage": {
         "download_min_bytes": 325000000,
@@ -1029,8 +1029,8 @@
         "index": "indexes/manuals/faa-amt-airframe-powerplant-2023.sqlite3",
         "semantic_index": "indexes/semantic/faa-amt-airframe-powerplant-2023"
       },
-      "status": "planned",
-      "notes": "The FAA's current aviation handbooks page identifies FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant as the 2023 companions to the already published General corpus. Official HEAD checks on 2026-08-20 report application/pdf assets of 111,959,636 and 214,668,861 bytes (326,628,497 total), last modified in July 2023. The FAA exposes no adjacent publisher digests, so acquisition will record local per-file SHA-256 values without claiming publisher verification. Full page/text-layer validation is required before publication."
+      "status": "evaluated",
+      "notes": "Acquired the two official FAA PDFs (326,628,497 bytes total) and pinned local SHA-256 e5adb2696b545344b42bf7bf93c113ea94ff1456e8f8f772a6b6b02e243c4f13 for Airframe and 7fe4ee09e6593af9307df1d1088d93be39ffa3839ad376ed975c0c952a066eb2 for Powerplant; the FAA provides no adjacent publisher digests. Page-aware import examined 1,552 pages: 1,550 have searchable text and the two covers are image-only. It recorded 183 rotated-text pages for targeted visual review, with no uninterpretable-font pages, and published 3,498 chunks in a 19,853,312-byte database. Integrity, foreign-key, row-count, FTS-count, citation, and discriminating Powerplant smoke-query validation passed. The 47-topic Airframe/Powerplant stable-ID gate achieved every Success, Recall, MRR, and nDCG cutoff at 1.0. The handbooks are generalized training references and do not supersede regulations or manufacturer instructions."
     },
     {
       "dataset_id": "cmake-4.4-docs",

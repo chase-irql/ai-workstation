@@ -25,11 +25,11 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
-### Active repair-handbook extension: FAA Airframe and Powerplant
+### Completed repair-handbook extension: FAA Airframe and Powerplant
 
-The next bounded practical-repair set completes the FAA Aviation Maintenance Technician trilogy. The current FAA page identifies the 2023 FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant handbooks as companions to the already indexed General volume. Official files are 111,959,636 and 214,668,861 bytes (326,628,497 bytes total), both respond as PDFs, and their July 2023 modification dates agree with the FAA catalog. They cover aircraft structures and systems plus reciprocating/turbine engines, their subsystems, maintenance, and troubleshooting.
+The bounded practical-repair set completing the FAA Aviation Maintenance Technician trilogy is acquired and evaluated. The current FAA page identifies the 2023 FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant handbooks as companions to the already indexed General volume. Official files are 111,959,636 and 214,668,861 bytes (326,628,497 bytes total), and their July 2023 modification dates agree with the FAA catalog. Local SHA-256 values pin both files because the FAA provides no adjacent publisher digests.
 
-The registry caps the raw set at 329 MB and its index at 1.5 GB. Acquisition is resumable and per-file hashed; the FAA provides no adjacent publisher digests. Both handbooks must pass the all-file text-layer, page-citation, warning-accounting, database-validation, and stable-ID evaluation gates before the corpus is served.
+The page-aware import examined all 1,552 pages: 1,550 have searchable text and the two covers are image-only. It records 183 rotated-text pages for targeted visual QA and no uninterpretable-font pages. The 3,498 page-bounded chunks occupy a verified 19,853,312-byte database. A 47-topic gate spanning structures, rigging, hydraulics, landing gear, fuel, electrical, instruments, cabin systems, reciprocating engines, turbine engines, propellers, maintenance, and troubleshooting achieves every Success, Recall, MRR, and nDCG cutoff at 1.0. These generalized training references do not supersede regulations or manufacturer instructions.
 
 ### Completed engineering-handbook extension: DOE Fundamentals
 

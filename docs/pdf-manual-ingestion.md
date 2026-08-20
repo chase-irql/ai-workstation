@@ -64,6 +64,8 @@ The pilot revealed rotated text in diagrams and tables. The importer keeps this 
 
 The second validated corpus is the complete 22-volume DOE Fundamentals archive. It exercises bounded multi-file acquisition, file-set source paths, reviewed title overrides, and structured extraction-warning counts. Across 2,842 pages, 2,692 have searchable text, 6 are image-only, and 144 are blank; 108 pages report legacy uninterpretable fonts and one reports rotated text. The resulting 5,533 chunks occupy a 25,423,872-byte verified BM25 database. Its 59-topic inter-volume gate has Success@1/5/10, Recall@5/10/50, and MRR@10 of `1.0`, with nDCG@10 `0.999418`. Because these handbooks are archived/canceled, citations must not present them as current DOE policy or current safety requirements.
 
+FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant complete the AMT handbook trilogy. The two 2023 PDFs contain 1,552 pages; 1,550 are searchable and two covers are image-only. The importer records 183 rotated-text pages and no uninterpretable-font pages. Their 3,498 chunks produce a 19,853,312-byte verified index, and a 47-topic Airframe/Powerplant gate passes every configured metric at `1.0`. The handbooks themselves state that generalized material does not replace regulations or manufacturer instructions.
+
 ## Current limitations
 
 - No OCR or handwriting recognition.

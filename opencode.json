@@ -104,6 +104,8 @@
         "--index",
         "doe-fundamentals-handbooks=indexes\\manuals\\doe-fundamentals-handbooks.sqlite3",
         "--index",
+        "faa-amt-airframe-powerplant-2023=indexes\\manuals\\faa-amt-airframe-powerplant-2023.sqlite3",
+        "--index",
         "cmake-4.4-docs=indexes\\documentation\\cmake-4.4.sqlite3",
         "--index",
         "openssl-4.0-docs=indexes\\documentation\\openssl-4.0.sqlite3",
