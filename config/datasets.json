@@ -1431,6 +1431,43 @@
       },
       "status": "evaluated",
       "notes": "Pinned to GitHub-verified commit 90e92beb7b1da8c5408f2cf0fb83c55d380a2886. The 14,392,039-byte archive has local SHA-256 b84fd093c7cf3dd4f67dfbb87ab1b9c8e1c49c08dff372acdc1aaeea32401245; GitHub supplied no adjacent publisher digest, so archive structure and 1,026 extracted files / 19,430,545 bytes were validated and the commit identity was independently verified. Retrieval scopes the 77 current English handbook/reference documents and excludes legacy handbook-v1, historical release notes, and Nightly Builds while retaining them raw. The corpus produced 935 chunks and a 2,441,216-byte verified BM25 database. The 40-topic lexical gate covers language features, type manipulation, JavaScript/JSDoc, modules, declarations, project configuration, migration, and tutorials."
+    },
+    {
+      "dataset_id": "gdb-17.2-manual",
+      "name": "GNU GDB 17.2 Manual",
+      "description": "Official GNU debugger guide covering execution control, breakpoints, stack and data inspection, core files, remote targets, tracing, Python extensions, and the machine interface.",
+      "category": "programming-tool-documentation",
+      "official_source_url": "https://sourceware.org/gdb/download/onlinedocs/gdb.html/",
+      "license": "GNU Free Documentation License 1.3 or later with the invariant and cover texts stated in the manual",
+      "attribution": "Free Software Foundation and GDB contributors",
+      "release": "17.2-manual-2026-05-10",
+      "update_frequency": "GDB release",
+      "scope": "complete official GDB 17.2 user manual, one HTML page per node",
+      "formats": ["HTML", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://sourceware.org/gdb/download/onlinedocs/gdb.html.html.tar.gz",
+        "source_url_template": "https://sourceware.org/gdb/download/onlinedocs/gdb.html/{relative_path}"
+      },
+      "ingestion": {
+        "smoke_query": "breakpoint conditions condition command",
+        "include_globs": ["*.html"],
+        "exclude_globs": ["index.html", "Command-and-Variable-Index.html", "Concept-Index.html"]
+      },
+      "storage": {
+        "download_min_bytes": 1000000,
+        "download_max_bytes": 1100000,
+        "extracted_max_bytes": 8000000,
+        "indexed_max_bytes": 7000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/gdb-17.2",
+        "processed": "corpora/processed/documentation/gdb-17.2",
+        "index": "indexes/documentation/gdb-17.2.sqlite3",
+        "semantic_index": "indexes/semantic/gdb-17.2-manual"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to Sourceware's official last-release documentation page for GDB 17.2. The 1,040,741-byte archive has local SHA-256 485224e760a2d6d5891edb3a7ae3f07b0337d9c9351c640cedc75696ba9f9253; Sourceware supplied no adjacent digest, so tar structure and 866 extracted files / 7,309,202 bytes were validated. Retrieval excludes only the duplicate top page and the two generated term indexes. The remaining 863 manual nodes produced 2,225 chunks and a 6,328,320-byte verified BM25 database. The 37-topic lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     }
   ]
 }
