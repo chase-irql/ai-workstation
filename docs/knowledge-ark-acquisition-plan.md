@@ -25,6 +25,10 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
+### Active textbook extension: microbiology
+
+The next registered textbook is the complete official OpenStax Microbiology source at immutable main commit `63385025…` (2026-07-08). It fills the gap between general biology and clinical reference with structured coverage of microbial cell biology, genetics, diversity, epidemiology, immunology, antimicrobial drugs, and infectious diseases. GitHub reports an unsigned commit and no publisher archive digest, so acquisition will record a local SHA-256, validate archive structure, enforce an 800 MB download ceiling and 2 GB extraction ceiling, confirm the collection license, and retain an explicit educational-not-clinical limitation. The existing OpenStax CNXML importer is reused only after source and collection structure validation.
+
 ### Wave 1: operational Stack Exchange sites
 
 These reuse the bounded-memory Stack Exchange importer and therefore have the lowest implementation risk.

@@ -2109,6 +2109,36 @@
       "notes": "Pinned to immutable official commit 1f6a35825395bb4aa2834cf1eca37512655f920c. The 69,074,097-byte archive has local SHA-256 3ecc98e6641bef622c48e5f031fda94f0cc3381201c46265f66ff016ef4d324d and safely expands to 1,546 files / 100,079,098 bytes with no links; 691 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and both collection manifests confirm CC BY-NC-SA 4.0. The 77 business-statistics and 102 general-statistics modules yield 179 stable documents and 6,011 chunks in a verified 11,792,384-byte index. The 51-topic descriptive-statistics-through-ANOVA stable-ID gate passes every configured metric at 1.0."
     },
     {
+      "dataset_id": "openstax-microbiology",
+      "name": "OpenStax Microbiology",
+      "description": "Complete OpenStax microbiology textbook covering microscopy, cell structure, metabolism, microbial genetics, classification, microbial diversity, pathogenicity, epidemiology, innate and adaptive immunity, clinical microbiology, antimicrobial drugs, and infectious diseases by body system.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/microbiology",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-microbiology main commit 633850257fbd3ccf6187b9428c55e80b69236382, 2026-07-08",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Microbiology manifest and referenced CNXML modules from the immutable official snapshot",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-microbiology/archive/633850257fbd3ccf6187b9428c55e80b69236382.tar.gz",
+        "source_commit": "633850257fbd3ccf6187b9428c55e80b69236382",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-microbiology/blob/633850257fbd3ccf6187b9428c55e80b69236382/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-microbiology-633850257fbd3ccf6187b9428c55e80b69236382",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "mechanisms antimicrobial drug resistance"
+      },
+      "storage": {"download_min_bytes": 100000000, "download_max_bytes": 800000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 500000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-microbiology", "processed": "corpora/processed/textbooks/openstax-microbiology", "index": "indexes/textbooks/openstax-microbiology.sqlite3", "semantic_index": "indexes/semantic/openstax-microbiology"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. The repository license begins with CC BY-NC-SA 4.0; the collection manifest and extracted license must be revalidated before publication. This is dated educational microbiology, not current clinical guidance."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
