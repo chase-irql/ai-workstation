@@ -1736,6 +1736,47 @@
       "notes": "Sourceware identifies these files as the HTML conversion of the documentation included in GNU Binutils 2.47 and dates the publication 2026-07-26. The bounded HTTP file-set acquisition validated and individually SHA-256-pinned all 8 manuals (6,914,167 bytes total); Sourceware provides no adjacent digests, so no publisher-checksum claim is made. The common-record generation contains 8 independently citable manuals and 1,807 chunks in a 6,664,192-byte verified BM25 database. The upstream BFD page's generic 'Untitled Document' metadata is deterministically corrected to 'BFD Library'. Its 33-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
+      "dataset_id": "dotnet-docs-20260820",
+      "name": ".NET Documentation Snapshot",
+      "description": "Official Microsoft .NET, C#, F#, Visual Basic, runtime, libraries, deployment, architecture, desktop, cloud, data, and application-development conceptual documentation.",
+      "category": "programming-platform-documentation",
+      "official_source_url": "https://learn.microsoft.com/dotnet/",
+      "license": "Creative Commons Attribution 4.0 International; repository and per-file notices retained",
+      "attribution": "Microsoft and .NET documentation contributors",
+      "release": "main commit e2fe6aca79d1a7296241f144a43dbccf42d58a47, 2026-08-19",
+      "update_frequency": "monthly snapshot or before major .NET upgrades",
+      "scope": "all official Markdown under docs from the immutable snapshot; shared DocFX includes expanded into canonical pages; standalone include fragments, samples, media, build metadata, and source code excluded from retrieval but retained raw",
+      "formats": ["Markdown", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/dotnet/docs/archive/e2fe6aca79d1a7296241f144a43dbccf42d58a47.tar.gz",
+        "source_commit": "e2fe6aca79d1a7296241f144a43dbccf42d58a47",
+        "source_commit_verified": true,
+        "source_url_template": "https://github.com/dotnet/docs/blob/e2fe6aca79d1a7296241f144a43dbccf42d58a47/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "docs-e2fe6aca79d1a7296241f144a43dbccf42d58a47",
+        "include_globs": ["docs/*.md", "docs/**/*.md"],
+        "exclude_globs": ["docs/includes/**", "docs/**/includes/**"],
+        "resolve_docfx_includes": true,
+        "smoke_query": ".NET framework-dependent deployment runtimeconfig"
+      },
+      "storage": {
+        "download_min_bytes": 50000000,
+        "download_max_bytes": 300000000,
+        "extracted_max_bytes": 1000000000,
+        "indexed_max_bytes": 2000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/dotnet-docs-20260820",
+        "processed": "corpora/processed/documentation/dotnet-docs-20260820",
+        "index": "indexes/documentation/dotnet-docs-20260820.sqlite3",
+        "semantic_index": "indexes/semantic/dotnet-docs-20260820"
+      },
+      "status": "planned",
+      "notes": "Pinned to the current official dotnet/docs main commit observed on 2026-08-20. GitHub does not publish a digest for commit archives, so acquisition will pin a local SHA-256 and validate archive structure without claiming publisher-checksum verification. The 23,578-file tree contains about 68 MiB of Markdown plus samples/media; retrieval is limited to canonical docs while DocFX include fragments are expanded safely and excluded as standalone citations."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

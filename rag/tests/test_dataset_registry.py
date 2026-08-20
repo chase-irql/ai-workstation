@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 54)
+        self.assertEqual(len(datasets), 55)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -41,6 +41,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("go-1.26.7-docs", dataset_ids)
         self.assertIn("podman-6.1-docs", dataset_ids)
         self.assertIn("binutils-2.47-docs", dataset_ids)
+        self.assertIn("dotnet-docs-20260820", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",

@@ -7,6 +7,7 @@ import hashlib
 import html
 import json
 import os
+import posixpath
 import re
 import shlex
 import shutil
@@ -46,6 +47,7 @@ HUGO_SHORTCODE_RE = re.compile(r"\{\{[<%]\s*(.*?)\s*[>%]\}\}")
 HUGO_HEADING_RE = re.compile(r'^\s*\{\{[<%]\s*heading\s+["\']([^"\']+)["\']\s*[>%]\}\}\s*$')
 HUGO_COMMENT_OPEN_RE = re.compile(r"^\s*\{\{[<%]\s*comment(?:\s+.*?)?\s*[>%]\}\}\s*$")
 HUGO_COMMENT_CLOSE_RE = re.compile(r"^\s*\{\{[<%]\s*/\s*comment\s*[>%]\}\}\s*$")
+DOCFX_INCLUDE_RE = re.compile(r"(?im)^\s*\[!INCLUDE\s+\[[^\]]*\]\(([^)]+)\)\]\s*$")
 MARKDOWN_HEADING_ATTRIBUTE_RE = re.compile(r"\s+\{#[A-Za-z0-9_.:-]+\}\s*$")
 MAN_MACRO_RE = re.compile(r"^\.([A-Za-z]{1,4})\s*(.*)$")
 RFC_MARKER_RE = re.compile(r"(?im)^\s*(?:Request for Comments|RFC)\s*:\s*\d+")
@@ -1586,6 +1588,55 @@ def _read_source(path: Path) -> tuple[str, str]:
     raise UnicodeError(f"Unable to decode documentation source: {path}")
 
 
+def _resolve_docfx_includes(
+    text: str,
+    relative: str,
+    sources: dict[str, Path],
+    *,
+    stack: tuple[str, ...] = (),
+) -> str:
+    """Expand local DocFX Markdown include directives without leaving the source tree."""
+
+    if relative in stack:
+        chain = " -> ".join((*stack, relative))
+        raise ValueError(f"DocFX include cycle detected: {chain}")
+    current_stack = (*stack, relative)
+
+    def replace_include(match: re.Match[str]) -> str:
+        raw_target = match.group(1).strip()
+        if raw_target.startswith("<") and raw_target.endswith(">"):
+            raw_target = raw_target[1:-1].strip()
+        # DocFX accepts an optional quoted title after an unquoted path.  The
+        # repositories in scope use URL encoding for path spaces, so splitting
+        # on whitespace is deterministic here.
+        target = raw_target.split(maxsplit=1)[0].split("#", 1)[0].split("?", 1)[0]
+        target = unquote(target).replace("\\", "/")
+        if target.startswith("~/"):
+            candidate = target[2:]
+        else:
+            candidate = posixpath.join(posixpath.dirname(relative), target)
+        normalized = posixpath.normpath(candidate)
+        if (
+            not normalized
+            or normalized == ".."
+            or normalized.startswith("../")
+            or posixpath.isabs(candidate)
+            or re.match(r"^[A-Za-z]:", candidate)
+        ):
+            raise ValueError(f"DocFX include escapes the source root: {relative!r} -> {raw_target!r}")
+        included_path = sources.get(normalized)
+        if included_path is None:
+            raise ValueError(f"DocFX include target was not found: {relative!r} -> {normalized!r}")
+        before = included_path.stat()
+        included_text, _ = _read_source(included_path)
+        after = included_path.stat()
+        if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+            raise RuntimeError(f"DocFX include changed during import: {included_path}")
+        return _resolve_docfx_includes(included_text, normalized, sources, stack=current_stack)
+
+    return DOCFX_INCLUDE_RE.sub(replace_include, text)
+
+
 def _stable_id(corpus: str, relative: str) -> str:
     digest = hashlib.sha256(relative.casefold().encode("utf-8")).hexdigest()[:24]
     return f"{corpus}:{digest}"
@@ -1660,6 +1711,7 @@ def import_documentation(
     max_chars: int = 3200,
     min_chars: int = 300,
     max_files: int | None = None,
+    resolve_docfx_includes: bool = False,
     force: bool = False,
 ) -> dict[str, object]:
     """Convert a documentation tree into validated common records atomically."""
@@ -1708,6 +1760,15 @@ def import_documentation(
     formats: dict[str, int] = {}
     document_paths_by_id: dict[str, str] = {}
     started = datetime.now(timezone.utc)
+    include_sources: dict[str, Path] = {}
+    if resolve_docfx_includes:
+        for candidate in content_root.rglob("*"):
+            if not candidate.is_file() or candidate.is_symlink():
+                continue
+            candidate_relative = candidate.relative_to(content_root).as_posix()
+            if portable_names_encoded:
+                candidate_relative = "/".join(unquote(part) for part in candidate_relative.split("/"))
+            include_sources[candidate_relative] = candidate
     try:
         with documents_path.open("w", encoding="utf-8", newline="\n") as documents_stream, chunks_path.open(
             "w", encoding="utf-8", newline="\n"
@@ -1721,6 +1782,8 @@ def import_documentation(
                 relative = path.relative_to(content_root).as_posix()
                 if portable_names_encoded:
                     relative = "/".join(unquote(part) for part in relative.split("/"))
+                if resolve_docfx_includes and DOCFX_INCLUDE_RE.search(text):
+                    text = _resolve_docfx_includes(text, relative, include_sources)
                 parsed = parse_document(path, text)
                 chunk_values = chunk_blocks(parsed.blocks, max_chars, min_chars)
                 if not chunk_values:
@@ -1844,6 +1907,7 @@ def import_documentation(
                 "content_subdirectory": content_subdirectory,
                 "include_globs": list(include_globs),
                 "exclude_globs": list(exclude_globs),
+                "resolve_docfx_includes": resolve_docfx_includes,
             },
             "parts": [
                 {
@@ -1887,6 +1951,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--content-subdirectory")
     parser.add_argument("--include-glob", action="append", default=[])
     parser.add_argument("--exclude-glob", action="append", default=[])
+    parser.add_argument("--resolve-docfx-includes", action="store_true")
     parser.add_argument("--max-chars", type=int, default=3200)
     parser.add_argument("--min-chars", type=int, default=300)
     parser.add_argument("--max-files", type=int)
@@ -1908,6 +1973,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         content_subdirectory=args.content_subdirectory,
         include_globs=args.include_glob,
         exclude_globs=args.exclude_glob,
+        resolve_docfx_includes=args.resolve_docfx_includes,
         max_chars=args.max_chars,
         min_chars=args.min_chars,
         max_files=args.max_files,

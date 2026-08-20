@@ -53,6 +53,9 @@ if ($dataset.PSObject.Properties.Name -contains 'ingestion') {
             $importArguments += @('--exclude-glob', ([string]$pattern))
         }
     }
+    if (($dataset.ingestion.PSObject.Properties.Name -contains 'resolve_docfx_includes') -and $dataset.ingestion.resolve_docfx_includes) {
+        $importArguments += '--resolve-docfx-includes'
+    }
 }
 if ($PSBoundParameters.ContainsKey('MaxFiles')) { $importArguments += @('--max-files', $MaxFiles) }
 if ($Force) { $importArguments += '--force' }

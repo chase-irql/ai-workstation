@@ -620,6 +620,53 @@ class DocumentationImportTests(unittest.TestCase):
             manifest = json.loads((output / "corpus-manifest.json").read_text())
             self.assertEqual(manifest["configuration"]["include_globs"], ["rfc*.txt"])
 
+    def test_docfx_includes_expand_into_canonical_pages_without_fragment_documents(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            (source / "docs").mkdir(parents=True)
+            (source / "includes").mkdir()
+            (source / "docs" / "overview.md").write_text(
+                "# Deployment\n\n[!INCLUDE [Shared guidance](~/includes/shared.md)]\n",
+                encoding="utf-8",
+            )
+            (source / "includes" / "shared.md").write_text(
+                "Use the framework-dependent deployment model.\n",
+                encoding="utf-8",
+            )
+            output = root / "processed"
+            import_documentation(
+                source,
+                output,
+                corpus="dotnet-docs",
+                source_version="test",
+                license_name="test",
+                include_globs=("docs/*.md", "docs/**/*.md"),
+                resolve_docfx_includes=True,
+            )
+            documents = [json.loads(line) for line in (output / "documents.jsonl").read_text().splitlines()]
+            chunks = [json.loads(line) for line in (output / "chunks.jsonl").read_text().splitlines()]
+            self.assertEqual(len(documents), 1)
+            self.assertEqual(documents[0]["attributes"]["relative_path"], "docs/overview.md")
+            self.assertIn("framework-dependent deployment", chunks[0]["text"])
+            manifest = json.loads((output / "corpus-manifest.json").read_text())
+            self.assertTrue(manifest["configuration"]["resolve_docfx_includes"])
+
+            (source / "docs" / "escape.md").write_text(
+                "# Unsafe\n\n[!INCLUDE [Escape](../../outside.md)]\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "escapes the source root"):
+                import_documentation(
+                    source,
+                    root / "unsafe",
+                    corpus="dotnet-docs",
+                    source_version="test",
+                    license_name="test",
+                    include_globs=("docs/escape.md",),
+                    resolve_docfx_includes=True,
+                )
+
     def test_rfc_header_metadata_is_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
