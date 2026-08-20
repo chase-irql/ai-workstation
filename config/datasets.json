@@ -1605,6 +1605,48 @@
       "notes": "Pinned to the official LLVM 22.1.8 GitHub release asset. The 167,061,596-byte archive passed the SHA-256 published by GitHub's release API, and its Sigstore attestation URL is retained. Safe extraction validated 169,010 files / 2,023,722,863 bytes while skipping 19 archive links and reversibly encoding 152,079 Windows-incompatible members. The complete source archive is retained while retrieval is restricted to the current documentation trees for major LLVM subprojects and excludes historical release notes. The result contains 2,352 documents, 18,655 chunks, and a 51,531,776-byte verified BM25 database. Its 44-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
+      "dataset_id": "go-1.26.7-docs",
+      "name": "Go 1.26.7 Documentation and Standard Library",
+      "description": "Official Go language documentation, command guidance, standard-library package documentation, exported APIs, declaration signatures, and package examples from the Go 1.26.7 source release.",
+      "category": "programming-language-documentation",
+      "official_source_url": "https://go.dev/doc/",
+      "license": "BSD 3-Clause; per-file notices retained",
+      "attribution": "The Go Authors and contributors",
+      "release": "go1.26.7",
+      "update_frequency": "each stable Go maintenance release",
+      "scope": "official language documentation plus Go-aware extraction of package comments and exported declarations from the standard library and bundled commands; tests, testdata, vendored dependencies, implementation bodies, and non-documentation assets excluded from retrieval but retained raw",
+      "formats": ["Go source", "Markdown", "HTML", "plain text", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://go.dev/dl/go1.26.7.src.tar.gz",
+        "publisher_checksum_algorithm": "sha256",
+        "publisher_checksum": "0ed24eac755105085b89fe9cabc2742b91a0ad7b94b59d3ad364918ebc8956ad",
+        "publisher_checksum_source": "https://go.dev/dl/?mode=json&include=all",
+        "source_tag": "go1.26.7",
+        "source_url_template": "https://cs.opensource.google/go/go/+/refs/tags/go1.26.7:{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "go",
+        "include_globs": ["doc/*.md", "doc/**/*.md", "doc/*.html", "doc/**/*.html", "src/*.go", "src/**/*.go"],
+        "exclude_globs": ["src/vendor/**", "src/cmd/vendor/**", "src/**/testdata/**", "src/**/*_test.go"],
+        "smoke_query": "Go net http Server timeouts"
+      },
+      "storage": {
+        "download_min_bytes": 34000000,
+        "download_max_bytes": 35000000,
+        "extracted_max_bytes": 350000000,
+        "indexed_max_bytes": 200000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/go-1.26.7",
+        "processed": "corpora/processed/documentation/go-1.26.7",
+        "index": "indexes/documentation/go-1.26.7.sqlite3",
+        "semantic_index": "indexes/semantic/go-1.26.7-docs"
+      },
+      "status": "planned",
+      "notes": "Pinned to the current stable Go 1.26.7 source archive listed by go.dev on 2026-08-20. The publisher's download API supplies the exact SHA-256 and byte count. A dedicated deterministic parser will retain package documentation and exported declarations without executing downloaded toolchain binaries or indexing implementation bodies."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
