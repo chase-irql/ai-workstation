@@ -22,8 +22,8 @@ SMOKE_QUERIES = (
 def _expected_counts(input_directory: Path) -> tuple[int, int]:
     stats_path = input_directory / "extraction-stats.json"
     value = json.loads(stats_path.read_text(encoding="utf-8"))
-    if not value.get("completed") or value.get("stop_reason") != "archive_complete":
-        raise ValueError("Corpus extraction is not archive_complete")
+    if not value.get("completed") or value.get("stop_reason") not in {"archive_complete", "source_complete"}:
+        raise ValueError("Corpus extraction is not complete")
     counts = value.get("totals", value)
     return int(counts["documents"]), int(counts["chunks"])
 

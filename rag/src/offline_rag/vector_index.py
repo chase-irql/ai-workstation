@@ -1202,6 +1202,7 @@ def hybrid_search(
     results: list[dict[str, Any]] = []
     for document_id in ordered:
         item = representatives[document_id]
+        item["pre_fusion_ranking_reason"] = item.get("ranking_reason")
         item["raw_score"] = scores[document_id]
         item["score"] = scores[document_id]
         item["fusion_score"] = scores[document_id]

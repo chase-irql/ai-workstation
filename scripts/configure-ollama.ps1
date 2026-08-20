@@ -1,16 +1,20 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-    [string]$TargetStore = 'D:\ai-workstation\models\ollama',
+    [string]$TargetStore,
     [ValidateRange(4096, 1048576)][int]$ContextLength = 65536,
     [switch]$MigrateExistingStore,
+    [switch]$AllowExternalStore,
     [switch]$RestartApp
 )
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
+$root = Get-ProjectRoot
+if (-not $TargetStore) { $TargetStore = Join-Path $root 'models\ollama' }
 $target = [System.IO.Path]::GetFullPath($TargetStore)
-if (-not $target.StartsWith('D:\ai-workstation\', [System.StringComparison]::OrdinalIgnoreCase)) {
-    throw "Target store must remain under D:\ai-workstation. Resolved path: $target"
+$rootPrefix = $root.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+if (-not $AllowExternalStore -and -not $target.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    throw "Target store must remain under the project root unless -AllowExternalStore is supplied. Resolved path: $target"
 }
 New-Item -ItemType Directory -Force -Path $target | Out-Null
 
@@ -51,7 +55,7 @@ $snapshot = [ordered]@{
     after = $settings
     source_store_retained = (Join-Path $env:USERPROFILE '.ollama\models')
 }
-$snapshotPath = Join-Path (Get-ProjectRoot) 'results\ollama-environment-snapshot.json'
+$snapshotPath = Join-Path $root 'results\ollama-environment-snapshot.json'
 $snapshot | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
 
 if ($RestartApp) {

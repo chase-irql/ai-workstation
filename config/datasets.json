@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "datasets": [
+    {
+      "dataset_id": "python-3.14-docs",
+      "name": "Python 3.14 Documentation",
+      "description": "Official Python language, standard-library, tutorial, HOWTO, and C API documentation.",
+      "category": "programming-documentation",
+      "official_source_url": "https://docs.python.org/3/",
+      "license": "Python Software Foundation License Version 2; examples additionally 0BSD",
+      "attribution": "Python Software Foundation",
+      "release": "3.14.7",
+      "update_frequency": "each Python maintenance release",
+      "scope": "complete English HTML documentation archive for Python 3.14",
+      "formats": ["HTML", "ZIP"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://docs.python.org/3/archives/python-3.14-docs-html.zip",
+        "publisher_checksum": null
+      },
+      "storage": {
+        "download_min_bytes": 15000000,
+        "download_max_bytes": 25000000,
+        "extracted_max_bytes": 150000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/python-3.14",
+        "processed": "corpora/processed/documentation/python-3.14",
+        "index": "indexes/documentation/python-3.14.sqlite3",
+        "semantic_index": "indexes/semantic/python-3.14-docs"
+      },
+      "status": "evaluated",
+      "notes": "Acquired and indexed 3.14.7. The acquisition manifest records local SHA-256 9306da398ae5a9142deb22d5c7865994fe0ada961022c8dea8ee341348e14181; the publisher did not provide a checksum in the archive listing."
+    },
+    {
+      "dataset_id": "git-docs",
+      "name": "Git Documentation",
+      "description": "Official Git command references, user manual, technical notes, and release documentation.",
+      "category": "programming-documentation",
+      "official_source_url": "https://git-scm.com/docs",
+      "license": "GPL-2.0-only with project documentation terms",
+      "attribution": "Git project contributors",
+      "release": "2.55.0",
+      "update_frequency": "each stable Git release",
+      "scope": "Documentation directory and generated manual pages from one pinned stable source release",
+      "formats": ["AsciiDoc", "man", "HTML"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://www.kernel.org/pub/software/scm/git/git-2.55.0.tar.xz",
+        "publisher_checksum": "457fdb04dc8728e007d4688695e6912e6f680727920f2a40bf11eacc17505357",
+        "checksum_manifest": "https://www.kernel.org/pub/software/scm/git/sha256sums.asc",
+        "source_url_template": "https://git.kernel.org/pub/scm/git/git.git/tree/{relative_path}?h=v2.55.0"
+      },
+      "storage": {
+        "download_min_bytes": 7000000,
+        "download_max_bytes": 15000000,
+        "extracted_max_bytes": 1000000000,
+        "indexed_max_bytes": 2000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/git",
+        "processed": "corpora/processed/documentation/git",
+        "index": "indexes/documentation/git.sqlite3",
+        "semantic_index": "indexes/semantic/git-docs"
+      },
+      "status": "evaluated",
+      "notes": "Pinned official kernel.org release archive; publisher SHA-256 verified. Parsed 985 documentation files into 4,953 chunks and passed the versioned lexical retrieval gate."
+    },
+    {
+      "dataset_id": "linux-man-pages",
+      "name": "Linux man-pages",
+      "description": "Official Linux kernel and C library userspace interface manual pages.",
+      "category": "system-documentation",
+      "official_source_url": "https://www.kernel.org/doc/man-pages/",
+      "license": "per-page Linux man-pages licenses",
+      "attribution": "Linux man-pages project and individual page authors",
+      "release": "6.18",
+      "update_frequency": "each Linux man-pages release",
+      "scope": "complete released man-pages source tree, excluding historical duplicate releases",
+      "formats": ["roff", "tar.xz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.18.tar.xz",
+        "publisher_checksum": "c934fadc8b59748c68227a34f6581d2ddf8282b73cdcd52546c8cd88b74b24d1",
+        "checksum_manifest": "https://www.kernel.org/pub/linux/docs/man-pages/sha256sums.asc",
+        "source_url_template": "https://git.kernel.org/pub/scm/docs/man-pages/man-pages.git/tree/{relative_path}?h=man-pages-6.18"
+      },
+      "storage": {
+        "download_min_bytes": 1000000,
+        "download_max_bytes": 5000000,
+        "extracted_max_bytes": 150000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/linux-man-pages",
+        "processed": "corpora/processed/documentation/linux-man-pages",
+        "index": "indexes/documentation/linux-man-pages.sqlite3",
+        "semantic_index": "indexes/semantic/linux-man-pages"
+      },
+      "status": "evaluated",
+      "notes": "Pinned official kernel.org release archive; publisher SHA-256 verified. Parsed 1,245 non-alias manual documents into 13,155 chunks and passed the versioned lexical retrieval gate. Per-page license notices remain in source text."
+    },
+    {
+      "dataset_id": "rfc-editor-text",
+      "name": "RFC Editor Text Collection",
+      "description": "Complete text RFC, BCP, STD, FYI, and IEN publication collection and indexes.",
+      "category": "standards",
+      "official_source_url": "https://www.rfc-editor.org/series/rfc-download/",
+      "license": "IETF Trust Legal Provisions",
+      "attribution": "RFC authors, RFC Editor, and IETF Trust",
+      "release": "snapshot-2026-08-19",
+      "update_frequency": "monthly snapshot or before an offline release",
+      "scope": "RFC Editor rfcs-text-only module plus publication metadata",
+      "formats": ["plain text", "XML", "rsync"],
+      "acquisition": {
+        "method": "rsync",
+        "location": "rsync://rsync.rfc-editor.org/rfcs-text-only",
+        "source_url_template": "https://www.rfc-editor.org/rfc/{relative_path}"
+      },
+      "ingestion": {
+        "include_globs": ["rfc*.txt"],
+        "exclude_globs": ["rfc-index*.txt", "rfc-ref*.txt", "rfcxx00.txt"]
+      },
+      "storage": {
+        "download_min_bytes": 500000000,
+        "download_max_bytes": 650000000,
+        "extracted_max_bytes": 650000000,
+        "indexed_max_bytes": 2000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/rfc-editor",
+        "processed": "corpora/processed/documentation/rfc-editor",
+        "index": "indexes/documentation/rfc-editor.sqlite3",
+        "semantic_index": "indexes/semantic/rfc-editor-text"
+      },
+      "status": "evaluated",
+      "notes": "Acquired 10,057 regular files (555,449,714 bytes) from the official rsync module with a complete SHA-256 inventory; symlink aliases are intentionally omitted. Parsed 9,822 primary rfc*.txt publications into 348,831 chunks, preserving RFC number, publication date/status, ISSN, obsoletes, and updates metadata. Published and source-verified 348,831 Qwen3-Embedding 0.6B vectors at 256 dimensions. The final routed/reranked exact-query gate retains Success@1 and MRR@10 of 1.0. Deterministic evidence reranking recovers all six original paraphrase cases in the first 10 and improves expanded 18-query Success@10 from 0.888889 to 0.944444."
+    },
+    {
+      "dataset_id": "iana-protocol-registries",
+      "name": "IANA Protocol Registries",
+      "description": "Structured protocol numbers, media types, ports, parameters, and related registries.",
+      "category": "structured-standards-data",
+      "official_source_url": "https://www.iana.org/protocols",
+      "license": "CC0 1.0 Universal (IANA/IETF Protocol Registries joint statement)",
+      "attribution": "Internet Assigned Numbers Authority",
+      "release": "snapshot-2026-08-19",
+      "update_frequency": "monthly snapshot or before an offline release",
+      "scope": "complete machine-readable XML/CSV registry exports; HTML retained only when needed for context",
+      "formats": ["XML", "CSV", "plain text", "RNG", "XSL"],
+      "acquisition": {
+        "method": "rsync",
+        "location": "rsync://rsync.iana.org/assignments"
+      },
+      "storage": {
+        "download_min_bytes": 60000000,
+        "download_max_bytes": 100000000,
+        "extracted_max_bytes": 100000000,
+        "indexed_max_bytes": 750000000
+      },
+      "paths": {
+        "raw": "corpora/raw/structured/iana",
+        "processed": "corpora/processed/structured/iana",
+        "index": "indexes/structured/iana.sqlite3"
+      },
+      "status": "evaluated",
+      "notes": "Acquired the complete official assignments rsync snapshot: 8,269 regular files and 70,672,402 bytes with aggregate SHA-256 7c8e859136528cfe12aab4840f837ede1d8054541c50a7126cdcb8c05257b462. Parsed 675 IANA registry XML files into 4,256 nested registry documents, 110,423 structured table records, and 114,590 chunks. The six-case lexical gate achieved Success@1, MRR@10, Recall@50, and nDCG@10 of 1.0."
+    },
+    {
+      "dataset_id": "sqlite-docs",
+      "name": "SQLite Documentation",
+      "description": "Official SQLite language, API, architecture, file-format, and operational documentation.",
+      "category": "database-documentation",
+      "official_source_url": "https://www.sqlite.org/docs.html",
+      "license": "SQLite documentation copyright and blessing; verify release archive notice",
+      "attribution": "SQLite project",
+      "release": "pin-current-release-at-acquisition",
+      "update_frequency": "each SQLite release",
+      "scope": "complete official generated documentation for one pinned stable release",
+      "formats": ["HTML", "ZIP"],
+      "acquisition": {
+        "method": "official-export",
+        "location": "https://www.sqlite.org/download.html"
+      },
+      "storage": {
+        "download_min_bytes": 10000000,
+        "download_max_bytes": 200000000,
+        "extracted_max_bytes": 500000000,
+        "indexed_max_bytes": 1500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/sqlite",
+        "processed": "corpora/processed/documentation/sqlite",
+        "index": "indexes/documentation/sqlite.sqlite3"
+      },
+      "status": "planned",
+      "notes": "Resolve and record the year-qualified release archive URL immediately before acquisition."
+    }
+  ]
+}

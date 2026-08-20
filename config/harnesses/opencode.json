@@ -4,10 +4,6 @@
   "enabled_providers": ["ollama"],
   "permission": {
     "*": "allow",
-    "skill": "deny",
-    "external_directory": "deny",
-    "webfetch": "deny",
-    "websearch": "deny"
   },
   "compaction": {
     "auto": true,
@@ -36,6 +32,10 @@
         },
         "nemotron-3-nano:30b-a3b-q4_K_M": {
           "name": "Nemotron-3-Nano 30B-A3B Q4_K_M",
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "orcarouter/Qwen3.8-27B-Uncensored:iq3_xxs": {
+          "name": "Qwen3.8 27B Uncensored IQ3_XXS",
           "limit": { "context": 65536, "output": 8192 }
         }
       }

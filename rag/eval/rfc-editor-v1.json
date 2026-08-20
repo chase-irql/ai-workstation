@@ -1,0 +1,67 @@
+{
+  "schema_version": 2,
+  "name": "RFC Editor snapshot 2026-08-19 lexical retrieval",
+  "description": "Deterministic retrieval gate for primary RFC publications, including current and historically superseded specifications.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "http-semantics-001",
+      "query": "HTTP semantics content negotiation conditional requests",
+      "query_type": "protocol_lookup",
+      "relevance": {
+        "rfc-editor-text:3f9054029f235d4602d1c991": 3,
+        "rfc-editor-text:c8e8ee1a4025bdc67a0e1212": 1
+      }
+    },
+    {
+      "id": "tls13-key-schedule-001",
+      "query": "Transport Layer Security Protocol Version 1.3 key schedule handshake",
+      "query_type": "protocol_lookup",
+      "relevance": {
+        "rfc-editor-text:90114a31d33a6ca4ef9f91b6": 3,
+        "rfc-editor-text:d6212bf18f98369967db2a2b": 2
+      }
+    },
+    {
+      "id": "uri-resolution-001",
+      "query": "URI generic syntax relative reference resolution",
+      "query_type": "conceptual",
+      "relevance": {
+        "rfc-editor-text:535d7547ee08a225cf00b57d": 3,
+        "rfc-editor-text:c6045e8604b800f5d074085c": 1
+      }
+    },
+    {
+      "id": "dns-message-format-001",
+      "query": "DOMAIN NAMES IMPLEMENTATION SPECIFICATION message format resource records",
+      "query_type": "protocol_lookup",
+      "relevance": {
+        "rfc-editor-text:00a6eaeedf8251c35ba7d815": 3,
+        "rfc-editor-text:e239af7850138dbd3c425c0e": 1
+      }
+    },
+    {
+      "id": "tcp-congestion-001",
+      "query": "TCP Congestion Control slow start congestion avoidance fast retransmit",
+      "query_type": "algorithm_lookup",
+      "relevance": {
+        "rfc-editor-text:70382eb2504ca1d281c73b2f": 3,
+        "rfc-editor-text:184d37e7d633d69bfcb27dc1": 2,
+        "rfc-editor-text:42af7d72d8e4abd457949f56": 1
+      }
+    },
+    {
+      "id": "quic-migration-001",
+      "query": "QUIC UDP multiplexed secure transport connection migration",
+      "query_type": "protocol_lookup",
+      "relevance": {
+        "rfc-editor-text:2bf359b079d4ec87877020f3": 3
+      }
+    }
+  ]
+}

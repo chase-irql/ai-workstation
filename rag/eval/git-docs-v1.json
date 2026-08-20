@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "name": "Git 2.55.0 documentation lexical pilot",
+  "description": "Deterministic retrieval gate for official Git command, user, and technical documentation.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "rebase-autosquash-001",
+      "query": "git rebase autosquash fixup",
+      "query_type": "command_lookup",
+      "relevance": {
+        "git-docs:47a9c438d6ed61c3a7b03da4": 3,
+        "git-docs:5142d56741e870cf66a76b3e": 2
+      }
+    },
+    {
+      "id": "worktree-lock-001",
+      "query": "git worktree prune locked",
+      "query_type": "operational",
+      "relevance": {
+        "git-docs:4ba55f027c252529a1c9c8b9": 3,
+        "git-docs:f5fc0eb1c47ade4a06c3b2f4": 1
+      }
+    },
+    {
+      "id": "fsck-dangling-001",
+      "query": "git fsck dangling objects",
+      "query_type": "troubleshooting",
+      "relevance": {
+        "git-docs:724e0994dacc32f98f786325": 3,
+        "git-docs:a7322bc97fd115f7fbe8a8e8": 1
+      }
+    },
+    {
+      "id": "partial-clone-001",
+      "query": "partial clone promisor remote",
+      "query_type": "conceptual",
+      "relevance": {
+        "git-docs:f5dd6b9beefbee234b5a3f87": 3,
+        "git-docs:54011d786644a085c93f5399": 2,
+        "git-docs:c72ad60a2e301c511c4b87a6": 1
+      }
+    }
+  ]
+}

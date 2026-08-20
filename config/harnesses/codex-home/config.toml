@@ -1,6 +1,6 @@
-model = "devstral-small-2:24b-instruct-2512-q4_K_M"
+model = "__MODEL_ID__"
 model_provider = "ollama-benchmark"
-model_catalog_json = "D:\\ai-workstation\\config\\harnesses\\codex-models.json"
+model_catalog_json = "__MODEL_CATALOG_JSON__"
 sandbox_mode = "workspace-write"
 approval_policy = "on-request"
 web_search = "disabled"
@@ -13,25 +13,25 @@ wire_api = "responses"
 # These bundled skills are unrelated to the coding benchmark and otherwise
 # consume a large fraction of a local model's prompt budget.
 [[skills.config]]
-path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\imagegen"
+path = "__CODEX_HOME__\\skills\\.system\\imagegen"
 enabled = false
 
 [[skills.config]]
-path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\openai-docs"
+path = "__CODEX_HOME__\\skills\\.system\\openai-docs"
 enabled = false
 
 [[skills.config]]
-path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\plugin-creator"
+path = "__CODEX_HOME__\\skills\\.system\\plugin-creator"
 enabled = false
 
 [[skills.config]]
-path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\review-agent"
+path = "__CODEX_HOME__\\skills\\.system\\review-agent"
 enabled = false
 
 [[skills.config]]
-path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\skill-creator"
+path = "__CODEX_HOME__\\skills\\.system\\skill-creator"
 enabled = false
 
 [[skills.config]]
-path = "D:\\ai-workstation\\runtime\\codex-home\\skills\\.system\\skill-installer"
+path = "__CODEX_HOME__\\skills\\.system\\skill-installer"
 enabled = false

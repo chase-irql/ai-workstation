@@ -71,7 +71,24 @@
       "supports_reasoning_summaries": false,
       "truncation_policy": { "limit": 10000, "mode": "bytes" },
       "visibility": "list"
+    },
+    {
+      "slug": "orcarouter/Qwen3.8-27B-Uncensored:iq3_xxs",
+      "display_name": "Qwen3.8 27B Uncensored IQ3_XXS",
+      "base_instructions": "",
+      "context_window": 65536,
+      "default_verbosity": "low",
+      "experimental_supported_tools": [],
+      "input_modalities": ["text", "image"],
+      "priority": 4,
+      "shell_type": "default",
+      "support_verbosity": true,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [],
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": false,
+      "truncation_policy": { "limit": 10000, "mode": "bytes" },
+      "visibility": "list"
     }
   ]
 }
-

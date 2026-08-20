@@ -10,6 +10,7 @@ from typing import Any
 import numpy as np
 
 from .bm25 import read_index_metadata
+from .chunk_vector_index import CHUNK_REPRESENTATION, ChunkVectorIndex
 from .embeddings import EmbeddingProvider
 from .retrieval import index_status, search_documents
 from .vector_index import VectorIndex, hybrid_search, load_vector_manifest, semantic_search
@@ -97,7 +98,7 @@ class RetrievalRuntime:
         self.default_mode = default_mode
         self.query_cache_size = query_cache_size
         self._load_lock = threading.Lock()
-        self._vector_index: VectorIndex | None = None
+        self._vector_index: VectorIndex | ChunkVectorIndex | None = None
         self._provider: CachedEmbeddingProvider | None = None
         self._last_load_error: str | None = None
         self._last_query_error: str | None = None
@@ -111,7 +112,7 @@ class RetrievalRuntime:
     def _semantic_published(self) -> bool:
         return self.vector_directory is not None and (self.vector_directory / "manifest.json").is_file()
 
-    def _load_semantic(self) -> tuple[VectorIndex, CachedEmbeddingProvider]:
+    def _load_semantic(self) -> tuple[VectorIndex | ChunkVectorIndex, CachedEmbeddingProvider]:
         if self._vector_index is not None and self._provider is not None:
             return self._vector_index, self._provider
         with self._load_lock:
@@ -119,7 +120,7 @@ class RetrievalRuntime:
                 return self._vector_index, self._provider
             if not self._semantic_published() or self.vector_directory is None or self.provider_factory is None:
                 raise RetrievalUnavailableError("semantic retrieval has no verified published generation")
-            vector_index: VectorIndex | None = None
+            vector_index: VectorIndex | ChunkVectorIndex | None = None
             try:
                 manifest = load_vector_manifest(self.vector_directory)
                 source_metadata = read_index_metadata(self.database)
@@ -127,12 +128,20 @@ class RetrievalRuntime:
                     raise ValueError("semantic generation is bound to a different BM25 database")
                 if manifest.get("source_build_id") != source_metadata.get("build_id"):
                     raise ValueError("semantic generation source build ID does not match BM25")
-                provider = CachedEmbeddingProvider(self.provider_factory(), self.query_cache_size)
+                resolved_provider = self.provider_factory()
+                provider = (
+                    resolved_provider
+                    if isinstance(resolved_provider, CachedEmbeddingProvider)
+                    else CachedEmbeddingProvider(resolved_provider, self.query_cache_size)
+                )
                 if int(manifest["dimensions"]) != provider.dimensions:
                     raise ValueError("semantic generation dimensions do not match the embedding provider")
                 if manifest.get("provider") != provider.provider_metadata:
                     raise ValueError("semantic generation provider identity does not match configuration")
-                vector_index = VectorIndex(self.vector_directory)
+                if manifest.get("representation") == CHUNK_REPRESENTATION:
+                    vector_index = ChunkVectorIndex(self.vector_directory, self.database)
+                else:
+                    vector_index = VectorIndex(self.vector_directory)
                 self._vector_index = vector_index
                 self._provider = provider
                 self._last_load_error = None
@@ -197,8 +206,14 @@ class RetrievalRuntime:
 
     def status(self) -> dict[str, Any]:
         published = self._semantic_published()
+        published_manifest: dict[str, Any] | None = None
+        if published and self.vector_directory is not None:
+            try:
+                published_manifest = load_vector_manifest(self.vector_directory)
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._last_load_error = str(error)
         available = ["bm25"]
-        if published and self.provider_factory is not None:
+        if published_manifest is not None and self.provider_factory is not None:
             available.extend(("semantic", "hybrid"))
         provider = self._provider
         return {
@@ -207,9 +222,23 @@ class RetrievalRuntime:
             "bm25_ready": True,
             "semantic": {
                 "configured": self.vector_directory is not None,
-                "published": published,
+                "published": published_manifest is not None,
                 "loaded": self._vector_index is not None,
                 "directory": str(self.vector_directory) if self.vector_directory is not None else None,
+                "representation": (
+                    self._vector_index.manifest.get("representation", "document-title-lead")
+                    if self._vector_index is not None
+                    else (
+                        published_manifest.get("representation", "document-title-lead")
+                        if published_manifest is not None
+                        else None
+                    )
+                ),
+                "vector_count": (
+                    published_manifest.get("chunk_count", published_manifest.get("document_count"))
+                    if published_manifest is not None
+                    else None
+                ),
                 "last_load_error": self._last_load_error,
                 "last_query_error": self._last_query_error,
                 "query_cache": provider.status()

@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "name": "Linux man-pages 6.18 semantic paraphrase gate",
+  "description": "Conceptual system-programming questions without relying on exact API constants.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "epoll-paraphrase-001",
+      "query": "wait efficiently for many file descriptors and receive state transitions once",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "linux-man-pages:c841311155d126e3654a5484": 3,
+        "linux-man-pages:8df8000072b0139dfff38a87": 1
+      }
+    },
+    {
+      "id": "openat2-paraphrase-001",
+      "query": "confine pathname lookup so it cannot escape beneath a directory",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "linux-man-pages:60a40d1981783baec616ff42": 3
+      }
+    },
+    {
+      "id": "robust-mutex-paraphrase-001",
+      "query": "recover a process shared lock after the thread owning it terminates",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "linux-man-pages:246851f3910834aef2e5800f": 3,
+        "linux-man-pages:87b09284b90728138745fb3e": 2
+      }
+    },
+    {
+      "id": "mmap-paraphrase-001",
+      "query": "map memory at a requested address only when that range is unused",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "linux-man-pages:06a8260208c39e918236f510": 3
+      }
+    }
+  ]
+}

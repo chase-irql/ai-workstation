@@ -27,3 +27,28 @@ __pycache__/
 .venv/
 node_modules/
 *.log
+
+# Local credentials and machine-specific secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*.json
+
+# Large model, database, vector, and archive formats
+*.faiss
+*.gguf
+*.onnx
+*.safetensors
+*.sqlite3
+*.db
+*.zim
+*.7z
+*.bz2
+*.gz
+*.xz
+*.zip
+*.zst
+*.part

@@ -12,6 +12,26 @@ This package provides the CPU-only foundation for the local knowledge system:
 
 The lexical baseline remains usable without Ollama or GPU use. Semantic indexing and queries are a separate optional stage and do not modify the published BM25 database.
 
+## Corpus-neutral documentation
+
+`offline_rag.documentation` converts structured documentation trees to the common record contract without changing the version-1 Wikipedia path. It supports HTML, Markdown, reStructuredText, AsciiDoc, man/roff, numbered RFC text, and plain text; preserves headings, code, tables, provenance, versions, licenses, and neighbor links; and publishes output atomically. `offline_rag.iana` provides a table-aware importer for nested IANA registry XML and one-record-per-chunk exact retrieval. `offline_rag.acquisition` and `offline_rag.rsync_acquisition` provide resumable, integrity-checked acquisition, while `config/datasets.json` records the planned source and storage contract.
+
+Python 3.14.7, Git 2.55.0, Linux man-pages 6.18, the RFC Editor 2026-08-19 text snapshot, and the IANA assignments snapshot are queryable with `scripts/query-documentation.ps1`. Their versioned lexical and semantic gates live under `rag/eval/`. Python, Git, man-pages, and RFCs have published chunk-level semantic indexes; IANA remains BM25/structured-first. See `docs/documentation-corpus-ingestion.md` for their exact lifecycle and `docs/corpus-semantic-roadmap.md` for measured embedding results.
+
+`offline_rag.knowledge_mcp_server` federates those indexes with Wikipedia through a read-only MCP interface. Cross-corpus search uses deterministic per-corpus reciprocal-rank fusion because raw BM25 scores from differently sized databases are not directly comparable. Corpus-filtered search, bounded context/document retrieval, build status, lazy Wikipedia semantic retrieval, and explicit BM25 fallback are exposed without merging or rewriting the source indexes. See `docs/unified-knowledge-mcp.md`.
+
+`offline_rag.chunk_vector_index` builds a separate vector for every documentation chunk using its title, heading path, and text. Generations are resumable, source-build-bound, checksum-verified, reusable by exact representation fingerprint, and atomically published. Build or compare one registered corpus with:
+
+```powershell
+.\scripts\run-corpus-semantic.ps1 -DatasetId python-3.14-docs
+.\scripts\get-corpus-semantic-status.ps1
+.\scripts\evaluate-corpus-semantic.ps1 `
+  -DatasetId python-3.14-docs `
+  -Suite rag\eval\python-docs-semantic-v1.json
+```
+
+The unified MCP supports multiple independent semantic generations. `retrieval=auto` keeps exact technical identifiers on BM25 and uses hybrid retrieval for conceptual language; the transparent `deterministic-evidence-v2` reranker and provenance-preserving duplicate suppression run before the final result limit. Evaluate that complete path with `scripts/evaluate-reranked-corpus.ps1`; unlike the lower-level semantic comparison, it measures routing, fusion, reranking, and deduplication together.
+
 ## Pilot commands
 
 From `D:\ai-workstation`:
@@ -115,6 +135,14 @@ Configure both installed agent harnesses from the repository root:
 .\scripts\configure-wikipedia-mcp.ps1
 ```
 
+Launch the interactive OpenCode workspace with the configured Ollama provider, default general-agent model, and project MCP settings by running:
+
+```powershell
+.\scripts\start-opencode.ps1
+```
+
+Pass `-ModelId` to select another model from `config/models.json`. Inside OpenCode, `/models` lists the models exposed by the configured local provider.
+
 The root `opencode.json` is the operational OpenCode configuration. Codex registration is written by its CLI to the current user's Codex configuration. Neither path changes the immutable benchmark profiles under `config/harnesses/`. The MCP server starts on demand, reads the published SQLite database in read-only mode, and does not load Ollama or use the GPU.
 
 The model-and-tool evaluation verifies more than process exit: it requires the model to call the expected MCP tools, retrieve stable document IDs, include expected facts, emit a Wikipedia citation, and make no failed tool calls. It selects the highest-priority general-agent model from `config/models.json` unless `-ModelId` is supplied:
@@ -125,7 +153,7 @@ The model-and-tool evaluation verifies more than process exit: it requires the m
 .\scripts\evaluate-wikipedia-agent.ps1 -CaseId apollo-guidance-computer -Unload
 ```
 
-The versioned prompts are in `rag/eval/wikipedia-agent-v1.json`; generated evidence is retained under the ignored `results/rag/agent-e2e/` directory.
+The current versioned prompts and deterministic concept assertions are in `rag/eval/wikipedia-agent-v2.json`; the original v1 exact-term suite remains available for historical comparison. Generated evidence is retained under the ignored `results/rag/agent-e2e/` directory.
 
 See `docs/rag-record-schema.md` for the common record contract and `docs/wikipedia-multistream-design.md` for the parallel extraction design and recovery model.
 

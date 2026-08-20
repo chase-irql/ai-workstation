@@ -11,11 +11,31 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from _fixtures import write_archive
 from offline_rag.bm25 import build_index
-from offline_rag.evaluate import evaluate, percentile_nearest_rank, ranking_metrics, validate_suite
+from offline_rag.evaluate import (
+    evaluate,
+    percentile_nearest_rank,
+    ranking_metrics,
+    ranking_metrics_grouped,
+    validate_suite,
+)
 from offline_rag.wikipedia_dump import extract
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_grouped_metrics_count_alternate_sources_at_the_retained_rank(self):
+        metrics = ranking_metrics_grouped(
+            [("primary", "relevant-a"), ("relevant-b",)],
+            {"relevant-a": 3, "relevant-b": 1},
+            success_cutoffs=(1, 2),
+            recall_cutoffs=(1, 2),
+            mrr_cutoff=2,
+            ndcg_cutoff=2,
+        )
+        self.assertEqual(metrics["success_at_1"], 1.0)
+        self.assertEqual(metrics["recall_at_1"], 0.5)
+        self.assertEqual(metrics["recall_at_2"], 1.0)
+        self.assertEqual(metrics["mrr_at_2"], 1.0)
+
     def test_hand_calculated_metrics(self):
         relevance = {"b": 3, "c": 1, "d": 2}
         metrics = ranking_metrics(
@@ -142,4 +162,3 @@ class EvaluationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

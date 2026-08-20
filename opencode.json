@@ -5,14 +5,63 @@
     "offline-wikipedia": {
       "type": "local",
       "command": [
-        "D:\\ai-workstation\\.venv\\Scripts\\python.exe",
+        ".\\.venv\\Scripts\\python.exe",
         "-m",
         "offline_rag.mcp_server",
         "--database",
-        "D:\\ai-workstation\\indexes\\wikipedia\\enwiki-20260801-full.sqlite3"
+        "indexes\\wikipedia\\enwiki-20260801-full.sqlite3",
+        "--vector-index",
+        "indexes\\wikipedia\\enwiki-20260801-semantic-full",
+        "--models",
+        "config\\models.json",
+        "--default-retrieval",
+        "hybrid",
+        "--query-cache-size",
+        "256"
       ],
       "environment": {
-        "PYTHONPATH": "D:\\ai-workstation\\rag\\src"
+        "PYTHONPATH": "rag\\src"
+      },
+      "enabled": true,
+      "timeout": 30000
+    },
+    "offline-knowledge": {
+      "type": "local",
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-m",
+        "offline_rag.knowledge_mcp_server",
+        "--index",
+        "wikipedia=indexes\\wikipedia\\enwiki-20260801-full.sqlite3",
+        "--index",
+        "python-3.14-docs=indexes\\documentation\\python-3.14.sqlite3",
+        "--index",
+        "git-docs=indexes\\documentation\\git.sqlite3",
+        "--index",
+        "linux-man-pages=indexes\\documentation\\linux-man-pages.sqlite3",
+        "--index",
+        "rfc-editor-text=indexes\\documentation\\rfc-editor.sqlite3",
+        "--index",
+        "iana-protocol-registries=indexes\\structured\\iana.sqlite3",
+        "--corpus-vector",
+        "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",
+        "--corpus-vector",
+        "python-3.14-docs=indexes\\semantic\\python-3.14-docs",
+        "--corpus-vector",
+        "git-docs=indexes\\semantic\\git-docs",
+        "--corpus-vector",
+        "linux-man-pages=indexes\\semantic\\linux-man-pages",
+        "--corpus-vector",
+        "rfc-editor-text=indexes\\semantic\\rfc-editor-text",
+        "--models",
+        "config\\models.json",
+        "--default-vector-retrieval",
+        "hybrid",
+        "--query-cache-size",
+        "256"
+      ],
+      "environment": {
+        "PYTHONPATH": "rag\\src"
       },
       "enabled": true,
       "timeout": 30000

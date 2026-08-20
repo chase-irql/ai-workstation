@@ -1,0 +1,61 @@
+{
+  "schema_version": 2,
+  "name": "IANA protocol registries snapshot 2026-08-19 lexical retrieval",
+  "description": "Deterministic table-record lookup gate for authoritative IANA assignments.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "https-port-001",
+      "query": "https 443 tcp HTTP over TLS",
+      "query_type": "port_lookup",
+      "relevance": {
+        "iana:498b1aec5c3ec9460a184d32": 3
+      }
+    },
+    {
+      "id": "tcp-protocol-number-001",
+      "query": "Assigned Internet Protocol Numbers TCP 6",
+      "query_type": "number_lookup",
+      "relevance": {
+        "iana:c89bfbef6f205783d85ff5f2": 3
+      }
+    },
+    {
+      "id": "json-media-type-001",
+      "query": "application json RFC 8259",
+      "query_type": "media_type_lookup",
+      "relevance": {
+        "iana:0e4c0d0d5ef4010c062e99c3": 3
+      }
+    },
+    {
+      "id": "websocket-close-001",
+      "query": "WebSocket close code 1000 normal closure",
+      "query_type": "code_lookup",
+      "relevance": {
+        "iana:8519071b824ac731455ea150": 3
+      }
+    },
+    {
+      "id": "dns-aaaa-001",
+      "query": "DNS resource record type AAAA 28",
+      "query_type": "number_lookup",
+      "relevance": {
+        "iana:ac6183117f3ca9571428298e": 3
+      }
+    },
+    {
+      "id": "tls-cipher-suite-001",
+      "query": "TLS AES 128 GCM SHA256",
+      "query_type": "code_lookup",
+      "relevance": {
+        "iana:4f2fb93c23bace2cb54d72cd": 3
+      }
+    }
+  ]
+}

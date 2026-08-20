@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "name": "RFC Editor semantic paraphrase gate v2",
+  "description": "Expanded indirect technical questions covering web, transport, security, naming, data formats, mail, and IPv6 standards.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "http-semantics-paraphrase-001",
+      "query": "choose a response representation using client preferences and cached validators",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:3f9054029f235d4602d1c991": 3,
+        "rfc-editor-text:c8e8ee1a4025bdc67a0e1212": 1
+      }
+    },
+    {
+      "id": "tls13-paraphrase-001",
+      "query": "derive traffic secrets across the phases of a modern encrypted handshake",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:90114a31d33a6ca4ef9f91b6": 3,
+        "rfc-editor-text:d6212bf18f98369967db2a2b": 1
+      }
+    },
+    {
+      "id": "uri-resolution-paraphrase-001",
+      "query": "turn a relative resource location into an absolute identifier using a base",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:535d7547ee08a225cf00b57d": 3,
+        "rfc-editor-text:c6045e8604b800f5d074085c": 1
+      }
+    },
+    {
+      "id": "dns-format-paraphrase-001",
+      "query": "binary wire layout for mapping host names to addresses and carrying resource data",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:00a6eaeedf8251c35ba7d815": 3,
+        "rfc-editor-text:e239af7850138dbd3c425c0e": 1
+      }
+    },
+    {
+      "id": "tcp-congestion-paraphrase-001",
+      "query": "grow a sender window cautiously and recover its rate after detecting lost packets",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:70382eb2504ca1d281c73b2f": 3,
+        "rfc-editor-text:184d37e7d633d69bfcb27dc1": 2
+      }
+    },
+    {
+      "id": "quic-migration-paraphrase-001",
+      "query": "keep a secure multiplexed connection alive when a client changes network address",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:2bf359b079d4ec87877020f3": 3
+      }
+    },
+    {
+      "id": "http-cache-freshness-001",
+      "query": "decide whether a stored web response can be reused and when its freshness expires",
+      "query_type": "web_protocol",
+      "relevance": {"rfc-editor-text:d153254831786b978b464b39": 3}
+    },
+    {
+      "id": "dns-over-https-001",
+      "query": "carry name resolution requests inside encrypted web requests",
+      "query_type": "naming_security",
+      "relevance": {"rfc-editor-text:b7f4744ef39cc3ea72b065c3": 3}
+    },
+    {
+      "id": "websocket-upgrade-001",
+      "query": "upgrade a web connection into a bidirectional message channel",
+      "query_type": "web_protocol",
+      "relevance": {"rfc-editor-text:0eef259c442df0219b64fa9e": 3}
+    },
+    {
+      "id": "oauth-pkce-001",
+      "query": "prevent an intercepted authorization code from being redeemed by another public client",
+      "query_type": "security",
+      "relevance": {"rfc-editor-text:bac2c4590bedfd97dbf11621": 3}
+    },
+    {
+      "id": "ipv6-neighbor-discovery-001",
+      "query": "discover routers and neighboring link layer addresses on an IPv6 network",
+      "query_type": "networking",
+      "relevance": {"rfc-editor-text:8f4d2fb123bcb5f1ec5f4414": 3}
+    },
+    {
+      "id": "smtp-starttls-001",
+      "query": "upgrade an existing mail transfer connection to encrypted transport",
+      "query_type": "mail_security",
+      "relevance": {"rfc-editor-text:fd58f28dfcaefa0dd7ac1f4e": 3}
+    },
+    {
+      "id": "cbor-compact-data-001",
+      "query": "compact binary data representation for small messages and constrained systems",
+      "query_type": "data_format",
+      "relevance": {"rfc-editor-text:0762977c18cb90b7e4c75bd8": 3}
+    },
+    {
+      "id": "json-merge-patch-001",
+      "query": "describe partial changes to a JSON object without replacing the whole document",
+      "query_type": "data_format",
+      "relevance": {"rfc-editor-text:293ade61580e0fbb87c7e437": 3}
+    },
+    {
+      "id": "language-tags-001",
+      "query": "standard labels combining language script region and variant subtags",
+      "query_type": "internationalization",
+      "relevance": {"rfc-editor-text:bfb4a522e128877748973f00": 3}
+    },
+    {
+      "id": "http3-over-quic-001",
+      "query": "run web request semantics over multiplexed QUIC streams",
+      "query_type": "web_protocol",
+      "relevance": {"rfc-editor-text:341f3571dbf6a42ddfaf0020": 3}
+    },
+    {
+      "id": "acme-certificate-automation-001",
+      "query": "automatically prove control of a domain and obtain a certificate",
+      "query_type": "security",
+      "relevance": {"rfc-editor-text:60776be79616c91fc09859a7": 3}
+    },
+    {
+      "id": "totp-time-code-001",
+      "query": "generate a one time password from a shared secret and the current time",
+      "query_type": "security",
+      "relevance": {"rfc-editor-text:9899fc6b3149e77f6bc2d285": 3}
+    }
+  ]
+}

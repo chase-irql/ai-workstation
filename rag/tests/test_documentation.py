@@ -1,0 +1,473 @@
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from offline_rag.bm25 import build_index, read_index_metadata, search
+from offline_rag.documentation import (
+    chunk_blocks,
+    import_documentation,
+    parse_asciidoc,
+    parse_html,
+    parse_man,
+    parse_markdown,
+    parse_rfc,
+    parse_rst,
+)
+from offline_rag.verify import verify_database
+
+
+class DocumentationParserTests(unittest.TestCase):
+    def test_html_preserves_title_hierarchy_code_and_tables(self):
+        parsed = parse_html(
+            """
+            <html><head><title>Vector API</title><script>discard me</script></head><body>
+            <nav>discard navigation</nav><div class="sphinxsidebar"><h3>Table of Contents</h3><p>discard sidebar</p></div>
+            <h1>Containers<a href="#containers">¶</a></h1><p>Use <code>std::vector</code><br>carefully.</p>
+            <h2>Example</h2><pre>std::vector&lt;int&gt; values;\nvalues.push_back(4);</pre>
+            <table><tr><th>Error</th><th>Meaning</th></tr><tr><td>E23</td><td>Blocked intake</td></tr></table>
+            </body></html>
+            """,
+            "fallback",
+        )
+        self.assertEqual(parsed.title, "Vector API")
+        self.assertEqual(parsed.blocks[0].heading_path, ("Containers",))
+        self.assertIn("std::vector", parsed.blocks[0].text)
+        self.assertEqual(parsed.blocks[1].kind, "code")
+        self.assertEqual(parsed.blocks[1].heading_path, ("Containers", "Example"))
+        self.assertIn("values.push_back", parsed.blocks[1].text)
+        self.assertTrue(any(block.text == "E23" and block.kind == "td" for block in parsed.blocks))
+        self.assertFalse(any("discard" in block.text for block in parsed.blocks))
+
+    def test_markdown_rst_and_man_structure(self):
+        markdown = parse_markdown(
+            """# Build Guide
+
+Introduction.
+
+## Configure
+
+```powershell
+cmake --preset windows
+```
+""",
+            "fallback",
+        )
+        self.assertEqual(markdown.title, "Build Guide")
+        self.assertEqual(markdown.blocks[-1].heading_path, ("Build Guide", "Configure"))
+        self.assertEqual(markdown.blocks[-1].attributes["language"], "powershell")
+
+        rst = parse_rst(
+            """SQLite Backup
+=============
+
+Create a consistent backup.
+
+Example
+-------
+
+.. code-block:: sql
+
+   VACUUM INTO 'backup.db';
+""",
+            "fallback",
+        )
+        self.assertEqual(rst.title, "SQLite Backup")
+        self.assertEqual(rst.blocks[-1].kind, "code")
+        self.assertEqual(rst.blocks[-1].attributes["language"], "sql")
+
+        man = parse_man(
+            '.TH OPEN 2 "2026-08-19" "Linux"\n.SH NAME\nopen \\- open a file\n.SH ERRORS\n.B EACCES\nPermission denied.\n',
+            "open",
+        )
+        self.assertEqual(man.title, "OPEN")
+        self.assertEqual(man.blocks[-1].heading_path, ("ERRORS",))
+        self.assertIn("Permission denied", man.blocks[-1].text)
+
+        asciidoc = parse_asciidoc(
+            """= Git Manual
+
+== Plumbing
+
+[source,sh]
+----
+git cat-file -p HEAD
+----
+""",
+            "fallback",
+        )
+        self.assertEqual(asciidoc.title, "Git Manual")
+        self.assertEqual(asciidoc.blocks[-1].heading_path, ("Plumbing",))
+        self.assertEqual(asciidoc.blocks[-1].attributes["language"], "sh")
+
+        classic_asciidoc = parse_asciidoc(
+            """git-rebase(1)
+=============
+
+NAME
+----
+git-rebase - Reapply commits.
+
+DESCRIPTION
+-----------
+Transplant commits onto another base.
+""",
+            "fallback",
+        )
+        self.assertEqual(classic_asciidoc.title, "git-rebase(1)")
+        self.assertEqual(classic_asciidoc.blocks[0].heading_path, ("NAME",))
+        self.assertEqual(classic_asciidoc.blocks[-1].heading_path, ("DESCRIPTION",))
+
+        diagram = parse_asciidoc(
+            """= Layout
+
+== Example
+
+------------
+/path/to/worktree 1234abc (detached HEAD)
+------------
+""",
+            "fallback",
+        )
+        self.assertEqual(diagram.blocks[-1].kind, "code")
+        self.assertEqual(diagram.blocks[-1].heading_path, ("Example",))
+
+    def test_oversized_content_and_short_trailing_chunks(self):
+        from offline_rag.documentation import ContentBlock
+
+        blocks = (
+            ContentBlock(("Large",), "word " * 90, "paragraph", {}),
+            ContentBlock(("Large",), "short tail", "paragraph", {}),
+        )
+        chunks = chunk_blocks(blocks, max_chars=128, min_chars=40)
+        self.assertGreater(len(chunks), 1)
+        self.assertTrue(all(0 < len(text) <= 128 for _, text, _ in chunks))
+        self.assertFalse(chunks[-1][1] == "short tail")
+
+    def test_rfc_text_preserves_numbered_hierarchy(self):
+        parsed = parse_rfc(
+            """Network Working Group                                      A. Author
+Request for Comments: 9999                                  August 2026
+
+                    A Test Transport Protocol
+
+1.  Introduction
+
+This document defines a test protocol.
+
+2.  Operation
+
+2.1.  Handshake
+
+The client sends HELLO before DATA.
+
+Author [Page 1]
+""",
+            "rfc9999",
+        )
+        self.assertEqual(parsed.title, "A Test Transport Protocol")
+        self.assertEqual(parsed.format, "rfc-text")
+        self.assertEqual(parsed.blocks[-1].heading_path, ("2. Operation", "2.1. Handshake"))
+        self.assertIn("HELLO", parsed.blocks[-1].text)
+        self.assertFalse(any("Page 1" in block.text for block in parsed.blocks))
+
+    def test_rfc_title_and_headings_handle_modern_and_early_formats(self):
+        modern = parse_rfc(
+            """Internet Engineering Task Force                         J. Example
+Request for Comments: 9293                                  August 2022
+STD: 7
+
+                  Transmission Control Protocol (TCP)
+
+Abstract
+
+This document specifies TCP and updates prior requirements 1011 and 1122.
+
+1.  Introduction
+
+TCP provides a reliable byte stream.
+
+Appendix A.  Other Changes
+
+This appendix records changes.
+""",
+            "rfc9293",
+        )
+        self.assertEqual(modern.title, "Transmission Control Protocol (TCP)")
+        self.assertIn(("Abstract",), [block.heading_path for block in modern.blocks])
+        self.assertIn(("1. Introduction",), [block.heading_path for block in modern.blocks])
+        self.assertIn(("Appendix A. Other Changes",), [block.heading_path for block in modern.blocks])
+        self.assertFalse(any("1011. and" in " / ".join(block.heading_path) for block in modern.blocks))
+
+        early = parse_rfc(
+            """Network Working Group                                  Steve Crocker
+Request for Comments: 1                                    UCLA
+7 April 1969
+
+Title: Host Software
+Author: Steve Crocker
+
+I. INTRODUCTION
+
+The software is described here.
+""",
+            "rfc1",
+        )
+        self.assertEqual(early.title, "Host Software")
+        self.assertFalse(any(path and path[-1].startswith("7.") for path in (block.heading_path for block in early.blocks)))
+
+
+class DocumentationImportTests(unittest.TestCase):
+    def _source(self, root: Path) -> Path:
+        source = root / "source"
+        source.mkdir()
+        (source / "guide.html").write_text(
+            "<title>SQLite Recovery</title><h1>Recovery</h1>"
+            "<p>Use the integrity_check pragma before attempting recovery.</p>"
+            "<h2>Backup</h2><pre>VACUUM INTO 'backup.db';</pre>",
+            encoding="utf-8",
+        )
+        (source / "api.md").write_text(
+            "# C++ API\n\nThe foo_bar function returns a std::vector value.\n",
+            encoding="utf-8",
+        )
+        (source / "search.html").write_text("<p>duplicate search index</p>", encoding="utf-8")
+        (source / "asset.png").write_bytes(b"not documentation")
+        return source
+
+    def test_import_common_records_manifest_and_bm25_end_to_end(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = self._source(root)
+            output = root / "processed"
+            result = import_documentation(
+                source,
+                output,
+                corpus="sqlite-docs",
+                source_version="3.50.4",
+                license_name="SQLite documentation terms",
+                base_url="https://sqlite.org/docs/",
+                source_timestamp="2026-08-19T00:00:00Z",
+                max_chars=256,
+                min_chars=30,
+            )
+            self.assertEqual(result["documents"], 2)
+            manifest = json.loads((output / "corpus-manifest.json").read_text(encoding="utf-8"))
+            stats = json.loads((output / "extraction-stats.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["record_format"], "offline-rag-common-jsonl-v1")
+            self.assertTrue(stats["completed"])
+            self.assertEqual(stats["stop_reason"], "source_complete")
+            documents = [json.loads(line) for line in (output / "documents.jsonl").read_text().splitlines()]
+            chunks = [json.loads(line) for line in (output / "chunks.jsonl").read_text().splitlines()]
+            self.assertTrue(all(item["schema_version"] == 1 for item in documents + chunks))
+            self.assertTrue(all(item["content_id"].startswith("sha256:") for item in chunks))
+            recovery_chunks = [item for item in chunks if item["document_id"] == documents[1]["document_id"]]
+            self.assertGreaterEqual(len(recovery_chunks), 2)
+            self.assertEqual(recovery_chunks[0]["next_chunk_id"], recovery_chunks[1]["chunk_instance_id"])
+
+            database = root / "docs.sqlite3"
+            built = build_index(output, database)
+            self.assertEqual(built["documents"], 2)
+            metadata = read_index_metadata(database)
+            self.assertEqual(metadata["source_corpora"], ["sqlite-docs"])
+            result = search(database, "integrity_check pragma", limit=3)[0]
+            self.assertEqual(result["title"], "SQLite Recovery")
+            self.assertEqual(result["source_version"], "3.50.4")
+            self.assertEqual(result["source_timestamp"], "2026-08-19T00:00:00Z")
+            self.assertIn("sqlite-docs — SQLite Recovery § Recovery (3.50.4)", result["citation"])
+            technical = search(database, "foo_bar std::vector C++", limit=3)[0]
+            self.assertEqual(technical["title"], "C++ API")
+            verification = verify_database(database, output, smoke_queries=("integrity_check pragma",))
+            self.assertTrue(verification["verified"])
+
+    def test_file_limit_is_explicitly_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = self._source(root)
+            output = root / "limited"
+            import_documentation(
+                source,
+                output,
+                corpus="test-docs",
+                source_version="1",
+                license_name="test",
+                max_files=1,
+            )
+            stats = json.loads((output / "extraction-stats.json").read_text())
+            self.assertFalse(stats["completed"])
+            self.assertEqual(stats["stop_reason"], "file_limit")
+            with self.assertRaisesRegex(ValueError, "allow_incomplete"):
+                build_index(output, root / "limited.sqlite3")
+            build_index(output, root / "limited.sqlite3", allow_incomplete=True)
+
+    def test_include_and_exclude_globs_select_primary_rfc_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            (source / "bcp").mkdir(parents=True)
+            fixture = "Request for Comments: 9999\n\nA Test RFC\n\n1.  Introduction\n\nUseful text.\n"
+            (source / "rfc9999.txt").write_text(fixture, encoding="utf-8")
+            (source / "rfc-index.txt").write_text(fixture, encoding="utf-8")
+            (source / "bcp" / "rfc9999.txt").write_text(fixture, encoding="utf-8")
+            output = root / "processed"
+            import_documentation(
+                source,
+                output,
+                corpus="rfc-editor",
+                source_version="snapshot-test",
+                license_name="test",
+                include_globs=("rfc*.txt",),
+                exclude_globs=("rfc-index*.txt",),
+            )
+            documents = [json.loads(line) for line in (output / "documents.jsonl").read_text().splitlines()]
+            self.assertEqual([item["attributes"]["relative_path"] for item in documents], ["rfc9999.txt"])
+            self.assertEqual(documents[0]["attributes"]["rfc_number"], 9999)
+            manifest = json.loads((output / "corpus-manifest.json").read_text())
+            self.assertEqual(manifest["configuration"]["include_globs"], ["rfc*.txt"])
+
+    def test_rfc_header_metadata_is_preserved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            (source / "rfc9846.txt").write_text(
+                """Internet Engineering Task Force (IETF)                 E. Example
+Request for Comments: 9846                                 Independent
+Obsoletes: 5077, 5246, 8446                                July 2026
+Updates: 5705, 6066
+Category: Standards Track
+ISSN: 2070-1721
+
+The Transport Layer Security Protocol Version 1.3
+
+1.  Introduction
+
+Protocol text.
+""",
+                encoding="utf-8",
+            )
+            output = root / "processed"
+            import_documentation(
+                source,
+                output,
+                corpus="rfc-editor-text",
+                source_version="snapshot-test",
+                license_name="test",
+            )
+            document = json.loads((output / "documents.jsonl").read_text().splitlines()[0])
+            self.assertEqual(document["attributes"]["rfc_number"], 9846)
+            self.assertEqual(document["attributes"]["obsoletes"], [5077, 5246, 8446])
+            self.assertEqual(document["attributes"]["updates"], [5705, 6066])
+            self.assertEqual(document["attributes"]["publication_status"], "Standards Track")
+            self.assertEqual(document["attributes"]["publication_date"], "July 2026")
+            self.assertEqual(document["attributes"]["issn"], "2070-1721")
+
+    def test_single_archive_wrapper_does_not_change_stable_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            wrapper = root / "release-1.0"
+            wrapper.mkdir()
+            source = self._source(wrapper)
+            direct_output = root / "direct"
+            wrapped_output = root / "wrapped"
+            common = {
+                "corpus": "test-docs",
+                "source_version": "1",
+                "license_name": "test",
+                "base_url": "https://example.test/docs/",
+            }
+            import_documentation(source, direct_output, **common)
+            import_documentation(wrapper, wrapped_output, **common)
+            direct_documents = (direct_output / "documents.jsonl").read_text(encoding="utf-8")
+            wrapped_documents = (wrapped_output / "documents.jsonl").read_text(encoding="utf-8")
+            self.assertEqual(direct_documents, wrapped_documents)
+
+    def test_version_pinned_source_url_template(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = self._source(root)
+            output = root / "processed"
+            import_documentation(
+                source,
+                output,
+                corpus="test-docs",
+                source_version="1.0",
+                license_name="test",
+                source_url_template="https://example.test/tree/{relative_path}?h=v1.0",
+            )
+            documents = [json.loads(line) for line in (output / "documents.jsonl").read_text().splitlines()]
+            self.assertEqual(documents[0]["source_url"], "https://example.test/tree/api.md?h=v1.0")
+            with self.assertRaisesRegex(ValueError, "relative_path"):
+                import_documentation(
+                    source,
+                    root / "invalid",
+                    corpus="test-docs",
+                    source_version="1.0",
+                    license_name="test",
+                    source_url_template="https://example.test/no-placeholder",
+                )
+
+    def test_portable_archive_names_decode_before_identity_and_provenance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release = root / "release"
+            release.mkdir()
+            (root / ".archive-name-encoding-v1.json").write_text(
+                '{"schema_version":1,"encoded_members":1}\n', encoding="utf-8"
+            )
+            (release / "_%45xit.2").write_text('.TH _Exit 2\n.SH NAME\n_Exit \\- terminate process\n', encoding="utf-8")
+            output = root / "processed"
+            import_documentation(
+                root,
+                output,
+                corpus="man-test",
+                source_version="1",
+                license_name="test",
+                source_url_template="https://example.test/{relative_path}?h=v1",
+            )
+            document = json.loads((output / "documents.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            self.assertEqual(document["attributes"]["relative_path"], "_Exit.2")
+            self.assertEqual(document["source_url"], "https://example.test/_Exit.2?h=v1")
+
+    def test_existing_and_unrecognized_output_protection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = self._source(root)
+            output = root / "processed"
+            import_documentation(
+                source,
+                output,
+                corpus="test-docs",
+                source_version="1",
+                license_name="test",
+            )
+            before = (output / "corpus-manifest.json").read_bytes()
+            with self.assertRaises(FileExistsError):
+                import_documentation(
+                    source,
+                    output,
+                    corpus="test-docs",
+                    source_version="2",
+                    license_name="test",
+                )
+            self.assertEqual((output / "corpus-manifest.json").read_bytes(), before)
+            (output / "personal-notes.txt").write_text("preserve me")
+            with self.assertRaisesRegex(ValueError, "unrecognized"):
+                import_documentation(
+                    source,
+                    output,
+                    corpus="test-docs",
+                    source_version="2",
+                    license_name="test",
+                    force=True,
+                )
+            self.assertEqual((output / "personal-notes.txt").read_text(), "preserve me")
+
+
+if __name__ == "__main__":
+    unittest.main()

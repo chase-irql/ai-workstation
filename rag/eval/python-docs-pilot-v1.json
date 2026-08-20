@@ -1,0 +1,60 @@
+{
+  "schema_version": 2,
+  "name": "Python 3.14 documentation lexical pilot",
+  "description": "Small deterministic gate for the first corpus-neutral documentation import.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "pathlib-glob-001",
+      "query": "pathlib Path glob recursive patterns",
+      "query_type": "api_lookup",
+      "relevance": {
+        "python-3.14-docs:1c81e9a0659910b8dcc2c39d": 3,
+        "python-3.14-docs:44f9e183e7bee7eae64c9623": 1
+      }
+    },
+    {
+      "id": "asyncio-cancellation-001",
+      "query": "asyncio TaskGroup cancellation",
+      "query_type": "conceptual",
+      "relevance": {
+        "python-3.14-docs:f0b927a57cd17b2b36dd54aa": 3,
+        "python-3.14-docs:0ff3863cd48afd9825c38fce": 1,
+        "python-3.14-docs:53a303aebe1c965e837c10ec": 1
+      }
+    },
+    {
+      "id": "pyconfig-001",
+      "query": "PyConfig initialization configuration",
+      "query_type": "c_api_lookup",
+      "relevance": {
+        "python-3.14-docs:a49a47d3e3e658dacaa0e8c4": 3,
+        "python-3.14-docs:efc40d5a5a3a0be811dc0771": 1
+      }
+    },
+    {
+      "id": "free-threading-001",
+      "query": "free threaded Python global interpreter lock",
+      "query_type": "conceptual",
+      "relevance": {
+        "python-3.14-docs:5f879070ee13ff67735b9127": 3,
+        "python-3.14-docs:e90d8b5b04f5980a78c688e6": 3,
+        "python-3.14-docs:53a303aebe1c965e837c10ec": 1
+      }
+    },
+    {
+      "id": "sqlite-backup-001",
+      "query": "sqlite3 backup database",
+      "query_type": "api_lookup",
+      "relevance": {
+        "python-3.14-docs:eff92c34e6d3a0fbc18b48b3": 3,
+        "python-3.14-docs:9b71645181e6d516abbfecec": 1
+      }
+    }
+  ]
+}

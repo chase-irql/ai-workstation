@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "name": "Python 3.14 documentation semantic paraphrase gate",
+  "description": "Conceptual queries deliberately phrased differently from official headings.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "pathlib-paraphrase-001",
+      "query": "walk nested directories and match filenames using shell style wildcards",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "python-3.14-docs:1c81e9a0659910b8dcc2c39d": 3,
+        "python-3.14-docs:44f9e183e7bee7eae64c9623": 1
+      }
+    },
+    {
+      "id": "taskgroup-paraphrase-001",
+      "query": "structured concurrency cancels sibling coroutines after one task fails",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "python-3.14-docs:f0b927a57cd17b2b36dd54aa": 3,
+        "python-3.14-docs:0ff3863cd48afd9825c38fce": 1
+      }
+    },
+    {
+      "id": "free-threading-paraphrase-001",
+      "query": "run interpreter threads simultaneously on multiple CPU cores without a global lock",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "python-3.14-docs:e90d8b5b04f5980a78c688e6": 3,
+        "python-3.14-docs:5f879070ee13ff67735b9127": 2
+      }
+    },
+    {
+      "id": "sqlite-backup-paraphrase-001",
+      "query": "copy a live database while other connections continue using it",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "python-3.14-docs:eff92c34e6d3a0fbc18b48b3": 3,
+        "python-3.14-docs:9b71645181e6d516abbfecec": 1
+      }
+    }
+  ]
+}

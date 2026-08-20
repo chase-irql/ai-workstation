@@ -1,0 +1,66 @@
+{
+  "schema_version": 2,
+  "name": "RFC Editor semantic paraphrase gate",
+  "description": "Protocol questions deliberately phrased without exact RFC titles or numbers.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "http-semantics-paraphrase-001",
+      "query": "choose a response representation using client preferences and cached validators",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:3f9054029f235d4602d1c991": 3,
+        "rfc-editor-text:c8e8ee1a4025bdc67a0e1212": 1
+      }
+    },
+    {
+      "id": "tls13-paraphrase-001",
+      "query": "derive traffic secrets across the phases of a modern encrypted handshake",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:90114a31d33a6ca4ef9f91b6": 3,
+        "rfc-editor-text:d6212bf18f98369967db2a2b": 1
+      }
+    },
+    {
+      "id": "uri-resolution-paraphrase-001",
+      "query": "turn a relative resource location into an absolute identifier using a base",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:535d7547ee08a225cf00b57d": 3,
+        "rfc-editor-text:c6045e8604b800f5d074085c": 1
+      }
+    },
+    {
+      "id": "dns-format-paraphrase-001",
+      "query": "binary wire layout for mapping host names to addresses and carrying resource data",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:00a6eaeedf8251c35ba7d815": 3,
+        "rfc-editor-text:e239af7850138dbd3c425c0e": 1
+      }
+    },
+    {
+      "id": "tcp-congestion-paraphrase-001",
+      "query": "grow a sender window cautiously and recover its rate after detecting lost packets",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:70382eb2504ca1d281c73b2f": 3,
+        "rfc-editor-text:184d37e7d633d69bfcb27dc1": 2
+      }
+    },
+    {
+      "id": "quic-migration-paraphrase-001",
+      "query": "keep a secure multiplexed connection alive when a client changes network address",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "rfc-editor-text:2bf359b079d4ec87877020f3": 3
+      }
+    }
+  ]
+}

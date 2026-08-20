@@ -1,10 +1,59 @@
 [CmdletBinding()]
 param(
     [string]$ModelId,
-    [string]$Suite = 'rag\eval\wikipedia-agent-v1.json',
+    [string]$Suite = 'rag\eval\wikipedia-agent-v2.json',
     [string]$CaseId,
     [switch]$Unload
 )
+
+function ConvertTo-AnswerComparisonTokens {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Text)
+
+    # Compare facts as normalized token phrases so harmless punctuation,
+    # possessives, and common English inflections do not create false
+    # negatives. This remains deliberately narrower than semantic grading.
+    $normalized = $Text.Normalize([Text.NormalizationForm]::FormKC).ToLowerInvariant()
+    $normalized = $normalized -replace "(?<=\p{L})['’]s\b", ''
+    foreach ($match in [regex]::Matches($normalized, '[\p{L}\p{Nd}]+')) {
+        $token = $match.Value
+        if ($token.Length -gt 5 -and $token.EndsWith('ing', [StringComparison]::Ordinal)) {
+            $token = $token.Substring(0, $token.Length - 3)
+        }
+        elseif ($token.Length -gt 4 -and $token.EndsWith('ed', [StringComparison]::Ordinal)) {
+            $token = $token.Substring(0, $token.Length - 2)
+        }
+        elseif ($token.Length -gt 3 -and $token.EndsWith('s', [StringComparison]::Ordinal) -and
+                -not $token.EndsWith('ss', [StringComparison]::Ordinal)) {
+            $token = $token.Substring(0, $token.Length - 1)
+        }
+        $token
+    }
+}
+
+function Test-AnswerContainsTerm {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Answer,
+        [Parameter(Mandatory)][string]$ExpectedTerm
+    )
+
+    $answerTokens = @(ConvertTo-AnswerComparisonTokens -Text $Answer)
+    $expectedTokens = @(ConvertTo-AnswerComparisonTokens -Text $ExpectedTerm)
+    if ($expectedTokens.Count -eq 0 -or $answerTokens.Count -lt $expectedTokens.Count) { return $false }
+
+    for ($start = 0; $start -le $answerTokens.Count - $expectedTokens.Count; $start++) {
+        $matches = $true
+        for ($offset = 0; $offset -lt $expectedTokens.Count; $offset++) {
+            if ($answerTokens[$start + $offset] -cne $expectedTokens[$offset]) {
+                $matches = $false
+                break
+            }
+        }
+        if ($matches) { return $true }
+    }
+    return $false
+}
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 $root = Get-ProjectRoot
@@ -18,8 +67,8 @@ $model = Get-ModelDefinition -ModelId $ModelId
 $suitePath = [System.IO.Path]::GetFullPath((Join-Path $root $Suite))
 if (-not (Test-Path -LiteralPath $suitePath -PathType Leaf)) { throw "Suite not found: $suitePath" }
 $definition = Get-Content -LiteralPath $suitePath -Raw | ConvertFrom-Json
-if ($definition.schema_version -ne 1 -or @($definition.cases).Count -lt 1) {
-    throw 'Agent evaluation suite must use schema version 1 and contain at least one case.'
+if ($definition.schema_version -notin @(1, 2) -or @($definition.cases).Count -lt 1) {
+    throw 'Agent evaluation suite must use schema version 1 or 2 and contain at least one case.'
 }
 $selectedCases = @($definition.cases)
 if ($CaseId) {
@@ -84,7 +133,25 @@ try {
 
         $missingTools = @($case.required_tools | Where-Object { $_ -notin $tools })
         $missingDocuments = @($case.expected_document_ids | Where-Object { $_ -notin $retrievedDocuments })
-        $missingTerms = @($case.expected_answer_terms | Where-Object { $answer -notmatch [regex]::Escape($_) })
+        $missingTerms = @()
+        $missingConcepts = @()
+        if ($definition.schema_version -eq 1) {
+            $missingTerms = @($case.expected_answer_terms | Where-Object {
+                -not (Test-AnswerContainsTerm -Answer $answer -ExpectedTerm ([string]$_))
+            })
+        }
+        else {
+            foreach ($concept in @($case.expected_answer_concepts)) {
+                $matched = $false
+                foreach ($alternative in @($concept.alternatives)) {
+                    if (Test-AnswerContainsTerm -Answer $answer -ExpectedTerm ([string]$alternative)) {
+                        $matched = $true
+                        break
+                    }
+                }
+                if (-not $matched) { $missingConcepts += [string]$concept.id }
+            }
+        }
         $hasCitation = $answer -match 'Wikipedia\s+[—-].*https://en\.wikipedia\.org/wiki/'
         $passed = (
             $harnessExitCode -eq 0 -and
@@ -92,6 +159,7 @@ try {
             $missingTools.Count -eq 0 -and
             $missingDocuments.Count -eq 0 -and
             $missingTerms.Count -eq 0 -and
+            $missingConcepts.Count -eq 0 -and
             $hasCitation
         )
         $caseResults += [ordered]@{
@@ -106,6 +174,7 @@ try {
             missing_tools = $missingTools
             missing_document_ids = $missingDocuments
             missing_answer_terms = $missingTerms
+            missing_answer_concepts = $missingConcepts
             citation_present = $hasCitation
             maximum_input_tokens = $maximumInputTokens
             output_tokens = $outputTokens
@@ -121,9 +190,11 @@ finally {
 $report = [ordered]@{
     schema_version = 1
     suite = $definition.name
+    suite_schema_version = $definition.schema_version
     suite_path = $suitePath
     model_id = $ModelId
     ollama_model = $model.ollama_model
+    answer_matcher = 'normalized_token_phrase_v1'
     started_at = $started.ToString('o')
     finished_at = (Get-Date).ToString('o')
     cases = $caseResults.Count

@@ -16,7 +16,7 @@ from typing import Any
 
 import zstandard
 
-from .records import CommonChunk, wikipedia_chunks_to_common, wikipedia_document_to_common
+from .records import CommonChunk, chunk_records_to_common, document_record_to_common
 
 
 INDEX_SCHEMA_VERSION = 2
@@ -233,7 +233,7 @@ def _batched(values: Iterable[tuple[Any, ...]], size: int = 1000) -> Iterator[li
 def _document_rows(paths: Sequence[Path]) -> Iterator[tuple[Any, ...]]:
     for path in paths:
         for item in read_jsonl(path):
-            document = wikipedia_document_to_common(item)
+            document = document_record_to_common(item)
             yield (
                 document.document_id,
                 document.corpus,
@@ -249,7 +249,7 @@ def _document_rows(paths: Sequence[Path]) -> Iterator[tuple[Any, ...]]:
 
 def _chunk_rows(paths: Sequence[Path]) -> Iterator[tuple[Any, ...]]:
     for path in paths:
-        common_chunks: Iterable[CommonChunk] = wikipedia_chunks_to_common(read_jsonl(path))
+        common_chunks: Iterable[CommonChunk] = chunk_records_to_common(read_jsonl(path))
         for chunk in common_chunks:
             yield (
                 chunk.chunk_instance_id,
@@ -585,10 +585,18 @@ def read_index_metadata(database: Path) -> dict[str, Any]:
         connection.close()
 
 
-def _citation(corpus: str, title: str, heading_path: list[str], timestamp: str | None, url: str | None) -> str:
+def _citation(
+    corpus: str,
+    title: str,
+    heading_path: list[str],
+    timestamp: str | None,
+    url: str | None,
+    source_version: str | None = None,
+) -> str:
     label = "Wikipedia" if corpus == "wikipedia-en" else corpus
     section = f" § {' > '.join(heading_path)}" if heading_path else ""
-    revision = f" ({timestamp})" if timestamp else ""
+    provenance = timestamp if corpus == "wikipedia-en" else source_version or timestamp
+    revision = f" ({provenance})" if provenance else ""
     source = f" {url}" if url else ""
     return f"{label} — {title}{section}{revision}{source}"
 
@@ -599,8 +607,8 @@ def _search_v2(
     limit: int,
 ) -> list[dict[str, object]]:
     select_sql = """
-        SELECT c.chunk_instance_id AS chunk_id, c.document_id, d.corpus, d.title,
-               c.heading_path, c.text, d.source_url, d.source_timestamp,
+        SELECT c.chunk_instance_id AS chunk_id, c.content_id, c.document_id, d.corpus, d.title,
+               c.heading_path, c.text, d.source_url, d.source_version, d.source_timestamp,
                c.ordinal, c.attributes_json,
                bm25(chunks_fts, 5.0, 2.0, 1.0, 2.0) AS raw_score
         FROM chunks_fts
@@ -643,7 +651,8 @@ def _search_v2(
         attributes = json.loads(item.pop("attributes_json"))
         heading_path = [part.strip() for part in item["heading_path"].split(">") if part.strip()]
         item["heading_path"] = heading_path
-        item["revision_timestamp"] = attributes.get("revision_timestamp") or item.pop("source_timestamp")
+        item["source_timestamp"] = item.get("source_timestamp")
+        item["revision_timestamp"] = attributes.get("revision_timestamp") or item["source_timestamp"]
         item["section_index"] = attributes.get("section_index")
         item["chunk_index"] = attributes.get("chunk_index")
         item["score"] = item["raw_score"]
@@ -657,6 +666,7 @@ def _search_v2(
             heading_path,
             item["revision_timestamp"],
             item["source_url"],
+            item["source_version"],
         )
         results.append(item)
     return results

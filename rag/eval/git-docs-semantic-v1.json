@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "name": "Git 2.55 documentation semantic paraphrase gate",
+  "description": "Operational questions whose wording differs from command and option names.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "autosquash-paraphrase-001",
+      "query": "automatically move fixup commits beside their targets during history rewriting",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "git-docs:47a9c438d6ed61c3a7b03da4": 3,
+        "git-docs:5142d56741e870cf66a76b3e": 2
+      }
+    },
+    {
+      "id": "worktree-paraphrase-001",
+      "query": "prevent a secondary checkout from being removed by automatic cleanup",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "git-docs:4ba55f027c252529a1c9c8b9": 3,
+        "git-docs:f5fc0eb1c47ade4a06c3b2f4": 1
+      }
+    },
+    {
+      "id": "fsck-paraphrase-001",
+      "query": "find repository objects that are unreachable from every reference",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "git-docs:724e0994dacc32f98f786325": 3,
+        "git-docs:a7322bc97fd115f7fbe8a8e8": 1
+      }
+    },
+    {
+      "id": "partial-clone-paraphrase-001",
+      "query": "avoid downloading file contents until they are needed from the remote",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {
+        "git-docs:f5dd6b9beefbee234b5a3f87": 3,
+        "git-docs:54011d786644a085c93f5399": 2
+      }
+    }
+  ]
+}

@@ -49,6 +49,16 @@
       "notes": "Deferred comparison because its official Q4 build is substantially larger."
     },
     {
+      "id": "qwen38-27b-uncensored",
+      "ollama_model": "orcarouter/Qwen3.8-27B-Uncensored:iq3_xxs",
+      "role": "general-agent",
+      "architecture": "dense-hybrid-27b",
+      "quantization": "IQ3_XXS",
+      "download_gb": 12,
+      "priority": 1,
+      "notes": "Abliterated vision/tool/reasoning model. Verified 100% GPU-resident on the RTX 5080 at 65,536 context; VRAM headroom is minimal and safety alignment is substantially removed."
+    },
+    {
       "id": "qwen3-embedding-0.6b",
       "ollama_model": "qwen3-embedding:0.6b",
       "role": "embedding",

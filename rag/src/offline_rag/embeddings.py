@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -96,13 +97,21 @@ class OllamaEmbeddingClient:
         base_url: str = DEFAULT_OLLAMA_URL,
         timeout_seconds: float = 300.0,
         keep_alive: str = "10m",
+        max_retries: int = 3,
+        retry_backoff_seconds: float = 1.0,
     ) -> None:
         if timeout_seconds <= 0 or not math.isfinite(timeout_seconds):
             raise ValueError("timeout_seconds must be positive and finite")
+        if not 0 <= max_retries <= 10:
+            raise ValueError("max_retries must be between 0 and 10")
+        if retry_backoff_seconds < 0 or not math.isfinite(retry_backoff_seconds):
+            raise ValueError("retry_backoff_seconds must be nonnegative and finite")
         self.config = config
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.keep_alive = keep_alive
+        self.max_retries = max_retries
+        self.retry_backoff_seconds = retry_backoff_seconds
 
     @property
     def dimensions(self) -> int:
@@ -138,14 +147,31 @@ class OllamaEmbeddingClient:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        try:
-            with urlopen(request, timeout=self.timeout_seconds) as response:
-                value: Any = json.load(response)
-        except HTTPError as error:
-            detail = error.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"Ollama embedding request failed with HTTP {error.code}: {detail}") from error
-        except URLError as error:
-            raise RuntimeError(f"Ollama embedding endpoint is unavailable at {self.base_url}: {error.reason}") from error
+        value: Any = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                with urlopen(request, timeout=self.timeout_seconds) as response:
+                    value = json.load(response)
+                break
+            except HTTPError as error:
+                detail = error.read().decode("utf-8", errors="replace")
+                transient_runner_failure = error.code == 400 and any(
+                    marker in detail.casefold()
+                    for marker in ("connection refused", "actively refused", "/tokenize", "/embedding")
+                )
+                retryable = error.code in {408, 409, 425, 429} or error.code >= 500 or transient_runner_failure
+                if not retryable or attempt >= self.max_retries:
+                    raise RuntimeError(
+                        f"Ollama embedding request failed with HTTP {error.code} after {attempt + 1} attempt(s): {detail}"
+                    ) from error
+            except URLError as error:
+                if attempt >= self.max_retries:
+                    raise RuntimeError(
+                        f"Ollama embedding endpoint is unavailable at {self.base_url} after "
+                        f"{attempt + 1} attempt(s): {error.reason}"
+                    ) from error
+            if self.retry_backoff_seconds:
+                time.sleep(self.retry_backoff_seconds * (2**attempt))
         embeddings = value.get("embeddings") if isinstance(value, dict) else None
         if not isinstance(embeddings, list) or len(embeddings) != len(texts):
             raise RuntimeError(

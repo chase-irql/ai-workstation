@@ -38,19 +38,56 @@ def ranking_metrics(
 ) -> dict[str, float]:
     """Calculate document-level IR metrics for one deterministic ranking."""
 
+    return ranking_metrics_grouped(
+        [(value,) for value in ranked_ids],
+        relevance,
+        success_cutoffs,
+        recall_cutoffs,
+        mrr_cutoff,
+        ndcg_cutoff,
+    )
+
+
+def ranking_metrics_grouped(
+    ranked_id_groups: Sequence[Sequence[str]],
+    relevance: Mapping[str, int],
+    success_cutoffs: Sequence[int] = (1, 5, 10),
+    recall_cutoffs: Sequence[int] = (5, 10),
+    mrr_cutoff: int = 10,
+    ndcg_cutoff: int | None = 10,
+) -> dict[str, float]:
+    """Calculate metrics where one evidence result may preserve alternate source IDs."""
+
     relevant_ids = set(relevance)
     if not relevant_ids:
         raise ValueError("relevance must not be empty")
     values: dict[str, float] = {}
     for cutoff in success_cutoffs:
-        values[f"success_at_{cutoff}"] = float(any(item in relevant_ids for item in ranked_ids[:cutoff]))
+        values[f"success_at_{cutoff}"] = float(
+            any(relevant_ids.intersection(group) for group in ranked_id_groups[:cutoff])
+        )
     for cutoff in recall_cutoffs:
-        found = len(relevant_ids.intersection(ranked_ids[:cutoff]))
+        found_ids: set[str] = set()
+        for group in ranked_id_groups[:cutoff]:
+            found_ids.update(relevant_ids.intersection(group))
+        found = len(found_ids)
         values[f"recall_at_{cutoff}"] = found / len(relevant_ids)
-    first_rank = next((rank for rank, item in enumerate(ranked_ids[:mrr_cutoff], start=1) if item in relevant_ids), None)
+    first_rank = next(
+        (
+            rank
+            for rank, group in enumerate(ranked_id_groups[:mrr_cutoff], start=1)
+            if relevant_ids.intersection(group)
+        ),
+        None,
+    )
     values[f"mrr_at_{mrr_cutoff}"] = 1.0 / first_rank if first_rank is not None else 0.0
     if ndcg_cutoff is not None:
-        gains = [int(relevance.get(item, 0)) for item in ranked_ids[:ndcg_cutoff]]
+        seen_relevant: set[str] = set()
+        gains: list[int] = []
+        for group in ranked_id_groups[:ndcg_cutoff]:
+            matching = relevant_ids.intersection(group) - seen_relevant
+            gains.append(max((int(relevance[item]) for item in matching), default=0))
+            seen_relevant.update(matching)
         dcg = sum((2**gain - 1) / math.log2(rank + 1) for rank, gain in enumerate(gains, start=1))
         ideal = sorted((int(value) for value in relevance.values()), reverse=True)[:ndcg_cutoff]
         idcg = sum((2**gain - 1) / math.log2(rank + 1) for rank, gain in enumerate(ideal, start=1))
@@ -163,15 +200,20 @@ def _deduplicate_documents(chunks: Iterable[Mapping[str, Any]]) -> list[dict[str
         if document_id in seen:
             continue
         seen.add(document_id)
-        documents.append(
-            {
-                "document_id": document_id,
-                "title": str(chunk["title"]),
-                "chunk_id": str(chunk["chunk_id"]),
-                "raw_score": float(chunk["raw_score"]),
-                "citation": str(chunk["citation"]),
-            }
-        )
+        document = {
+            "document_id": document_id,
+            "title": str(chunk["title"]),
+            "chunk_id": str(chunk["chunk_id"]),
+            "raw_score": float(chunk["raw_score"]),
+            "citation": str(chunk["citation"]),
+        }
+        alternate_ids = chunk.get("alternate_document_ids")
+        if isinstance(alternate_ids, list):
+            document["alternate_document_ids"] = [str(value) for value in alternate_ids if value]
+        alternate_sources = chunk.get("alternate_sources")
+        if isinstance(alternate_sources, list):
+            document["alternate_sources"] = [dict(value) for value in alternate_sources if isinstance(value, Mapping)]
+        documents.append(document)
     return documents
 
 
@@ -216,12 +258,25 @@ def evaluate_retriever(
         chunks = retriever(case["query"], suite["candidate_chunks"], case["query_mode"])
         latency_ms = (time.perf_counter() - started) * 1000
         documents = _deduplicate_documents(chunks)
-        rank_values = [
-            document["document_id"] if case["relevance_kind"] == "document_id" else document["title"]
-            for document in documents
-        ]
-        metrics = ranking_metrics(
-            rank_values,
+        if case["relevance_kind"] == "document_id":
+            rank_groups = [
+                [document["document_id"], *document.get("alternate_document_ids", [])]
+                for document in documents
+            ]
+        else:
+            rank_groups = [
+                [
+                    document["title"],
+                    *[
+                        str(source.get("title"))
+                        for source in document.get("alternate_sources", [])
+                        if source.get("title")
+                    ],
+                ]
+                for document in documents
+            ]
+        metrics = ranking_metrics_grouped(
+            rank_groups,
             case["relevance"],
             suite["success_cutoffs"],
             suite["recall_cutoffs"],

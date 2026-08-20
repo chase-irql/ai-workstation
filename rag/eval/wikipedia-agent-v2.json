@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "name": "Offline Wikipedia model-and-tool verification v2",
+  "cases": [
+    {
+      "id": "apollo-guidance-computer",
+      "prompt": "This is an end-to-end offline RAG verification. You MUST use the offline-wikipedia MCP tools and must not answer from memory alone. Check wikipedia_index_status, then search Wikipedia to answer: Which guidance computer was used during the Apollo program, which organization designed it, and where was it installed? Use the evidence in the search result. If more context is genuinely needed, use retrieve_wikipedia_context around the relevant chunk; do not fetch the whole document. Return a concise answer and include exact citation strings returned by the tools under a Sources heading. Do not use web search.",
+      "expected_document_ids": ["enwiki:188887"],
+      "expected_answer_concepts": [
+        {"id": "computer", "alternatives": ["Apollo Guidance Computer"]},
+        {"id": "designer", "alternatives": ["MIT Instrumentation Laboratory"]},
+        {"id": "command-module", "alternatives": ["command module"]},
+        {"id": "lunar-module", "alternatives": ["Lunar Module"]}
+      ],
+      "required_tools": ["wikipedia_index_status", "search_wikipedia"]
+    },
+    {
+      "id": "albedo-definition",
+      "prompt": "Use the offline-wikipedia MCP tools, not memory or web search. Check wikipedia_index_status, then find and explain what albedo measures and what values 0 and 1 mean. Use the evidence in the search result; expand only with retrieve_wikipedia_context if needed. Answer concisely and include the exact returned citation under a Sources heading.",
+      "expected_document_ids": ["enwiki:39"],
+      "expected_answer_concepts": [
+        {"id": "quantity", "alternatives": ["fraction", "proportion", "ratio", "how much"]},
+        {"id": "reflection", "alternatives": ["reflected", "reflects", "reflection"]},
+        {"id": "zero-value", "alternatives": ["0"]},
+        {"id": "one-value", "alternatives": ["1", "100 percent", "100%"]}
+      ],
+      "required_tools": ["wikipedia_index_status", "search_wikipedia"]
+    },
+    {
+      "id": "technical-aliases",
+      "prompt": "Use the offline-wikipedia MCP tools, not memory or web search. Check wikipedia_index_status, then search for C# .NET 8 and identify the book title in the retrieved evidence that connects C# 12 with .NET 8 and name its author. Answer concisely and include the exact returned citation under a Sources heading.",
+      "expected_document_ids": ["enwiki:81305113"],
+      "expected_answer_concepts": [
+        {"id": "book-title", "alternatives": ["C# 12 and .NET 8"]},
+        {"id": "author", "alternatives": ["Mark J. Price"]}
+      ],
+      "required_tools": ["wikipedia_index_status", "search_wikipedia"]
+    }
+  ]
+}

@@ -273,6 +273,7 @@ class VectorIndexTests(unittest.TestCase):
                 )
             self.assertEqual(result["results"][0]["document_id"], "enwiki:100")
             self.assertEqual(result["results"][0]["ranking_reason"], "hybrid_rrf")
+            self.assertEqual(result["results"][0]["pre_fusion_ranking_reason"], "exact_title")
             self.assertEqual(result["results"][0]["fusion"]["lexical_rank"], 1)
             self.assertEqual(result["results"][0]["fusion"]["semantic_rank"], 1)
 

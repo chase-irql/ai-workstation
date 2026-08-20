@@ -6,7 +6,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from offline_rag.records import make_content_id, wikipedia_chunks_to_common, wikipedia_document_to_common
+from offline_rag.records import (
+    chunk_records_to_common,
+    common_chunk_from_record,
+    common_document_from_record,
+    make_content_id,
+    wikipedia_chunks_to_common,
+    wikipedia_document_to_common,
+)
 
 
 class RecordTests(unittest.TestCase):
@@ -53,7 +60,44 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(chunks[1].previous_chunk_id, "instance-a")
         self.assertEqual(chunks[1].ordinal, 1)
 
+    def test_native_common_records_are_validated(self):
+        document = common_document_from_record(
+            {
+                "schema_version": 1,
+                "document_id": "python:library/pathlib",
+                "corpus": "python-docs",
+                "title": "pathlib",
+                "source_url": "https://docs.python.org/3/library/pathlib.html",
+                "source_version": "3.14.7",
+                "source_timestamp": None,
+                "license": "PSF-2.0",
+                "content_hash": make_content_id("Paths"),
+                "attributes": {"relative_path": "library/pathlib.html"},
+            }
+        )
+        chunk_record = {
+            "schema_version": 1,
+            "chunk_instance_id": "instance-1",
+            "content_id": make_content_id("Paths are objects."),
+            "document_id": document.document_id,
+            "parent_chunk_id": None,
+            "ordinal": 0,
+            "heading_path": ["Object-oriented filesystem paths"],
+            "text": "Paths are objects.",
+            "character_count": len("Paths are objects."),
+            "token_count": None,
+            "previous_chunk_id": None,
+            "next_chunk_id": None,
+            "attributes": {},
+        }
+        chunk = common_chunk_from_record(chunk_record)
+        streamed = list(chunk_records_to_common(iter([chunk_record])))
+        self.assertEqual(document.source_version, "3.14.7")
+        self.assertEqual(chunk, streamed[0])
+        invalid = dict(chunk_record, character_count=999)
+        with self.assertRaisesRegex(ValueError, "character_count"):
+            common_chunk_from_record(invalid)
+
 
 if __name__ == "__main__":
     unittest.main()
-

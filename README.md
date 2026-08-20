@@ -1,6 +1,10 @@
 # Local AI Workstation
 
-This repository is the control plane for a private, replaceable-model AI workstation. Large model files, generated benchmark runs, corpora, and indexes live beside the repository under `D:\ai-workstation`, but are intentionally excluded from Git.
+This open-source repository is the control plane for a private, replaceable-model AI workstation and offline knowledge system. It contains acquisition, ingestion, indexing, retrieval, evaluation, and agent-integration code. Large model files, generated benchmark runs, corpora, and indexes live beside the repository but are intentionally excluded from Git.
+
+The project code is licensed under Apache-2.0. Downloaded corpora, model weights, and derived indexes retain their upstream licenses and are not covered by the project license. See [Data distribution policy](docs/data-distribution-policy.md) before publishing any generated artifact.
+
+The checked-in OpenCode benchmark profile grants tools automatically and is intended only for trusted local repositories and reviewed commands. Tighten `config/harnesses/opencode.json` before using it on untrusted code or corpora.
 
 ## Phase 1 status
 
@@ -16,7 +20,15 @@ This repository is the control plane for a private, replaceable-model AI worksta
 
 ## Quick start
 
-Run PowerShell from this directory:
+The automation is currently Windows-first. Create the local Python environment from PowerShell:
+
+```powershell
+py -3.14 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r rag\requirements.txt
+```
+
+Then run from this directory:
 
 ```powershell
 .\scripts\configure-ollama.ps1 -MigrateExistingStore -RestartApp
@@ -29,6 +41,13 @@ Run PowerShell from this directory:
 
 Each benchmark run gets a fresh isolated Git workspace under `results/runs/` and records harness output, verification output, the final diff, timing, and environment metadata.
 
+For development and tests:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r rag\requirements-dev.txt
+.\.venv\Scripts\python.exe -m pytest rag\tests -q
+```
+
 See `docs/phase-1-results.md` for measurements and caveats.
 
 ## Layout
@@ -39,8 +58,10 @@ See `docs/phase-1-results.md` for measurements and caveats.
 - `scripts/`: setup, diagnostics, model management, and benchmark automation.
 - `models/`: Ollama and later GGUF model storage; ignored by Git.
 - `results/runs/`: generated benchmark evidence; ignored by Git.
-- `corpora/raw/`: future source documents; ignored by Git.
-- `indexes/`: future BM25/vector indexes; ignored by Git.
+- `corpora/raw/`: downloaded source archives and extracted corpora; ignored by Git.
+- `indexes/`: generated BM25/vector indexes; ignored by Git.
+
+Only source code, documentation, versioned manifests, evaluation suites, and tiny synthetic test fixtures belong in this repository. Do not commit raw datasets, extracted source text, vector databases, model weights, credentials, personal documents, or machine-generated result directories.
 
 Do not compare harnesses using different model tags, contexts, prompts, seed commits, or runtime settings. Change one variable at a time.
 
@@ -97,3 +118,47 @@ The gate verifies actual MCP calls, stable Wikipedia document IDs, expected answ
 The multistream extractor uses deterministic compressed shards and block-level resume. Use `.\scripts\run-wikipedia-full.ps1 -Resume` after a reboot or interruption.
 
 See `docs/rag-phase-2-results.md` for the verified-corpus results and `docs/rag-agent-results.md` for the model-and-tool verification.
+
+## Documentation corpora
+
+The corpus-neutral documentation path now imports HTML, Markdown, reStructuredText, AsciiDoc, man/roff, RFC text, and plain text into the same common record model and atomic SQLite FTS5/BM25 baseline used by Wikipedia. Python 3.14.7, Git 2.55.0, Linux man-pages 6.18, and the 2026-08-19 RFC Editor text snapshot are acquired, parsed, indexed, and evaluated. A separate table-aware importer has also published the complete 2026-08-19 IANA protocol-registry snapshot: 4,256 registry documents and 114,590 searchable chunks.
+
+```powershell
+.\scripts\validate-dataset-registry.ps1
+.\scripts\query-documentation.ps1 -DatasetId python-3.14-docs -Query 'pathlib glob recursive patterns'
+.\scripts\evaluate-documentation.ps1 -DatasetId python-3.14-docs -Suite rag\eval\python-docs-pilot-v1.json
+.\scripts\query-documentation.ps1 -DatasetId rfc-editor-text -Query 'TLS 1.3 key schedule'
+.\scripts\query-documentation.ps1 -DatasetId iana-protocol-registries -Query 'https tcp port'
+```
+
+See `docs/documentation-corpus-ingestion.md` for acquisition, rebuild, safety, parser, storage, and update details. These commands are CPU-only and do not load a local model. Embedding and hybrid rollout for the new corpora is staged separately in `docs/corpus-semantic-roadmap.md`.
+
+Chunk-level semantic generations can be built independently after the BM25 gate:
+
+```powershell
+.\scripts\run-corpus-semantic.ps1 -DatasetId python-3.14-docs
+.\scripts\get-corpus-semantic-status.ps1
+.\scripts\evaluate-corpus-semantic.ps1 -DatasetId python-3.14-docs -Suite rag\eval\python-docs-semantic-v1.json
+```
+
+Python, Git, and Linux man-pages now have published semantic generations covering all 26,948 chunks. RFC Editor adds another verified 348,831 chunk vectors across 9,822 documents. Exact identifiers remain BM25-first; natural-language paraphrases use hybrid retrieval through the unified MCP.
+
+## Unified offline knowledge tools
+
+OpenCode can search Wikipedia, Python, Git, Linux man-pages, RFCs, and IANA protocol registries through one read-only MCP server while every corpus remains independently replaceable:
+
+```powershell
+.\scripts\configure-knowledge-mcp.ps1 -Harness opencode
+.\scripts\start-opencode.ps1
+```
+
+To run the same local Ollama models through Codex without changing the normal global Codex model, use the isolated launcher:
+
+```powershell
+.\scripts\start-codex.ps1 -ModelId glm-4.7-flash
+.\scripts\start-codex.ps1 -ModelId qwen3-coder-30b -WorkingDirectory C:\GitHub\your-project
+```
+
+Omit `-ModelId` to select the same default general-agent model as the OpenCode launcher. The temporary Codex home is scoped to the launched process; plain `codex` continues to use the personal global configuration.
+
+The unified tools are `search_knowledge`, `retrieve_knowledge_context`, `retrieve_knowledge_document`, and `knowledge_index_status`. The existing Wikipedia-specific MCP tools remain configured for compatibility. See `docs/unified-knowledge-mcp.md` for corpus filters, CPU-only BM25 selection, ranking behavior, fallback behavior, and example prompts.

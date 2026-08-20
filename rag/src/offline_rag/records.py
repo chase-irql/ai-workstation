@@ -6,6 +6,7 @@ import re
 import unicodedata
 from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import asdict, dataclass, field
+from itertools import chain
 from typing import Any
 
 
@@ -22,6 +23,29 @@ def normalize_content(text: str) -> str:
 def make_content_id(text: str) -> str:
     digest = hashlib.sha256(normalize_content(text).encode("utf-8")).hexdigest()
     return f"sha256:{digest}"
+
+
+def _required_string(item: Mapping[str, Any], name: str) -> str:
+    value = item.get(name)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Common record field {name!r} must be a nonempty string")
+    return value
+
+
+def _optional_string(item: Mapping[str, Any], name: str) -> str | None:
+    value = item.get(name)
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError(f"Common record field {name!r} must be a string or null")
+    return value
+
+
+def _attributes(item: Mapping[str, Any]) -> dict[str, Any]:
+    value = item.get("attributes", {})
+    if not isinstance(value, Mapping):
+        raise ValueError("Common record field 'attributes' must be an object")
+    return dict(value)
 
 
 @dataclass(frozen=True)
@@ -59,6 +83,96 @@ class CommonChunk:
 
     def as_record(self) -> dict[str, Any]:
         return asdict(self)
+
+
+def common_document_from_record(item: Mapping[str, Any]) -> CommonDocument:
+    """Validate and deserialize a native common document record."""
+
+    schema_version = int(item.get("schema_version", COMMON_RECORD_SCHEMA_VERSION))
+    if schema_version != COMMON_RECORD_SCHEMA_VERSION:
+        raise ValueError(f"Unsupported common document schema version: {schema_version}")
+    return CommonDocument(
+        document_id=_required_string(item, "document_id"),
+        corpus=_required_string(item, "corpus"),
+        title=_required_string(item, "title"),
+        source_url=_optional_string(item, "source_url"),
+        source_version=_optional_string(item, "source_version"),
+        source_timestamp=_optional_string(item, "source_timestamp"),
+        license=_optional_string(item, "license"),
+        content_hash=_optional_string(item, "content_hash"),
+        attributes=_attributes(item),
+        schema_version=schema_version,
+    )
+
+
+def common_chunk_from_record(item: Mapping[str, Any]) -> CommonChunk:
+    """Validate and deserialize a native common chunk record."""
+
+    schema_version = int(item.get("schema_version", COMMON_RECORD_SCHEMA_VERSION))
+    if schema_version != COMMON_RECORD_SCHEMA_VERSION:
+        raise ValueError(f"Unsupported common chunk schema version: {schema_version}")
+    text = _required_string(item, "text")
+    heading_path = item.get("heading_path", [])
+    if not isinstance(heading_path, list) or any(not isinstance(part, str) for part in heading_path):
+        raise ValueError("Common chunk field 'heading_path' must be an array of strings")
+    ordinal = item.get("ordinal")
+    if not isinstance(ordinal, int) or isinstance(ordinal, bool) or ordinal < 0:
+        raise ValueError("Common chunk field 'ordinal' must be a nonnegative integer")
+    character_count = item.get("character_count", len(text))
+    if not isinstance(character_count, int) or isinstance(character_count, bool) or character_count != len(text):
+        raise ValueError("Common chunk character_count must equal len(text)")
+    token_count = item.get("token_count")
+    if token_count is not None and (
+        not isinstance(token_count, int) or isinstance(token_count, bool) or token_count < 0
+    ):
+        raise ValueError("Common chunk token_count must be a nonnegative integer or null")
+    return CommonChunk(
+        chunk_instance_id=_required_string(item, "chunk_instance_id"),
+        content_id=_required_string(item, "content_id"),
+        document_id=_required_string(item, "document_id"),
+        parent_chunk_id=_optional_string(item, "parent_chunk_id"),
+        ordinal=ordinal,
+        heading_path=list(heading_path),
+        text=text,
+        character_count=character_count,
+        token_count=token_count,
+        previous_chunk_id=_optional_string(item, "previous_chunk_id"),
+        next_chunk_id=_optional_string(item, "next_chunk_id"),
+        attributes=_attributes(item),
+        schema_version=schema_version,
+    )
+
+
+def document_record_to_common(item: Mapping[str, Any]) -> CommonDocument:
+    """Read a native common document, falling back to Wikipedia version 1."""
+
+    if "corpus" in item and "attributes" in item:
+        return common_document_from_record(item)
+    return wikipedia_document_to_common(item)
+
+
+def chunk_records_to_common(items: Iterable[Mapping[str, Any]]) -> Iterator[CommonChunk]:
+    """Read either native common chunks or legacy Wikipedia chunks.
+
+    A single input file may not mix the two formats. Native records stream one
+    at a time; legacy Wikipedia records retain their document-sized buffering
+    so neighbor links can still be synthesized.
+    """
+
+    iterator = iter(items)
+    try:
+        first = next(iterator)
+    except StopIteration:
+        return
+    native = "chunk_instance_id" in first and "content_id" in first and "attributes" in first
+    combined = chain((first,), iterator)
+    if native:
+        for item in combined:
+            if not ("chunk_instance_id" in item and "content_id" in item and "attributes" in item):
+                raise ValueError("Chunk input mixes common and legacy record formats")
+            yield common_chunk_from_record(item)
+        return
+    yield from wikipedia_chunks_to_common(combined)
 
 
 def wikipedia_document_to_common(item: Mapping[str, Any]) -> CommonDocument:
@@ -172,4 +286,3 @@ def wikipedia_chunks_to_common(items: Iterable[Mapping[str, Any]]) -> Iterator[C
         buffered.append(item)
     if buffered:
         yield from emit(buffered)
-
