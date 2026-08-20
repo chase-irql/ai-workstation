@@ -1601,8 +1601,8 @@
         "index": "indexes/documentation/llvm-project-22.1.8.sqlite3",
         "semantic_index": "indexes/semantic/llvm-project-22.1.8-docs"
       },
-      "status": "planned",
-      "notes": "Pinned to the official LLVM 22.1.8 GitHub release asset. GitHub's release API publishes the SHA-256 and the release supplies a Sigstore attestation bundle. The complete source archive is retained while ordinary retrieval is restricted to current documentation source trees."
+      "status": "evaluated",
+      "notes": "Pinned to the official LLVM 22.1.8 GitHub release asset. The 167,061,596-byte archive passed the SHA-256 published by GitHub's release API, and its Sigstore attestation URL is retained. Safe extraction validated 169,010 files / 2,023,722,863 bytes while skipping 19 archive links and reversibly encoding 152,079 Windows-incompatible members. The complete source archive is retained while retrieval is restricted to the current documentation trees for major LLVM subprojects and excludes historical release notes. The result contains 2,352 documents, 18,655 chunks, and a 51,531,776-byte verified BM25 database. Its 44-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

@@ -132,6 +132,8 @@
         "--index",
         "linux-kernel-7.2-docs=indexes\\documentation\\linux-kernel-7.2.sqlite3",
         "--index",
+        "llvm-project-22.1.8-docs=indexes\\documentation\\llvm-project-22.1.8.sqlite3",
+        "--index",
         "cpp-16.2-manual=indexes\\documentation\\cpp-16.2.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",

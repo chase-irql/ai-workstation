@@ -30,6 +30,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `gdb-17.2-manual` | GNU GDB 17.2 last-release manual | GFDL 1.3 or later with stated invariant and cover texts | 863 documents; 2,225 chunks | BM25 |
 | `gcc-16.2-manual` | GNU Compiler Collection 16.2 user manual | GFDL 1.3 or later with stated invariant and cover texts | 523 documents; 1,695 chunks | BM25 |
 | `linux-kernel-7.2-docs` | Linux 7.2 official source documentation | GPL-2.0-only and per-file SPDX licenses retained | 4,154 documents; 29,142 chunks | BM25 |
+| `llvm-project-22.1.8-docs` | LLVM Project 22.1.8 coordinated source release | Apache-2.0 with LLVM Exceptions; per-file notices retained | 2,352 documents; 18,655 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
@@ -113,6 +114,15 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Safe extraction validated 94,757 regular files / 1,615,609,096 bytes, skipped 99 archive links, and reversibly encoded 19,753 Windows-incompatible member names.
 - The common-record generation contains 4,154 documents and 29,142 chunks. The 80,310,272-byte FTS5 database passes checksum, manifest, row-count, foreign-key, integrity, smoke-query, and citation verification.
 - Its 44-topic stable-ID gate covers administration, troubleshooting, builds, synchronization, scheduling, memory, filesystems, networking, BPF, tracing, security, drivers, firmware, power management, isolation, ABI stability, and development; every lexical metric cutoff is `1.0`.
+
+### LLVM Project documentation
+
+- Official archive: LLVM Project 22.1.8 coordinated source release from GitHub.
+- Publisher SHA-256: `922f1817a0df7b1489272d18134ee0087a8b068828f87ac63b9861b1a9965888`, verified against GitHub's release-asset digest; the matching Sigstore attestation bundle URL is retained.
+- The full 167,061,596-byte source archive is retained. Retrieval scopes current documentation source trees for LLVM, Clang, clang-tools-extra, LLD, LLDB, libc++, Flang, MLIR, Polly, OpenMP, and compiler-rt while excluding historical release notes, source code, tests, and binary assets.
+- Safe extraction validated 169,010 regular files / 2,023,722,863 bytes, skipped 19 archive links, and reversibly encoded 152,079 Windows-incompatible members.
+- The common-record generation contains 2,352 documents and 18,655 chunks. Its 51,531,776-byte database passes source-manifest, row-count, foreign-key, FTS, integrity, smoke-query, and citation verification.
+- Its 44-topic stable-ID gate covers LLVM IR/tools, optimization, JIT, profiling, sanitizers, Clang tooling and analysis, linking, debugging, libc++, MLIR, Flang, OpenMP, compiler-rt, Polly, and testing; every lexical metric cutoff is `1.0`.
 
 ### Linux man-pages
 
