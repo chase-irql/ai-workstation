@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from offline_rag.acquisition import _download_http, extract_archive, validate_extraction
 from offline_rag.dataset_registry import DatasetDefinition
+import py7zr
 
 
 class AcquisitionTests(unittest.TestCase):
@@ -163,6 +164,34 @@ class AcquisitionTests(unittest.TestCase):
             self.assertEqual(validated["files"], 2)
             with self.assertRaises(FileExistsError):
                 extract_archive(archive, output)
+
+    def test_7z_is_integrity_checked_and_atomically_extracted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "Posts.xml"
+            source.write_text('<posts><row Id="1" /></posts>', encoding="utf-8")
+            archive = root / "site.7z"
+            with py7zr.SevenZipFile(archive, mode="w") as bundle:
+                bundle.write(source, "Posts.xml")
+            output = root / "extracted"
+            result = extract_archive(archive, output)
+            self.assertEqual(result["files"], 1)
+            self.assertEqual((output / "Posts.xml").read_text(encoding="utf-8"), source.read_text(encoding="utf-8"))
+            self.assertEqual(validate_extraction(archive, output)["files"], 1)
+
+    def test_7z_path_traversal_is_rejected_without_publication(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.txt"
+            source.write_text("do not escape", encoding="utf-8")
+            archive = root / "malicious.7z"
+            with py7zr.SevenZipFile(archive, mode="w") as bundle:
+                bundle.write(source, "../escape.txt")
+            output = root / "extracted"
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                extract_archive(archive, output)
+            self.assertFalse(output.exists())
+            self.assertFalse((root / "escape.txt").exists())
 
     def test_archive_path_traversal_is_rejected_without_publication(self):
         with tempfile.TemporaryDirectory() as directory:

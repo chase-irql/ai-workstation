@@ -1,0 +1,97 @@
+{
+  "schema_version": 2,
+  "name": "DevOps Stack Exchange June 2026 semantic paraphrase gate",
+  "description": "Natural-language troubleshooting and operational questions that avoid copying source titles or exact command terminology.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "host-daemon-paraphrase-001",
+      "query": "let a workload launched by the cluster create sibling containers through the host daemon socket",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"devops-stackexchange:post:2506": 3, "devops-stackexchange:post:3333": 2}
+    },
+    {
+      "id": "crashloop-paraphrase-001",
+      "query": "diagnose a cluster networking pod that repeatedly exits before becoming healthy",
+      "query_type": "troubleshooting_paraphrase",
+      "relevance": {"devops-stackexchange:post:19761": 3}
+    },
+    {
+      "id": "remote-state-paraphrase-001",
+      "query": "share infrastructure state among a team and prevent two deployments from updating it simultaneously",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"devops-stackexchange:post:18153": 3, "devops-stackexchange:post:18149": 2}
+    },
+    {
+      "id": "ansible-idempotency-paraphrase-001",
+      "query": "avoid recompiling software on every configuration run when invoking shell build steps",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"devops-stackexchange:post:9883": 3}
+    },
+    {
+      "id": "jenkins-vars-paraphrase-001",
+      "query": "refer to values declared in the environment block from later build stages",
+      "query_type": "workflow_paraphrase",
+      "relevance": {"devops-stackexchange:post:9126": 3, "devops-stackexchange:post:8020": 2}
+    },
+    {
+      "id": "jenkins-secret-paraphrase-001",
+      "query": "prevent passwords injected into a build from being printed in its log",
+      "query_type": "security_paraphrase",
+      "relevance": {"devops-stackexchange:post:11470": 3, "devops-stackexchange:post:11469": 2}
+    },
+    {
+      "id": "terraform-import-paraphrase-001",
+      "query": "bring an already existing cloud object under infrastructure configuration management without recreating it",
+      "query_type": "workflow_paraphrase",
+      "relevance": {"devops-stackexchange:post:11375": 3}
+    },
+    {
+      "id": "ansible-vault-paraphrase-001",
+      "query": "encrypt only selected secret configuration values while keeping the rest of the variables readable",
+      "query_type": "security_paraphrase",
+      "relevance": {"devops-stackexchange:post:995": 3, "devops-stackexchange:post:994": 2}
+    },
+    {
+      "id": "private-image-paraphrase-001",
+      "query": "a cluster cannot authenticate when downloading a private container artifact from another cloud project",
+      "query_type": "troubleshooting_paraphrase",
+      "relevance": {"devops-stackexchange:post:15814": 3}
+    },
+    {
+      "id": "probe-paraphrase-001",
+      "query": "distinguish whether a workload is alive from whether it can currently receive traffic",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"devops-stackexchange:post:14978": 3, "devops-stackexchange:post:18637": 2}
+    },
+    {
+      "id": "multistage-paraphrase-001",
+      "query": "name and publish the output produced by a particular intermediate Dockerfile stage",
+      "query_type": "workflow_paraphrase",
+      "relevance": {"devops-stackexchange:post:4450": 3, "devops-stackexchange:post:4447": 2}
+    },
+    {
+      "id": "parallel-pipeline-paraphrase-001",
+      "query": "run nested groups of build jobs concurrently inside a declarative automation workflow",
+      "query_type": "workflow_paraphrase",
+      "relevance": {"devops-stackexchange:post:6607": 3, "devops-stackexchange:post:6604": 2, "devops-stackexchange:post:5240": 2}
+    },
+    {
+      "id": "persistent-data-paraphrase-001",
+      "query": "keep application data when a cluster replaces or redeploys a pod",
+      "query_type": "conceptual_paraphrase",
+      "relevance": {"devops-stackexchange:post:4392": 3}
+    },
+    {
+      "id": "helm-config-paraphrase-001",
+      "query": "supply application configuration and repository secrets to a packaged cluster deployment",
+      "query_type": "workflow_paraphrase",
+      "relevance": {"devops-stackexchange:post:15511": 3}
+    }
+  ]
+}

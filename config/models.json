@@ -70,6 +70,19 @@
       "maximum_embedding_dimensions": 1024,
       "query_instruction": "Given a web search query, retrieve relevant passages that answer the query",
       "notes": "Document-level semantic retrieval baseline. The 256-dimensional Matryoshka output materially reduces the full-index storage requirement."
+    },
+    {
+      "id": "qwen3-embedding-0.6b-1024",
+      "ollama_model": "qwen3-embedding:0.6b",
+      "role": "embedding",
+      "architecture": "dense-0.6b",
+      "quantization": "Q8_0",
+      "download_gb": 0.64,
+      "priority": 2,
+      "embedding_dimensions": 1024,
+      "maximum_embedding_dimensions": 1024,
+      "query_instruction": "Given a web search query, retrieve relevant passages that answer the query",
+      "notes": "Higher-fidelity Matryoshka profile for smaller or semantically difficult corpora; uses four times the vector storage of the default 256-dimensional profile."
     }
   ]
 }

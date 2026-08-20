@@ -168,6 +168,6 @@ Stable IDs survive a version update when relative source paths remain stable. Ch
 
 Resumable HTTPS archives and versioned rsync snapshots are automated. Git clones and sites requiring a resolved export URL still require a corpus-specific acquisition adapter or a reviewed manual acquisition. The registry refuses to pretend those are ordinary HTTP downloads.
 
-IANA registries use `offline_rag.iana`, not the generic documentation importer. PDFs, JATS, Stack Exchange XML, maps, packages, and disk images likewise need their own handlers.
+IANA registries use `offline_rag.iana`, and Stack Exchange XML uses `offline_rag.stack_exchange`; neither is flattened through the generic documentation importer. PDFs, JATS, maps, packages, and disk images likewise need their own handlers.
 
-Documentation and IANA are exposed through the unified knowledge MCP without merging their databases. The corpus-neutral chunk-level semantic builder is active for Python, Git, man-pages, RFCs, and SQLite; IANA remains exact BM25/structured-first. The rollout results, routing rules, and activation gates are documented in `docs/corpus-semantic-roadmap.md`.
+Documentation, IANA, and DevOps Stack Exchange are exposed through the unified knowledge MCP without merging their databases. The corpus-neutral chunk-level semantic builder is active for Python, Git, man-pages, RFCs, SQLite, and DevOps Stack Exchange; IANA remains exact BM25/structured-first. The rollout results, routing rules, and activation gates are documented in `docs/corpus-semantic-roadmap.md`.

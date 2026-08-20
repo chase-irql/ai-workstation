@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+import py7zr
+
 from .dataset_registry import DatasetDefinition, PUBLISHER_CHECKSUM_ALGORITHMS, load_registry
 
 
@@ -251,7 +253,7 @@ def _validate_tar_link(root: Path, member: tarfile.TarInfo) -> None:
 
 
 def extract_archive(archive: Path, output: Path) -> dict[str, object]:
-    """Validate and atomically extract a ZIP or tar archive without path traversal."""
+    """Validate and atomically extract a ZIP, tar, or 7z archive."""
 
     if not archive.is_file():
         raise FileNotFoundError(archive)
@@ -307,6 +309,22 @@ def extract_archive(archive: Path, output: Path) -> dict[str, object]:
                             shutil.copyfileobj(source, destination, length=1024 * 1024)
                         files += 1
                         extracted_bytes += member.size
+        elif archive.suffix.casefold() == ".7z":
+            with py7zr.SevenZipFile(archive, mode="r") as bundle:
+                if bundle.needs_password():
+                    raise ValueError("Encrypted 7z archives are unsupported")
+                members = bundle.list()
+                for member in members:
+                    _safe_archive_member(temporary, member.filename)
+                    if member.is_symlink:
+                        raise ValueError(f"7z archive contains an unsupported link: {member.filename!r}")
+                    if member.is_file:
+                        files += 1
+                        extracted_bytes += int(member.uncompressed)
+                bundle.extractall(path=temporary)
+            for path in temporary.rglob("*"):
+                if path.is_symlink():
+                    raise ValueError(f"7z extraction created an unsupported link: {path}")
         else:
             raise ValueError(f"Unsupported or invalid archive: {archive}")
         if encoded_members:
@@ -381,6 +399,21 @@ def validate_extraction(archive: Path, output: Path) -> dict[str, object]:
             for name, path in actual_files.items():
                 if path.stat().st_size != expected_sizes[name]:
                     raise ValueError(f"Existing extraction size mismatch: {name}")
+    elif archive.suffix.casefold() == ".7z":
+        with py7zr.SevenZipFile(archive, mode="r") as bundle:
+            if bundle.needs_password():
+                raise ValueError("Encrypted 7z archives are unsupported")
+            for member in bundle.list():
+                _safe_archive_member(output, member.filename)
+                if member.is_symlink:
+                    raise ValueError(f"7z archive contains an unsupported link: {member.filename!r}")
+                if member.is_file:
+                    expected_sizes[member.filename.replace("\\", "/")] = int(member.uncompressed)
+        if set(actual_files) != set(expected_sizes):
+            raise ValueError("Existing extraction file set does not match 7z archive")
+        for name, path in actual_files.items():
+            if path.is_symlink() or path.stat().st_size != expected_sizes[name]:
+                raise ValueError(f"Existing extraction size or type mismatch: {name}")
     else:
         raise ValueError(f"Unsupported or invalid archive: {archive}")
     marker = output / PORTABLE_NAMES_MARKER

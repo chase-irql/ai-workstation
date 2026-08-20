@@ -114,8 +114,13 @@ def main() -> int:
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--smoke-query",
+        action="append",
+        help="Corpus-specific AND-mode smoke query; repeat for multiple queries",
+    )
     args = parser.parse_args()
-    result = verify_database(args.database, args.input)
+    result = verify_database(args.database, args.input, tuple(args.smoke_query) if args.smoke_query else SMOKE_QUERIES)
     rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

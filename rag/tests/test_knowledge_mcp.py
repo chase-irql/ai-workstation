@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import sys
 import tempfile
@@ -16,13 +17,68 @@ from offline_rag.bm25 import build_index
 from offline_rag.chunk_vector_index import build_chunk_vector_index
 from offline_rag.documentation import import_documentation
 from offline_rag.knowledge import KnowledgeCorpus, KnowledgeRuntime
-from offline_rag.knowledge_mcp_server import close_knowledge_mcp_server, create_knowledge_mcp_server
+from offline_rag.knowledge_mcp_server import _provider_factories, close_knowledge_mcp_server, create_knowledge_mcp_server
 from offline_rag.retrieval_runtime import CachedEmbeddingProvider
 from offline_rag.vector_index import build_vector_index
 from offline_rag.wikipedia_dump import extract
 
 
 class KnowledgeMCPTests(unittest.TestCase):
+    def test_corpus_vector_manifests_select_matching_embedding_profiles(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            models = root / "models.json"
+            models.write_text(
+                json.dumps({"models": [
+                    {"id": "small", "role": "embedding", "ollama_model": "same:latest", "embedding_dimensions": 256, "priority": 1},
+                    {"id": "large", "role": "embedding", "ollama_model": "same:latest", "embedding_dimensions": 1024, "priority": 2},
+                ]}),
+                encoding="utf-8",
+            )
+
+            vectors: dict[str, Path] = {}
+            for corpus, model_id, dimensions in (("one", "small", 256), ("two", "large", 1024), ("three", "small", 256)):
+                path = root / corpus
+                path.mkdir()
+                for name in ("vectors.faiss", "metadata.sqlite3"):
+                    (path / name).write_bytes(b"")
+                (path / "manifest.json").write_text(json.dumps({
+                    "schema_version": 1,
+                    "dimensions": dimensions,
+                    "provider": {
+                        "provider": "ollama",
+                        "model_id": model_id,
+                        "runtime_model": "same:latest",
+                        "dimensions": dimensions,
+                        "query_instruction": None,
+                    },
+                    "files": {
+                        "faiss": {"name": "vectors.faiss", "bytes": 0},
+                        "metadata": {"name": "metadata.sqlite3", "bytes": 0},
+                    },
+                }), encoding="utf-8")
+                vectors[corpus] = path
+
+            factories = _provider_factories(
+                vectors,
+                models=models,
+                model_id=None,
+                ollama_url="http://127.0.0.1:11434",
+                query_cache_size=8,
+            )
+            self.assertEqual(factories["one"]().dimensions, 256)
+            self.assertEqual(factories["two"]().dimensions, 1024)
+            self.assertIs(factories["one"](), factories["three"]())
+            self.assertIsNot(factories["one"](), factories["two"]())
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                _provider_factories(
+                    vectors,
+                    models=models,
+                    model_id="small",
+                    ollama_url="http://127.0.0.1:11434",
+                    query_cache_size=8,
+                )
+
     def prepare(self, root: Path) -> tuple[Path, Path]:
         wikipedia_output = root / "wikipedia-processed"
         extract(write_archive(root), wikipedia_output, "20260801", None, 3200)

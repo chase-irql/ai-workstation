@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "name": "DevOps Stack Exchange June 2026 lexical gate",
+  "description": "Stable-post-ID retrieval gate covering containers, Kubernetes, Terraform, Ansible, Jenkins, GitLab, Prometheus, Helm, and deployment practices.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "docker-kubernetes-deployment-001",
+      "query": "Docker Kubernetes deployment",
+      "query_type": "container_orchestration",
+      "relevance": {"devops-stackexchange:post:2506": 3, "devops-stackexchange:post:3333": 2}
+    },
+    {
+      "id": "kubernetes-crashloop-001",
+      "query": "Kubernetes CrashLoopBackOff logs",
+      "query_type": "troubleshooting",
+      "relevance": {"devops-stackexchange:post:19761": 3}
+    },
+    {
+      "id": "terraform-remote-state-001",
+      "query": "Terraform remote state locking",
+      "query_type": "infrastructure_as_code",
+      "relevance": {"devops-stackexchange:post:18153": 3, "devops-stackexchange:post:18149": 2}
+    },
+    {
+      "id": "ansible-idempotency-001",
+      "query": "Ansible idempotent command module",
+      "query_type": "configuration_management",
+      "relevance": {"devops-stackexchange:post:9883": 3}
+    },
+    {
+      "id": "jenkins-environment-001",
+      "query": "Jenkins declarative pipeline environment variables",
+      "query_type": "continuous_integration",
+      "relevance": {"devops-stackexchange:post:9126": 3, "devops-stackexchange:post:8020": 2}
+    },
+    {
+      "id": "gitlab-runner-001",
+      "query": "GitLab runner Docker executor",
+      "query_type": "continuous_integration",
+      "relevance": {"devops-stackexchange:post:17933": 3}
+    },
+    {
+      "id": "continuous-delivery-001",
+      "query": "continuous integration versus continuous delivery",
+      "query_type": "deployment_practice",
+      "relevance": {"devops-stackexchange:post:494": 3}
+    },
+    {
+      "id": "image-pull-001",
+      "query": "Kubernetes ImagePullBackOff image",
+      "query_type": "troubleshooting",
+      "relevance": {"devops-stackexchange:post:15814": 3}
+    },
+    {
+      "id": "terraform-import-001",
+      "query": "Terraform import existing resource",
+      "query_type": "infrastructure_as_code",
+      "relevance": {"devops-stackexchange:post:11375": 3}
+    },
+    {
+      "id": "ansible-vault-001",
+      "query": "Ansible vault encrypted variables",
+      "query_type": "configuration_management",
+      "relevance": {"devops-stackexchange:post:995": 3, "devops-stackexchange:post:994": 2}
+    },
+    {
+      "id": "jenkins-credentials-001",
+      "query": "Jenkins credentials console output",
+      "query_type": "security",
+      "relevance": {"devops-stackexchange:post:11470": 3, "devops-stackexchange:post:11469": 2}
+    },
+    {
+      "id": "prometheus-job-metrics-001",
+      "query": "Prometheus Kubernetes metrics",
+      "query_type": "observability",
+      "relevance": {"devops-stackexchange:post:16408": 3}
+    },
+    {
+      "id": "nginx-reverse-proxy-001",
+      "query": "Nginx reverse proxy Docker",
+      "query_type": "networking",
+      "relevance": {"devops-stackexchange:post:17192": 3}
+    },
+    {
+      "id": "helm-environment-001",
+      "query": "Helm values environment variables",
+      "query_type": "container_orchestration",
+      "relevance": {"devops-stackexchange:post:15511": 3}
+    },
+    {
+      "id": "persistent-volume-001",
+      "query": "Kubernetes persistent volume claim",
+      "query_type": "container_orchestration",
+      "relevance": {"devops-stackexchange:post:4392": 3}
+    },
+    {
+      "id": "kubernetes-probes-001",
+      "query": "Kubernetes liveness readiness probe",
+      "query_type": "container_orchestration",
+      "relevance": {"devops-stackexchange:post:14978": 3, "devops-stackexchange:post:18637": 2}
+    },
+    {
+      "id": "docker-multistage-001",
+      "query": "Docker multi stage build",
+      "query_type": "container_build",
+      "relevance": {"devops-stackexchange:post:4450": 3, "devops-stackexchange:post:4447": 2}
+    },
+    {
+      "id": "ansible-handler-001",
+      "query": "Ansible handler notify restart",
+      "query_type": "configuration_management",
+      "relevance": {"devops-stackexchange:post:17168": 3, "devops-stackexchange:post:17167": 2}
+    },
+    {
+      "id": "jenkins-parallel-001",
+      "query": "Jenkins parallel stages pipeline",
+      "query_type": "continuous_integration",
+      "relevance": {"devops-stackexchange:post:6607": 3, "devops-stackexchange:post:6604": 2, "devops-stackexchange:post:5240": 2}
+    }
+  ]
+}

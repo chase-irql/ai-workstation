@@ -15,6 +15,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `rfc-editor-text` | RFC Editor snapshot 2026-08-19 | IETF Trust Legal Provisions | 9,822 RFCs; 348,831 chunks | BM25 + chunk-level semantic/hybrid |
 | `iana-protocol-registries` | IANA assignments snapshot 2026-08-19 | CC0 1.0 Universal | 4,256 registries; 110,423 table records; 114,590 chunks | Structured BM25 |
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
+| `devops-stackexchange` | DevOps Stack Exchange 2026-06-30 community dump | CC BY-SA 3.0 or 4.0 per retained post | 11,877 retained posts; 13,531 chunks | BM25 + experimental 1,024-dim semantic/hybrid |
 
 Counts describe the pinned local generations, not upstream projects in perpetuity. Evaluation suites are small, versioned regression gates rather than broad claims about corpus completeness or answer accuracy.
 
@@ -66,6 +67,15 @@ Counts describe the pinned local generations, not upstream projects in perpetuit
 - Publisher SHA3-256: `7ccf86a52e7dd1fb9b31e63edcebe3b553f18f89cd26eef59c7f191a5111836e`.
 - Local archive SHA-256: `a1d0f5de57485d062796ed7e67daff0758b50d00001a0f233a2c15aaf40bbdc8`.
 - The HTML importer preserves headings, code, lists, API identifiers, SQL terms, and stable `sqlite.org` citations while excluding navigation and search furniture.
+
+### DevOps Stack Exchange
+
+- Archive: June 30, 2026 coordinated community release hosted by Internet Archive.
+- Publisher/coordinated SHA-256: `a08a86c7c386c0f0798817e64ecde03368908c7ed1cf90d2259f8f209421114b`.
+- The importer retains every question, every accepted answer regardless of score, and other answers only when their score is positive. It excluded 1,503 answers under that policy.
+- Each retained post is a separate document with a direct question or answer URL. Parent-question relationships, accepted status, title, tags, score, dates, contributor attribution, exact `ContentLicense`, HTML headings, lists, and code blocks are preserved.
+- The 19-case exact-term suite passes every Success, MRR, and Recall cutoff. The 1,024-dimensional paraphrase gate reaches Success@10 `0.571429` and Recall@50 `0.642857`; semantic retrieval is published for experimentation, not presented as a solved quality problem.
+- Acquisition and update procedure: [stack-exchange-ingestion.md](stack-exchange-ingestion.md).
 
 ## Lifecycle and publication rules
 

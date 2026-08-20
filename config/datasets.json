@@ -2,6 +2,40 @@
   "schema_version": 1,
   "datasets": [
     {
+      "dataset_id": "devops-stackexchange",
+      "name": "DevOps Stack Exchange",
+      "description": "Questions and answers about continuous delivery, infrastructure automation, containers, orchestration, and DevOps operations.",
+      "category": "technical-q-and-a",
+      "official_source_url": "https://devops.stackexchange.com/",
+      "license": "CC BY-SA 2.5, 3.0, or 4.0 per post ContentLicense field",
+      "attribution": "DevOps Stack Exchange contributors",
+      "release": "2026-06-30-community",
+      "update_frequency": "when a new coordinated Stack Exchange data dump is published",
+      "scope": "complete DevOps Stack Exchange site dump; all questions, accepted answers, and other positively scored answers",
+      "formats": ["Stack Exchange XML", "7z"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://archive.org/download/stackexchange_20260630_sakura/stackexchange_20260630/devops.stackexchange.com.7z",
+        "publisher_checksum": "a08a86c7c386c0f0798817e64ecde03368908c7ed1cf90d2259f8f209421114b",
+        "checksum_manifest": "https://github.com/LunarWatcher/se-data-dump-transformer/blob/master/docs/meta/Hashes.md",
+        "source_url_template": "https://devops.stackexchange.com/{post_type}/{post_id}"
+      },
+      "storage": {
+        "download_min_bytes": 18000000,
+        "download_max_bytes": 18500000,
+        "extracted_max_bytes": 500000000,
+        "indexed_max_bytes": 1500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/stack-exchange/devops",
+        "processed": "corpora/processed/stack-exchange/devops",
+        "index": "indexes/stack-exchange/devops.sqlite3",
+        "semantic_index": "indexes/semantic/devops-stackexchange-1024"
+      },
+      "status": "evaluated",
+      "notes": "Pinned June 2026 coordinated community release; publisher SHA-256 verified. Parsed 5,589 questions, 2,509 accepted answers, and 3,779 other positively scored answers into 11,877 post documents and 13,531 chunks with exact per-post citations. The 19-case lexical gate achieved Success@1/5/10, MRR@10, and Recall@5/10/50 of 1.0. A verified 1,024-dimensional semantic generation improves the 14-case paraphrase gate over 256 dimensions, but hybrid Success@10 remains 0.571429, so BM25 is the strong baseline and semantic retrieval remains experimental for this corpus."
+    },
+    {
       "dataset_id": "python-3.14-docs",
       "name": "Python 3.14 Documentation",
       "description": "Official Python language, standard-library, tutorial, HOWTO, and C API documentation.",

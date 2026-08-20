@@ -11,6 +11,7 @@ from pydantic import Field
 from .embeddings import OllamaEmbeddingClient, load_embedding_model_config
 from .knowledge import KnowledgeCorpus, KnowledgeRuntime
 from .retrieval_runtime import RETRIEVAL_MODES, CachedEmbeddingProvider
+from .vector_index import load_vector_manifest
 
 
 QueryMode = Literal["and", "phrase", "exact"]
@@ -143,6 +144,47 @@ def _mapping(values: Sequence[str], option: str) -> dict[str, Path]:
     return result
 
 
+def _provider_factories(
+    vector_indexes: dict[str, Path],
+    *,
+    models: Path,
+    model_id: str | None,
+    ollama_url: str,
+    query_cache_size: int,
+) -> dict[str, Any]:
+    """Resolve the exact provider identity recorded by each vector generation.
+
+    Corpora may deliberately use different Matryoshka dimensions. Providers
+    with the same recorded model profile share one lazy query cache, while a
+    global ``model_id`` remains a strict override for legacy commands.
+    """
+
+    providers: dict[str, CachedEmbeddingProvider] = {}
+    factories: dict[str, Any] = {}
+    for corpus_id, directory in vector_indexes.items():
+        manifest = load_vector_manifest(directory)
+        recorded = manifest.get("provider")
+        if not isinstance(recorded, dict):
+            raise ValueError(f"Semantic generation for {corpus_id!r} has no provider identity")
+        recorded_model_id = recorded.get("model_id")
+        if not isinstance(recorded_model_id, str) or not recorded_model_id:
+            raise ValueError(f"Semantic generation for {corpus_id!r} has no provider model_id")
+        selected_id = model_id or recorded_model_id
+        config = load_embedding_model_config(models, selected_id)
+        client = OllamaEmbeddingClient(config, base_url=ollama_url)
+        if dict(client.provider_metadata) != recorded:
+            raise ValueError(
+                f"Semantic generation for {corpus_id!r} requires provider {recorded_model_id!r} "
+                f"at {recorded.get('dimensions')} dimensions, but {selected_id!r} does not match"
+            )
+        provider = providers.get(selected_id)
+        if provider is None:
+            provider = CachedEmbeddingProvider(client, query_cache_size)
+            providers[selected_id] = provider
+        factories[corpus_id] = lambda resolved=provider: resolved
+    return factories
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the federated offline knowledge MCP server over stdio.")
     parser.add_argument("--index", action="append", required=True, metavar="CORPUS=DATABASE")
@@ -179,20 +221,19 @@ def main(argv: Iterable[str] | None = None) -> int:
     unknown_vectors = sorted(set(vector_indexes) - set(indexes))
     if unknown_vectors:
         raise ValueError(f"Semantic vector mappings name unknown corpora: {', '.join(unknown_vectors)}")
-    provider_factory = None
-    if vector_indexes:
-        config = load_embedding_model_config(args.models, args.model_id)
-        shared_provider = CachedEmbeddingProvider(
-            OllamaEmbeddingClient(config, base_url=args.ollama_url),
-            args.query_cache_size,
-        )
-        provider_factory = lambda: shared_provider
+    provider_factories = _provider_factories(
+        vector_indexes,
+        models=args.models,
+        model_id=args.model_id,
+        ollama_url=args.ollama_url,
+        query_cache_size=args.query_cache_size,
+    ) if vector_indexes else {}
     corpora = [
         KnowledgeCorpus(
             corpus_id,
             database,
             vector_directory=vector_indexes.get(corpus_id),
-            provider_factory=provider_factory if corpus_id in vector_indexes else None,
+            provider_factory=provider_factories.get(corpus_id),
             default_retrieval=args.default_vector_retrieval if corpus_id in vector_indexes else "bm25",
         )
         for corpus_id, database in indexes.items()
