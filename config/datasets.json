@@ -984,6 +984,55 @@
       "notes": "Acquired all 22 official DOE archive PDFs (42,482,570 bytes total) and pinned a local SHA-256 for every file; DOE supplies no adjacent publisher digests, so publisher-checksum verification is not claimed. Page-aware import examined 2,842 pages: 2,692 have searchable text, 6 are image-only, and 144 are blank. It published 5,533 chunks in a 25,423,872-byte database that passed integrity, foreign-key, row-count, FTS-count, citation, and smoke-query validation. Structured QA records 108 pages with legacy uninterpretable-font warnings and one with rotated text for targeted future visual/OCR review; the 59-topic gate still achieved Success@1/5/10, Recall@5/10/50, and MRR@10 of 1.0 with nDCG@10 0.999418. Two source PDFs embed an incorrect -92 chemistry identifier; reviewed title overrides correct citations to DOE-HDBK-1015/1-93 and /2-93 while retaining the embedded titles in provenance. Each volume carries Distribution Statement A. The archived/canceled sequence is historical fundamentals training, not current DOE policy or a substitute for current safety standards."
     },
     {
+      "dataset_id": "faa-amt-airframe-powerplant-2023",
+      "name": "FAA Aviation Maintenance Technician Handbooks — Airframe and Powerplant",
+      "description": "Official FAA companion handbooks covering aircraft structures and systems, reciprocating and turbine engines, fuel and induction, lubrication, ignition, electrical systems, inspections, maintenance, and troubleshooting.",
+      "category": "government-engineering-handbook",
+      "official_source_url": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation",
+      "license": "U.S. Government work; third-party material remains subject to notices in the handbooks",
+      "attribution": "Federal Aviation Administration, FAA-H-8083-31B and FAA-H-8083-32B",
+      "release": "FAA-H-8083-31B and FAA-H-8083-32B, 2023",
+      "update_frequency": "when the FAA publishes revised handbooks or errata",
+      "scope": "complete current 2023 Airframe and Powerplant handbook PDFs; General remains a separately versioned corpus",
+      "formats": ["PDF"],
+      "acquisition": {
+        "method": "http-file-set",
+        "location": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation",
+        "source_url_template": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/{relative_path}",
+        "assets": [
+          {
+            "url": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf",
+            "filename": "FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf",
+            "min_bytes": 111000000,
+            "max_bytes": 113000000
+          },
+          {
+            "url": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/amt_powerplant_handbook.pdf",
+            "filename": "amt_powerplant_handbook.pdf",
+            "min_bytes": 214000000,
+            "max_bytes": 216000000
+          }
+        ]
+      },
+      "ingestion": {
+        "smoke_query": "turbine engine compressor combustion section maintenance"
+      },
+      "storage": {
+        "download_min_bytes": 325000000,
+        "download_max_bytes": 329000000,
+        "extracted_max_bytes": 329000000,
+        "indexed_max_bytes": 1500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/manuals/faa-amt-airframe-powerplant-2023",
+        "processed": "corpora/processed/manuals/faa-amt-airframe-powerplant-2023",
+        "index": "indexes/manuals/faa-amt-airframe-powerplant-2023.sqlite3",
+        "semantic_index": "indexes/semantic/faa-amt-airframe-powerplant-2023"
+      },
+      "status": "planned",
+      "notes": "The FAA's current aviation handbooks page identifies FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant as the 2023 companions to the already published General corpus. Official HEAD checks on 2026-08-20 report application/pdf assets of 111,959,636 and 214,668,861 bytes (326,628,497 total), last modified in July 2023. The FAA exposes no adjacent publisher digests, so acquisition will record local per-file SHA-256 values without claiming publisher verification. Full page/text-layer validation is required before publication."
+    },
+    {
       "dataset_id": "cmake-4.4-docs",
       "name": "CMake 4.4 Documentation Source",
       "description": "Official CMake command, variable, property, module, policy, generator, manual, and release documentation.",

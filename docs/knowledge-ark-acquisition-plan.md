@@ -25,6 +25,12 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
+### Active repair-handbook extension: FAA Airframe and Powerplant
+
+The next bounded practical-repair set completes the FAA Aviation Maintenance Technician trilogy. The current FAA page identifies the 2023 FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant handbooks as companions to the already indexed General volume. Official files are 111,959,636 and 214,668,861 bytes (326,628,497 bytes total), both respond as PDFs, and their July 2023 modification dates agree with the FAA catalog. They cover aircraft structures and systems plus reciprocating/turbine engines, their subsystems, maintenance, and troubleshooting.
+
+The registry caps the raw set at 329 MB and its index at 1.5 GB. Acquisition is resumable and per-file hashed; the FAA provides no adjacent publisher digests. Both handbooks must pass the all-file text-layer, page-citation, warning-accounting, database-validation, and stable-ID evaluation gates before the corpus is served.
+
 ### Completed engineering-handbook extension: DOE Fundamentals
 
 The complete official DOE Fundamentals sequence is acquired and evaluated. Its 22 PDFs (42,482,570 bytes total) span classical physics; electrical science; thermodynamics, heat transfer, and fluid flow; instrumentation and control; mathematics; chemistry; engineering drawings; material science; mechanical science; and nuclear physics/reactor theory. Every asset was resolved from its official DOE record, validated as a PDF, and locally SHA-256 pinned. DOE supplies no adjacent publisher digests, so publisher-checksum verification is not claimed.
