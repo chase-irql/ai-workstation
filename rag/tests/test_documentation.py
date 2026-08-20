@@ -667,6 +667,25 @@ class DocumentationImportTests(unittest.TestCase):
                     resolve_docfx_includes=True,
                 )
 
+            (source / "docs" / "external.md").write_text(
+                "# External include\n\nLocal context remains.\n\n[!INCLUDE [Cross repository](~/other-repo/shared.md)]\n",
+                encoding="utf-8",
+            )
+            import_documentation(
+                source,
+                root / "external",
+                corpus="dotnet-docs",
+                source_version="test",
+                license_name="test",
+                include_globs=("docs/external.md",),
+                resolve_docfx_includes=True,
+                allow_missing_docfx_includes=True,
+            )
+            external_document = json.loads((root / "external/documents.jsonl").read_text().splitlines()[0])
+            self.assertEqual(external_document["attributes"]["unresolved_docfx_includes"], ["other-repo/shared.md"])
+            external_stats = json.loads((root / "external/extraction-stats.json").read_text())
+            self.assertEqual(external_stats["unresolved_docfx_includes"], 1)
+
     def test_rfc_header_metadata_is_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

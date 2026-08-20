@@ -1759,6 +1759,7 @@
         "include_globs": ["docs/*.md", "docs/**/*.md"],
         "exclude_globs": ["docs/includes/**", "docs/**/includes/**"],
         "resolve_docfx_includes": true,
+        "allow_missing_docfx_includes": true,
         "smoke_query": ".NET framework-dependent deployment runtimeconfig"
       },
       "storage": {
@@ -1773,8 +1774,8 @@
         "index": "indexes/documentation/dotnet-docs-20260820.sqlite3",
         "semantic_index": "indexes/semantic/dotnet-docs-20260820"
       },
-      "status": "planned",
-      "notes": "Pinned to the current official dotnet/docs main commit observed on 2026-08-20. GitHub does not publish a digest for commit archives, so acquisition will pin a local SHA-256 and validate archive structure without claiming publisher-checksum verification. The 23,578-file tree contains about 68 MiB of Markdown plus samples/media; retrieval is limited to canonical docs while DocFX include fragments are expanded safely and excluded as standalone citations."
+      "status": "evaluated",
+      "notes": "Pinned to official dotnet/docs commit e2fe6aca79d1a7296241f144a43dbccf42d58a47 observed on 2026-08-20. GitHub supplies no commit-archive digest, so the 274,457,692-byte archive is locally pinned as SHA-256 6a65c4abc3f9b55a3612ee069ca2d2ef7149b59bf0c7461c0bade7ff15aced30 without claiming publisher verification. Safe extraction validated 23,578 files / 382,589,198 bytes, no links, and 9,161 reversibly encoded Windows-incompatible names. Retrieval contains 13,225 canonical Markdown pages and 77,212 chunks in a 167,247,872-byte verified BM25 database. Local DocFX includes are expanded with cycle/traversal protection and excluded as standalone citations; 15 unavailable cross-repository include targets affecting 7 pages are removed and explicitly recorded. Its 50-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

@@ -1594,6 +1594,7 @@ def _resolve_docfx_includes(
     sources: dict[str, Path],
     *,
     stack: tuple[str, ...] = (),
+    missing_targets: set[str] | None = None,
 ) -> str:
     """Expand local DocFX Markdown include directives without leaving the source tree."""
 
@@ -1626,13 +1627,22 @@ def _resolve_docfx_includes(
             raise ValueError(f"DocFX include escapes the source root: {relative!r} -> {raw_target!r}")
         included_path = sources.get(normalized)
         if included_path is None:
+            if missing_targets is not None:
+                missing_targets.add(normalized)
+                return ""
             raise ValueError(f"DocFX include target was not found: {relative!r} -> {normalized!r}")
         before = included_path.stat()
         included_text, _ = _read_source(included_path)
         after = included_path.stat()
         if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
             raise RuntimeError(f"DocFX include changed during import: {included_path}")
-        return _resolve_docfx_includes(included_text, normalized, sources, stack=current_stack)
+        return _resolve_docfx_includes(
+            included_text,
+            normalized,
+            sources,
+            stack=current_stack,
+            missing_targets=missing_targets,
+        )
 
     return DOCFX_INCLUDE_RE.sub(replace_include, text)
 
@@ -1712,6 +1722,7 @@ def import_documentation(
     min_chars: int = 300,
     max_files: int | None = None,
     resolve_docfx_includes: bool = False,
+    allow_missing_docfx_includes: bool = False,
     force: bool = False,
 ) -> dict[str, object]:
     """Convert a documentation tree into validated common records atomically."""
@@ -1732,6 +1743,8 @@ def import_documentation(
         raise ValueError("max_files must be positive")
     if any(not pattern.strip() for pattern in (*include_globs, *exclude_globs)):
         raise ValueError("include and exclude glob patterns must be nonempty")
+    if allow_missing_docfx_includes and not resolve_docfx_includes:
+        raise ValueError("allow_missing_docfx_includes requires resolve_docfx_includes")
     if output.exists() and not force:
         raise FileExistsError(f"Output already exists: {output}; use --force to replace recognized importer output")
     portable_names_encoded = (source_root / PORTABLE_NAMES_MARKER).is_file()
@@ -1761,6 +1774,7 @@ def import_documentation(
     document_paths_by_id: dict[str, str] = {}
     started = datetime.now(timezone.utc)
     include_sources: dict[str, Path] = {}
+    unresolved_docfx_includes: set[str] = set()
     if resolve_docfx_includes:
         for candidate in content_root.rglob("*"):
             if not candidate.is_file() or candidate.is_symlink():
@@ -1782,8 +1796,15 @@ def import_documentation(
                 relative = path.relative_to(content_root).as_posix()
                 if portable_names_encoded:
                     relative = "/".join(unquote(part) for part in relative.split("/"))
+                document_missing_includes: set[str] = set()
                 if resolve_docfx_includes and DOCFX_INCLUDE_RE.search(text):
-                    text = _resolve_docfx_includes(text, relative, include_sources)
+                    text = _resolve_docfx_includes(
+                        text,
+                        relative,
+                        include_sources,
+                        missing_targets=document_missing_includes if allow_missing_docfx_includes else None,
+                    )
+                    unresolved_docfx_includes.update(document_missing_includes)
                 parsed = parse_document(path, text)
                 chunk_values = chunk_blocks(parsed.blocks, max_chars, min_chars)
                 if not chunk_values:
@@ -1820,6 +1841,11 @@ def import_documentation(
                         "relative_path": relative,
                         "source_sha256": source_sha256,
                         "format": parsed.format,
+                        **(
+                            {"unresolved_docfx_includes": sorted(document_missing_includes)}
+                            if document_missing_includes
+                            else {}
+                        ),
                         **({"case_distinct_path_collision": True} if case_collision else {}),
                         **(_rfc_metadata(text) if parsed.format == "rfc-text" else {}),
                     },
@@ -1884,6 +1910,7 @@ def import_documentation(
             "skipped_empty": skipped_empty,
             "source_bytes": source_bytes,
             "formats": formats,
+            "unresolved_docfx_includes": len(unresolved_docfx_includes),
             "started_at": started.isoformat(),
             "finished_at": finished.isoformat(),
         }
@@ -1908,6 +1935,7 @@ def import_documentation(
                 "include_globs": list(include_globs),
                 "exclude_globs": list(exclude_globs),
                 "resolve_docfx_includes": resolve_docfx_includes,
+                "allow_missing_docfx_includes": allow_missing_docfx_includes,
             },
             "parts": [
                 {
@@ -1952,6 +1980,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--include-glob", action="append", default=[])
     parser.add_argument("--exclude-glob", action="append", default=[])
     parser.add_argument("--resolve-docfx-includes", action="store_true")
+    parser.add_argument("--allow-missing-docfx-includes", action="store_true")
     parser.add_argument("--max-chars", type=int, default=3200)
     parser.add_argument("--min-chars", type=int, default=300)
     parser.add_argument("--max-files", type=int)
@@ -1974,6 +2003,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         include_globs=args.include_glob,
         exclude_globs=args.exclude_glob,
         resolve_docfx_includes=args.resolve_docfx_includes,
+        allow_missing_docfx_includes=args.allow_missing_docfx_includes,
         max_chars=args.max_chars,
         min_chars=args.min_chars,
         max_files=args.max_files,

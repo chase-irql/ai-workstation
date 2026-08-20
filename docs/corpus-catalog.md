@@ -34,6 +34,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `go-1.26.7-docs` | Go 1.26.7 stable source release | BSD 3-Clause; per-file notices retained | 1,320 documents; 18,647 chunks | BM25 |
 | `podman-6.1-docs` | Podman 6.1.0 signed release tag | Apache-2.0 | 223 manuals/guides; 2,484 chunks | BM25 |
 | `binutils-2.47-docs` | GNU Binutils 2.47 official HTML manuals | GFDL 1.3; exact manual notices retained | 8 manuals; 1,807 chunks | BM25 |
+| `dotnet-docs-20260820` | Official `dotnet/docs` commit `e2fe6aca…`, 2026-08-19 | CC-BY-4.0; repository/per-file notices retained | 13,225 pages; 77,212 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
@@ -152,6 +153,15 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - The corpus covers GNU `as`, `ld`, the binary utilities (`objdump`, `readelf`, `nm`, `ar`, `objcopy`, `strip`, and related tools), BFD, CTF, SFrame, `gprof`, and `gprofng`. Duplicate split-page HTML and PDFs are excluded.
 - The upstream BFD manual's `Untitled Document` metadata is deterministically repaired to `BFD Library`. The 8 manuals produce 1,807 heading-aware chunks in a 6,664,192-byte verified FTS5 database.
 - Its 33-topic stable-ID lexical gate covers assembly, linker scripts and shared objects, ELF inspection and transformation, object-file abstractions, type/debug formats, profiling, and stack-trace metadata; every metric cutoff is `1.0`.
+
+### .NET documentation
+
+- Official snapshot: `dotnet/docs` main commit `e2fe6aca79d1a7296241f144a43dbccf42d58a47` from 2026-08-19.
+- GitHub supplies no digest for commit archives. The 274,457,692-byte archive is therefore pinned by local SHA-256 `6a65c4abc3f9b55a3612ee069ca2d2ef7149b59bf0c7461c0bade7ff15aced30` without a publisher-checksum claim.
+- Safe extraction validated 23,578 regular files / 382,589,198 bytes, no archive links, and 9,161 reversibly encoded Windows-incompatible names. Samples, source code, media, and build metadata remain raw but are outside text retrieval.
+- The DocFX-aware importer expands local shared includes into their canonical parent pages, rejects cycles and path traversal, and excludes fragments as standalone citations. Fifteen unavailable cross-repository include targets affect 7 Azure-oriented pages; those directives are removed and recorded on the affected documents and in extraction statistics.
+- The common-record generation contains 13,225 canonical Markdown pages and 77,212 chunks. Its 167,247,872-byte FTS5 database passes source-manifest, row-count, foreign-key, integrity, smoke-query, and citation verification.
+- Its 50-topic stable-ID gate covers C#, F#, Visual Basic, runtime memory, extensions, networking, serialization, security, concurrency, deployment, CLI/build tooling, diagnostics, native/COM interop, compatibility, architecture, and testing; every lexical metric cutoff is `1.0`.
 
 ### Linux man-pages
 
