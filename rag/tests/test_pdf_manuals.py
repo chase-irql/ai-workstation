@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import logging
 import sys
 import tempfile
 import unittest
@@ -14,7 +15,7 @@ from reportlab.pdfgen import canvas
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from offline_rag.bm25 import build_index, search
-from offline_rag.pdf_manuals import import_pdf_manuals
+from offline_rag.pdf_manuals import _extract_page_text, import_pdf_manuals
 from offline_rag.verify import verify_database
 
 
@@ -55,6 +56,20 @@ def _write_mixed_scan(path: Path) -> None:
 
 
 class PdfManualImportTests(unittest.TestCase):
+    def test_pypdf_page_warnings_are_collected_without_changing_text(self):
+        class WarningPage:
+            def extract_text(self, **_: object) -> str:
+                logger = logging.getLogger("pypdf.test")
+                logger.warning("PDF contains an uninterpretable font. Output will be incomplete.")
+                logger.warning("Rotated text discovered. Layout will be degraded.")
+                return "  searchable   text  "
+
+        text, warnings = _extract_page_text(WarningPage())
+        self.assertEqual(text, "searchable   text")
+        self.assertEqual(len(warnings), 2)
+        self.assertTrue(any("uninterpretable font" in warning for warning in warnings))
+        self.assertTrue(any("Rotated text" in warning for warning in warnings))
+
     def test_page_aware_common_records_bm25_and_citations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -73,11 +88,13 @@ class PdfManualImportTests(unittest.TestCase):
                 source_timestamp="2026-08-20T00:00:00Z",
                 max_chars=512,
                 min_chars=60,
+                title_overrides={"pump-controller.pdf": "Pump Controller Manual — Corrected Title"},
             )
             self.assertEqual(result["documents"], 1)
             self.assertEqual(result["pages"], 3)
             self.assertEqual(result["text_pages"], 2)
             self.assertEqual(result["blank_pages"], 1)
+            self.assertEqual(result["pages_with_pypdf_warnings"], 0)
 
             manifest = json.loads((output / "corpus-manifest.json").read_text(encoding="utf-8"))
             stats = json.loads((output / "extraction-stats.json").read_text(encoding="utf-8"))
@@ -87,9 +104,12 @@ class PdfManualImportTests(unittest.TestCase):
             self.assertFalse(manifest["configuration"]["ocr"])
             self.assertTrue(stats["completed"])
             self.assertEqual(stats["stop_reason"], "source_complete")
-            self.assertEqual(document["title"], "Pump Controller Service Manual")
+            self.assertEqual(document["title"], "Pump Controller Manual — Corrected Title")
+            self.assertEqual(document["attributes"]["pdf_title"], "Pump Controller Service Manual")
+            self.assertTrue(document["attributes"]["title_overridden"])
             self.assertEqual(document["attributes"]["pdf_author"], "Example Manufacturer")
             self.assertEqual(document["attributes"]["page_count"], 3)
+            self.assertEqual(document["attributes"]["pages_with_pypdf_warnings"], 0)
             self.assertEqual(document["source_url"], "https://example.test/manuals/pump-controller.pdf")
             self.assertTrue(all(chunk["attributes"]["page_number"] in {1, 2} for chunk in chunks))
             self.assertTrue(any("Page 1" in chunk["heading_path"] for chunk in chunks))
@@ -163,6 +183,15 @@ class PdfManualImportTests(unittest.TestCase):
                     source_version="1",
                     license_name="test",
                     source_url_template="https://example.test/manual.pdf",
+                )
+            with self.assertRaisesRegex(ValueError, "do not match source PDFs"):
+                import_pdf_manuals(
+                    manual,
+                    root / "output",
+                    corpus="manual-test",
+                    source_version="1",
+                    license_name="test",
+                    title_overrides={"missing.pdf": "Missing Manual"},
                 )
 
 

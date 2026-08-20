@@ -50,6 +50,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `openstax-psychology` | OpenStax Psychology 2e commit `de7e40c9…`, 2026-07-09 | CC BY-NC-SA 4.0; attribution retained; educational, not current clinical guidance | 105 modules; 2,228 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
+| `doe-fundamentals-handbooks` | DOE-HDBK-1010-92 through DOE-HDBK-1019-93, Revision 0 archived sequence | Distribution Statement A; retain all document notices; historical/canceled training material | 22 volumes; 2,842 pages; 5,533 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
 | `gawk-5.4-manual` | GNU Awk 5.4 split-HTML manual, generated 2026-02-22 | GFDL 1.3 or later with stated invariant and cover texts | 502 documents; 1,332 chunks | BM25 |

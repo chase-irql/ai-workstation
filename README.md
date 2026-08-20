@@ -70,6 +70,7 @@ These corpora are implemented and verified in the current development installati
 | OpenStax Psychology 2e | Official source snapshot at `de7e40c9…` | 105 modules, 2,228 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
+| DOE Fundamentals Handbooks | DOE-HDBK-1010-92 through 1019-93, Revision 0 archive | 22 volumes, 2,842 pages, 5,533 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |
 | GNU Awk user's guide | Gawk 5.4, 2026-02-22 generation | 502 documents, 1,332 chunks | BM25 |

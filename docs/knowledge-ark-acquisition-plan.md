@@ -25,11 +25,13 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
-### Active engineering-handbook extension: DOE Fundamentals
+### Completed engineering-handbook extension: DOE Fundamentals
 
-The next bounded pilot is the complete official DOE Fundamentals sequence, not a random manual scrape. DOE's archive exposes 22 PDFs (42,482,570 bytes total) spanning classical physics; electrical science; thermodynamics, heat transfer, and fluid flow; instrumentation and control; mathematics; chemistry; engineering drawings; material science; mechanical science; and nuclear physics/reactor theory. Every asset was resolved from its official DOE record and responds as `application/pdf`. The registry caps the full raw set at 46 MB and the index at 500 MB, well inside the storage reserve.
+The complete official DOE Fundamentals sequence is acquired and evaluated. Its 22 PDFs (42,482,570 bytes total) span classical physics; electrical science; thermodynamics, heat transfer, and fluid flow; instrumentation and control; mathematics; chemistry; engineering drawings; material science; mechanical science; and nuclear physics/reactor theory. Every asset was resolved from its official DOE record, validated as a PDF, and locally SHA-256 pinned. DOE supplies no adjacent publisher digests, so publisher-checksum verification is not claimed.
 
-These Revision 0 handbooks are archived/canceled training material, not current DOE policy or a substitute for current safety standards. Each carries Distribution Statement A (approved for public release; distribution unlimited), and all document notices will be retained. The page-aware PDF importer must validate every file's text-layer ratio before any records are published; local per-file SHA-256 values will be pinned because DOE supplies no adjacent publisher digests.
+The page-aware import examined all 2,842 pages: 2,692 have searchable text, 6 are image-only, and 144 are blank. Its 5,533 chunks produce a verified 25,423,872-byte database. Structured extraction QA identifies 108 pages with legacy uninterpretable-font warnings and one rotated-text page for later visual/OCR review instead of burying those warnings in console output. A 59-topic inter-volume gate achieves every Success, Recall, and MRR cutoff at 1.0 with nDCG@10 0.999418. Reviewed title overrides correct two erroneous embedded chemistry identifiers while retaining the originals in provenance.
+
+These Revision 0 handbooks are archived/canceled training material, not current DOE policy or a substitute for current safety standards. Each carries Distribution Statement A (approved for public release; distribution unlimited), and all document notices are retained.
 
 ### Active textbook extension: microbiology
 

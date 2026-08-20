@@ -17,7 +17,13 @@ $registry = Get-Content -LiteralPath (Join-Path $root 'config\datasets.json') -R
 $matches = @($registry.datasets | Where-Object { $_.dataset_id -eq $DatasetId })
 if ($matches.Count -ne 1) { throw "Unknown or duplicate dataset ID '$DatasetId'." }
 $dataset = $matches[0]
-$sourceCandidate = if ($Source) { $Source } else { Join-Path $root ([string]$dataset.paths.raw) }
+$sourceCandidate = if ($Source) {
+    $Source
+} elseif ([string]$dataset.acquisition.method -eq 'http-file-set') {
+    Join-Path (Join-Path $root ([string]$dataset.paths.raw)) 'files'
+} else {
+    Join-Path $root ([string]$dataset.paths.raw)
+}
 $sourcePath = [System.IO.Path]::GetFullPath($sourceCandidate)
 if (-not (Test-Path -LiteralPath $sourcePath)) { throw "PDF source file or directory not found: $sourcePath" }
 $processed = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.processed)))
@@ -43,6 +49,17 @@ if ($dataset.acquisition.PSObject.Properties.Name -contains 'source_url_template
 }
 if ($dataset.PSObject.Properties.Name -contains 'source_timestamp') {
     $importArguments += @('--source-timestamp', ([string]$dataset.source_timestamp))
+}
+if ($dataset.ingestion -and $dataset.ingestion.PSObject.Properties.Name -contains 'title_overrides') {
+    $overridesPath = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.ingestion.title_overrides)))
+    $rootPrefix = [System.IO.Path]::GetFullPath($root).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    if (-not $overridesPath.StartsWith($rootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Title overrides path escapes the project root: $overridesPath"
+    }
+    if (-not (Test-Path -LiteralPath $overridesPath -PathType Leaf)) {
+        throw "Title overrides file not found: $overridesPath"
+    }
+    $importArguments += @('--title-overrides', $overridesPath)
 }
 if ($PSBoundParameters.ContainsKey('MaxFiles')) { $importArguments += @('--max-files', $MaxFiles) }
 if ($Force) { $importArguments += '--force' }

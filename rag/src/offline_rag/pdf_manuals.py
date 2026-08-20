@@ -3,12 +3,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 import os
 import re
 import shutil
 import tempfile
 import uuid
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -144,7 +145,23 @@ def _outline_paths(reader: PdfReader, page_count: int) -> list[tuple[str, ...]]:
     return result
 
 
-def _extract_page_text(page: Any) -> str:
+class _PdfWarningCollector(logging.Handler):
+    """Collect pypdf extraction warnings without flooding long imports."""
+
+    def __init__(self) -> None:
+        super().__init__(level=logging.WARNING)
+        self.messages: list[str] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.messages.append(record.getMessage())
+
+
+def _extract_page_text(page: Any) -> tuple[str, tuple[str, ...]]:
+    logger = logging.getLogger("pypdf")
+    collector = _PdfWarningCollector()
+    prior_propagate = logger.propagate
+    logger.addHandler(collector)
+    logger.propagate = False
     try:
         # Layout mode otherwise drops rotated table labels and diagram text.
         # Including them may slightly degrade spacing on those pages, but losing
@@ -152,7 +169,10 @@ def _extract_page_text(page: Any) -> str:
         value = page.extract_text(extraction_mode="layout", layout_mode_strip_rotated=False) or ""
     except (TypeError, ValueError, KeyError):
         value = page.extract_text() or ""
-    return normalize_content(value)
+    finally:
+        logger.removeHandler(collector)
+        logger.propagate = prior_propagate
+    return normalize_content(value), tuple(collector.messages)
 
 
 def _page_has_images(page: Any) -> bool:
@@ -184,6 +204,7 @@ def import_pdf_manuals(
     base_url: str | None = None,
     source_url_template: str | None = None,
     source_timestamp: str | None = None,
+    title_overrides: Mapping[str, str] | None = None,
     max_chars: int = 3200,
     min_chars: int = 300,
     min_searchable_ratio: float = 0.5,
@@ -216,6 +237,19 @@ def import_pdf_manuals(
 
     source_root, all_files = _pdf_files(source)
     files = all_files[:max_files] if max_files is not None else all_files
+    normalized_title_overrides: dict[str, str] = {}
+    for relative, title in (title_overrides or {}).items():
+        normalized_relative = Path(str(relative)).as_posix()
+        if Path(normalized_relative).is_absolute() or ".." in Path(normalized_relative).parts:
+            raise ValueError(f"title override path must be a safe relative path: {relative!r}")
+        normalized_title = normalize_content(str(title))
+        if not normalized_relative or not normalized_title:
+            raise ValueError("title override paths and titles must be nonempty")
+        normalized_title_overrides[normalized_relative] = normalized_title
+    available_relatives = {path.relative_to(source_root).as_posix() for path in all_files}
+    unknown_overrides = sorted(set(normalized_title_overrides) - available_relatives)
+    if unknown_overrides:
+        raise ValueError(f"title overrides do not match source PDFs: {unknown_overrides}")
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{output.name}.building-", dir=output.parent))
     documents_path = temporary / "documents.jsonl"
@@ -229,6 +263,9 @@ def import_pdf_manuals(
         "text_pages": 0,
         "image_only_pages": 0,
         "blank_pages": 0,
+        "pages_with_pypdf_warnings": 0,
+        "pages_with_uninterpretable_fonts": 0,
+        "pages_with_rotated_text": 0,
         "source_bytes": 0,
     }
     try:
@@ -265,8 +302,15 @@ def import_pdf_manuals(
                 outline_paths = _outline_paths(reader, page_count)
                 page_values: list[tuple[int, str, tuple[str, ...], str, list[tuple[tuple[str, ...], str, dict[str, Any]]]]] = []
                 text_pages = image_only_pages = blank_pages = 0
+                warning_pages = uninterpretable_font_pages = rotated_text_pages = 0
                 for page_index, page in enumerate(reader.pages):
-                    text = _extract_page_text(page)
+                    text, warnings = _extract_page_text(page)
+                    if warnings:
+                        warning_pages += 1
+                    if any("uninterpretable font" in warning.casefold() for warning in warnings):
+                        uninterpretable_font_pages += 1
+                    if any("rotated text" in warning.casefold() for warning in warnings):
+                        rotated_text_pages += 1
                     label = normalize_content(str(labels[page_index])) or str(page_index + 1)
                     page_heading = outline_paths[page_index] + (f"Page {label}",)
                     if text:
@@ -296,7 +340,8 @@ def import_pdf_manuals(
                     )
 
                 metadata = reader.metadata
-                title = _metadata_text(metadata, "/Title") or path.stem.replace("_", " ").replace("-", " ").strip()
+                pdf_title = _metadata_text(metadata, "/Title")
+                title = normalized_title_overrides.get(relative) or pdf_title or path.stem.replace("_", " ").replace("-", " ").strip()
                 document_id = _stable_id(corpus, relative)
                 prior_relative = document_paths_by_id.get(document_id)
                 case_collision = prior_relative is not None and prior_relative != relative
@@ -316,8 +361,12 @@ def import_pdf_manuals(
                     "text_pages": text_pages,
                     "image_only_pages": image_only_pages,
                     "blank_pages": blank_pages,
+                    "pages_with_pypdf_warnings": warning_pages,
+                    "pages_with_uninterpretable_fonts": uninterpretable_font_pages,
+                    "pages_with_rotated_text": rotated_text_pages,
                     "searchable_page_ratio": searchable_ratio,
                     "pdf_author": _metadata_text(metadata, "/Author"),
+                    "pdf_title": pdf_title,
                     "pdf_subject": _metadata_text(metadata, "/Subject"),
                     "pdf_keywords": _metadata_text(metadata, "/Keywords"),
                     "pdf_creator": _metadata_text(metadata, "/Creator"),
@@ -326,6 +375,8 @@ def import_pdf_manuals(
                 attributes = {key: value for key, value in attributes.items() if value is not None}
                 if case_collision:
                     attributes["case_distinct_path_collision"] = True
+                if relative in normalized_title_overrides:
+                    attributes["title_overridden"] = True
                 document = CommonDocument(
                     document_id=document_id,
                     corpus=corpus,
@@ -368,6 +419,9 @@ def import_pdf_manuals(
                 totals["text_pages"] += text_pages
                 totals["image_only_pages"] += image_only_pages
                 totals["blank_pages"] += blank_pages
+                totals["pages_with_pypdf_warnings"] += warning_pages
+                totals["pages_with_uninterpretable_fonts"] += uninterpretable_font_pages
+                totals["pages_with_rotated_text"] += rotated_text_pages
                 totals["source_bytes"] += before.st_size
             for stream in (documents_stream, chunks_stream):
                 stream.flush()
@@ -411,6 +465,9 @@ def import_pdf_manuals(
                 "text_pages": totals["text_pages"],
                 "image_only_pages": totals["image_only_pages"],
                 "blank_pages": totals["blank_pages"],
+                "pages_with_pypdf_warnings": totals["pages_with_pypdf_warnings"],
+                "pages_with_uninterpretable_fonts": totals["pages_with_uninterpretable_fonts"],
+                "pages_with_rotated_text": totals["pages_with_rotated_text"],
             },
             "configuration": {
                 "max_chars": max_chars,
@@ -418,6 +475,10 @@ def import_pdf_manuals(
                 "min_searchable_ratio": min_searchable_ratio,
                 "max_files": max_files,
                 "ocr": False,
+                "title_overrides": len(normalized_title_overrides),
+                "title_overrides_sha256": hashlib.sha256(
+                    json.dumps(normalized_title_overrides, ensure_ascii=False, sort_keys=True).encode("utf-8")
+                ).hexdigest(),
             },
             "parts": [{
                 "part": 0,
@@ -454,6 +515,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-url")
     parser.add_argument("--source-url-template")
     parser.add_argument("--source-timestamp")
+    parser.add_argument("--title-overrides", type=Path)
     parser.add_argument("--max-chars", type=int, default=3200)
     parser.add_argument("--min-chars", type=int, default=300)
     parser.add_argument("--min-searchable-ratio", type=float, default=0.5)
@@ -464,6 +526,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Iterable[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    title_overrides: Mapping[str, str] | None = None
+    if args.title_overrides is not None:
+        value = json.loads(args.title_overrides.read_text(encoding="utf-8"))
+        if not isinstance(value, dict) or not all(isinstance(key, str) and isinstance(title, str) for key, title in value.items()):
+            raise ValueError("title-overrides must be a JSON object mapping relative PDF paths to titles")
+        title_overrides = value
     result = import_pdf_manuals(
         args.source,
         args.output,
@@ -473,6 +541,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         base_url=args.base_url,
         source_url_template=args.source_url_template,
         source_timestamp=args.source_timestamp,
+        title_overrides=title_overrides,
         max_chars=args.max_chars,
         min_chars=args.min_chars,
         min_searchable_ratio=args.min_searchable_ratio,

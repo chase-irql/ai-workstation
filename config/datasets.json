@@ -965,7 +965,8 @@
         ]
       },
       "ingestion": {
-        "smoke_query": "Ohm law DC circuit voltage current resistance"
+        "smoke_query": "Ohm law DC circuit voltage current resistance",
+        "title_overrides": "config/pdf-manuals/doe-fundamentals-handbooks-titles.json"
       },
       "storage": {
         "download_min_bytes": 40000000,
@@ -979,8 +980,8 @@
         "index": "indexes/manuals/doe-fundamentals-handbooks.sqlite3",
         "semantic_index": "indexes/semantic/doe-fundamentals-handbooks"
       },
-      "status": "planned",
-      "notes": "Official DOE archive pages and PDF HEAD checks on 2026-08-20 identify 22 application/pdf assets totaling 42,482,570 bytes. Each handbook carries Distribution Statement A. The sequence is archived and canceled, so it is retained as durable fundamentals training rather than represented as current DOE policy or a current safety standard. The PDFs have visible text layers in DOE's official viewer; full local searchable-page validation remains the first ingestion gate. DOE exposes no adjacent publisher checksums, so acquisition will record per-file local SHA-256 values without claiming publisher verification."
+      "status": "evaluated",
+      "notes": "Acquired all 22 official DOE archive PDFs (42,482,570 bytes total) and pinned a local SHA-256 for every file; DOE supplies no adjacent publisher digests, so publisher-checksum verification is not claimed. Page-aware import examined 2,842 pages: 2,692 have searchable text, 6 are image-only, and 144 are blank. It published 5,533 chunks in a 25,423,872-byte database that passed integrity, foreign-key, row-count, FTS-count, citation, and smoke-query validation. Structured QA records 108 pages with legacy uninterpretable-font warnings and one with rotated text for targeted future visual/OCR review; the 59-topic gate still achieved Success@1/5/10, Recall@5/10/50, and MRR@10 of 1.0 with nDCG@10 0.999418. Two source PDFs embed an incorrect -92 chemistry identifier; reviewed title overrides correct citations to DOE-HDBK-1015/1-93 and /2-93 while retaining the embedded titles in provenance. Each volume carries Distribution Statement A. The archived/canceled sequence is historical fundamentals training, not current DOE policy or a substitute for current safety standards."
     },
     {
       "dataset_id": "cmake-4.4-docs",

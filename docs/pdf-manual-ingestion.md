@@ -17,7 +17,7 @@ Search citations therefore identify both the source document and a `Page …` he
 
 ## OCR safety gate
 
-Version 1 extracts existing PDF text layers with `pypdf`; it does not run OCR. Pages with images but no text are counted as image-only, while truly empty pages are counted separately. The import fails atomically when there is no searchable text or when the searchable ratio among text/image pages is below `--min-searchable-ratio` (default `0.5`). No partial corpus is published after this failure.
+Version 1 extracts existing PDF text layers with `pypdf`; it does not run OCR. Pages with images but no text are counted as image-only, while truly empty pages are counted separately. The import also records per-document and aggregate counts for pages where `pypdf` reports uninterpretable fonts or rotated text. Those warnings identify targeted visual/OCR review work without flooding a multi-volume import log. The import fails atomically when there is no searchable text or when the searchable ratio among text/image pages is below `--min-searchable-ratio` (default `0.5`). No partial corpus is published after this failure.
 
 This conservative behavior prevents a scanned service manual from appearing successfully indexed when its diagrams and instructions are actually invisible. OCR should be a later, explicit preprocessing stage that preserves page coordinates, rendered-page QA, OCR engine/version, and original PDFs.
 
@@ -39,7 +39,9 @@ Useful controls:
 .\scripts\run-pdf-manual-pipeline.ps1 -DatasetId <dataset-id> -Force
 ```
 
-The script defaults to the registry `paths.raw` location, but `-Source` can point to a single PDF or a directory tree. `-Force` never replaces an output directory containing unrelated files.
+The script defaults to the registry `paths.raw` location. For an `http-file-set`, it automatically uses that acquisition method's publication-ready `files/` payload root so stable document paths and `source_url_template` values do not acquire an internal storage prefix. `-Source` can point to a single PDF or a directory tree. `-Force` never replaces an output directory containing unrelated files.
+
+When a publisher's embedded PDF title is wrong, add a reviewed JSON mapping of relative PDF paths to exact titles and reference it as `ingestion.title_overrides` in the dataset registry. The importer validates every override against a source file, retains the original embedded title as `pdf_title`, marks the document `title_overridden`, and binds a deterministic override-map digest into the corpus manifest. This is for correcting provenance defects, not casually rewriting publisher titles.
 
 ## Evaluation and publication
 
@@ -59,6 +61,8 @@ Semantic embeddings are not automatic. Exact model numbers, error codes, and par
 `faa-amt-general-2023` is the first real corpus through this adapter. Its official 92,539,602-byte FAA-H-8083-30B PDF contains 677 pages; 676 have text and one cover is image-only. The published generation contains 1,837 page-bounded chunks and a 9,388,032-byte verified BM25 database. A 14-topic lexical coverage gate passes every cutoff, and manual citation inspection confirms page-aware results for electricity, nondestructive inspection, tools, corrosion, drawings, mathematics, fire safety, weight and balance, and fluid lines.
 
 The pilot revealed rotated text in diagrams and tables. The importer keeps this text searchable, accepting locally degraded spacing instead of the extraction library's default behavior of dropping it. Front-matter matches remain searchable but are ranked after matching body evidence.
+
+The second validated corpus is the complete 22-volume DOE Fundamentals archive. It exercises bounded multi-file acquisition, file-set source paths, reviewed title overrides, and structured extraction-warning counts. Across 2,842 pages, 2,692 have searchable text, 6 are image-only, and 144 are blank; 108 pages report legacy uninterpretable fonts and one reports rotated text. The resulting 5,533 chunks occupy a 25,423,872-byte verified BM25 database. Its 59-topic inter-volume gate has Success@1/5/10, Recall@5/10/50, and MRR@10 of `1.0`, with nDCG@10 `0.999418`. Because these handbooks are archived/canceled, citations must not present them as current DOE policy or current safety requirements.
 
 ## Current limitations
 
