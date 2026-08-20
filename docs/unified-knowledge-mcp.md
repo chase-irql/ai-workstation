@@ -53,21 +53,27 @@ From the repository root:
 .\scripts\start-opencode.ps1
 ```
 
-Restart an already-open OpenCode session so it discovers the new tools. The existing `offline-wikipedia` entry is deliberately retained for compatibility.
+Restart an already-open OpenCode session so it discovers the new tools and the
+project-local `.agents/skills/search-offline-knowledge` skill. The existing
+`offline-wikipedia` entry is deliberately retained for compatibility.
 
 Example prompt:
 
 ```text
-Use the offline knowledge tools to explain the TLS 1.3 key schedule. Search the RFC corpus first, retrieve nearby context where needed, distinguish the current specification from obsolete RFCs, and preserve exact source citations.
+How does the TLS 1.3 key schedule work?
 ```
 
-Exact IANA lookup example:
+Source-constrained example:
 
 ```text
-Use search_knowledge with corpora=["iana-protocol-registries"] and retrieval="bm25" to identify the assigned TCP port for HTTPS. Cite the exact IANA registry result.
+According to our IANA data, what TCP port is assigned to HTTPS?
 ```
 
-For a CPU-only request, tell the agent to pass `retrieval=bm25`. The local language model used by OpenCode is independent of the retrieval server. Semantic requests load only the configured embedding model; the chat model is unaffected.
+The skill selects exact BM25 retrieval for identifiers, measurements, quotations,
+and registry lookups; conceptual questions use automatic routing. For an explicitly
+CPU-only request, say so in ordinary language. The local language model used by
+OpenCode is independent of the retrieval server. Semantic requests load only the
+configured embedding model; the chat model is unaffected.
 
 ## Adding another corpus
 

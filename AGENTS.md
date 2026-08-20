@@ -7,3 +7,4 @@
 - Never store credentials in this repository. Use environment variables or provider credential stores.
 - Benchmark runs must use fresh isolated workspaces and must retain verification output and the final diff.
 - Use deterministic test commands where possible. Do not score a run as successful only because the harness exited with code zero.
+- When a request mentions the offline library, Knowledge Ark, RAG, local corpora, or source-backed local research, load the `search-offline-knowledge` skill before calling the `offline-knowledge` MCP.

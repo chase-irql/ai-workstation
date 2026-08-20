@@ -207,12 +207,19 @@ Or launch OpenCode:
 .\scripts\start-opencode.ps1
 ```
 
-Example agent prompt:
+The repository includes a project-local `search-offline-knowledge` skill for both
+Codex and OpenCode. It teaches the agent how to route searches, expand context,
+preserve identifiers, and produce exact citations. Restart an agent session after
+pulling or changing the skill, then ask a normal question:
 
 ```text
-Use the offline knowledge tools to explain the TLS 1.3 key schedule.
-Search the RFC corpus first, retrieve neighboring context where useful,
-distinguish current specifications from obsolete RFCs, and preserve exact citations.
+How does the TLS 1.3 key schedule work?
+```
+
+Mention a local source only when you want to constrain the answer:
+
+```text
+Using our Hesperian guides, how do I prepare oral rehydration solution?
 ```
 
 The MCP server exposes four tools:

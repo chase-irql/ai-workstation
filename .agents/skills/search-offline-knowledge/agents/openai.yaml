@@ -1,0 +1,4 @@
+interface:
+  display_name: "Search Offline Knowledge"
+  short_description: "Retrieve exact evidence from the local Knowledge Ark"
+  default_prompt: "Use $search-offline-knowledge to answer this question from the local Knowledge Ark with exact citations."
