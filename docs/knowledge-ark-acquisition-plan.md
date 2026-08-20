@@ -35,7 +35,7 @@ The complete official OpenStax Astronomy 2e source at immutable main commit `dff
 
 ### Active textbook extension: economics
 
-The next registered textbook is the official OpenStax Principles of Economics bundle at immutable main commit `d5cadb40…` (2026-07-09). Five collection manifests provide full Principles of Economics 3e, microeconomics, macroeconomics, and AP curricular paths, with substantial expected module reuse. It adds structured practical coverage of markets, firms, labor, money and banking, public policy, growth, inflation, unemployment, trade, inequality, and environmental economics. Acquisition is bounded to 300 MB compressed and 1 GB extracted, records a local SHA-256, validates archive structure and all collection licenses, and preserves every curricular occurrence while deduplicating only identical stable module IDs.
+The official OpenStax Principles of Economics bundle at immutable main commit `d5cadb40…` (2026-07-09) is acquired and evaluated. Five collection manifests provide Principles of Economics 3e, microeconomics, macroeconomics, and AP curricular paths. Its locally pinned 132,754,792-byte archive safely expands to 1,027 files / 174,919,048 bytes; all manifests confirm CC BY-NC-SA 4.0. Substantial intentional reuse turns 603 curricular occurrences into 190 stable documents and 2,787 chunks in a verified 8,994,816-byte database while retaining every occurrence in provenance. A 53-topic gate spans markets, firms, labor, market failures, inequality, GDP, growth, money and banking, monetary and fiscal policy, trade, foreign exchange, and personal finance and passes every configured metric.
 
 ### Wave 1: operational Stack Exchange sites
 

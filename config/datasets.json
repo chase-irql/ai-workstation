@@ -2195,8 +2195,8 @@
       },
       "storage": {"download_min_bytes": 25000000, "download_max_bytes": 300000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 400000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-principles-economics", "processed": "corpora/processed/textbooks/openstax-principles-economics", "index": "indexes/textbooks/openstax-principles-economics.sqlite3", "semantic_index": "indexes/semantic/openstax-principles-economics"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. Repository LICENSE and all five collection paths were checked before registration; collection licenses and shared module identities will be revalidated after extraction."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit d5cadb403718ff88078259a300eddc20d38563d5. The 132,754,792-byte archive has local SHA-256 b2c1670f41c0b7fc2c29b682c2e89ae4df52618d519d568449a05ab89822e89c and safely expands to 1,027 files / 174,919,048 bytes with no links; 752 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all five collection manifests confirm CC BY-NC-SA 4.0. The 603 ordered curricular occurrences deduplicate by stable module ID into 190 documents and 2,787 chunks in a verified 8,994,816-byte index. The 53-topic microeconomics-through-macroeconomics-and-finance stable-ID gate passes every configured metric at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

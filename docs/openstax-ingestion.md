@@ -28,6 +28,8 @@ Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection 
 
 `openstax-astronomy` contains Astronomy 2e from official repository commit `dff6acf8df597ceda73985308f838ed38417a606` (2026-07-21). Its 190,331,982-byte archive has locally measured SHA-256 `0183f9e4955320c0b3fb34c75107cc521536afc0aef3de5fef15fa410a342868` and safely expands to 945 files totaling 208,705,787 bytes with no links. Its 199-module collection states CC BY-NC-SA 4.0.
 
+`openstax-principles-economics` contains Principles of Economics 3e, Principles of Microeconomics 3e, Principles of Macroeconomics 3e, and AP micro/macro sequences from official repository commit `d5cadb403718ff88078259a300eddc20d38563d5` (2026-07-09). Its 132,754,792-byte archive has locally measured SHA-256 `b2c1670f41c0b7fc2c29b682c2e89ae4df52618d519d568449a05ab89822e89c` and safely expands to 1,027 files totaling 174,919,048 bytes with no links. All five collection manifests state CC BY-NC-SA 4.0. Their 603 ordered occurrences reuse modules heavily, yielding 190 stable documents while retaining all book and chapter placements in provenance.
+
 ## Structure retained
 
 The adapter preserves:
@@ -94,5 +96,7 @@ The introductory-statistics index has 179 documents, 6,011 chunks and FTS rows, 
 The Microbiology index has 159 documents, 4,115 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 11,165,696 bytes. The 57-case lexical suite has every reported rank metric at 1.0.
 
 The Astronomy 2e index has 199 documents, 2,095 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 9,064,448 bytes. The 54-case lexical suite has every reported rank metric at 1.0.
+
+The Principles of Economics index has 190 documents, 2,787 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 8,994,816 bytes. The 53-case lexical suite has every reported rank metric at 1.0.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.
