@@ -57,6 +57,8 @@ Wave 1 and the listed Wave 2 sites are downloaded, checksum-validated, extracted
 
 Network Engineering and Database Administrators have verified 256-dimensional semantic generations. Electrical Engineering, Unix & Linux, and Server Fault are processed by a storage-guarded sequential semantic queue. The remaining Wave 2 sites stay BM25-first until paraphrase suites demonstrate that the vector storage and build time provide measurable value.
 
+Wave 3 has begun with the official split-HTML Bash 5.3, Coreutils 9.11, Gawk 5.4, Grep 3.12, and Make 4.4.1 manuals. Together they add 1,091 canonical documents and 2,883 chunks for less than 1.8 MB of source archives and about 9.4 MB of BM25 databases—an example of the high knowledge-per-byte material this plan prioritizes.
+
 ### Wave 3: official programming and systems documentation
 
 Acquire pinned official releases with publisher checksums where available:

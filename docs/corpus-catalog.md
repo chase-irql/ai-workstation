@@ -15,6 +15,11 @@ This catalog is the human-readable inventory of every corpus currently published
 | `rfc-editor-text` | RFC Editor snapshot 2026-08-19 | IETF Trust Legal Provisions | 9,822 RFCs; 348,831 chunks | BM25 + chunk-level semantic/hybrid |
 | `iana-protocol-registries` | IANA assignments snapshot 2026-08-19 | CC0 1.0 Universal | 4,256 registries; 110,423 table records; 114,590 chunks | Structured BM25 |
 | `sqlite-docs` | SQLite 3.53.4 static HTML documentation | Public domain | 765 documents; 4,384 chunks | BM25 + chunk-level semantic/hybrid |
+| `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
+| `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
+| `gawk-5.4-manual` | GNU Awk 5.4 split-HTML manual, generated 2026-02-22 | GFDL 1.3 or later with stated invariant and cover texts | 502 documents; 1,332 chunks | BM25 |
+| `grep-3.12-manual` | GNU Grep 3.12 split-HTML manual, generated 2025-04-11 | GFDL; exact notices retained | 31 documents; 82 chunks | BM25 |
+| `make-4.4.1-manual` | GNU Make 4.4.1 split-HTML manual, generated 2023-02-26 | GFDL; exact notices retained | 173 documents; 444 chunks | BM25 |
 | `devops-stackexchange` | DevOps Stack Exchange 2026-06-30 community dump | CC BY-SA 3.0 or 4.0 per retained post | 11,877 retained posts; 13,531 chunks | BM25 + experimental 1,024-dim semantic/hybrid |
 | `security-stackexchange` | Information Security Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 171,041 retained posts; 188,770 chunks | BM25 + 256-dim semantic/hybrid |
 | `networkengineering-stackexchange` | Network Engineering Stack Exchange 2026-06-30 community dump | CC BY-SA 2.5, 3.0, or 4.0 per retained post | 39,592 retained posts; 44,174 chunks | BM25 + 256-dim semantic/hybrid |
@@ -57,6 +62,20 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - Official archive: kernel.org Git 2.55.0 release source.
 - Publisher SHA-256: `457fdb04dc8728e007d4688695e6912e6f680727920f2a40bf11eacc17505357`.
 - The importer preserves AsciiDoc/man structure, relative source paths, and version-pinned kernel.org citations.
+
+### GNU Bash reference manual
+
+- Official archive: `https://www.gnu.org/software/bash/manual/bash.html_node.tar.gz`.
+- Local archive SHA-256: `aa0bcdf6270035e061ffaca40f9f74dd879b2fe4d812cfbb12828ca7998ec0c3`.
+- GNU does not publish an adjacent cryptographic digest for this generated manual archive; acquisition therefore records the local digest and validates every tar member and extracted byte count.
+- The split-HTML structure preserves one canonical GNU manual URL per node. The 12-topic stable-ID lexical gate passes all ranking cutoffs.
+
+### GNU systems manuals
+
+- Coreutils 9.11, Gawk 5.4, Grep 3.12, and Make 4.4.1 use the same official generated split-HTML publication format and canonical per-node URLs.
+- GNU does not provide adjacent cryptographic digests for these generated documentation archives. Each acquisition manifest pins a local SHA-256 and records the exact download URL, generation label, tar member inventory, extracted byte count, and validation result.
+- The four archives produced 959 documents and 2,497 chunks. Each six-topic stable-ID lexical gate passes every ranking cutoff.
+- Gawk includes two pairs of upstream paths distinguished only by case. The importer preserves both with deterministic collision IDs while leaving all ordinary path-derived IDs unchanged.
 
 ### Linux man-pages
 

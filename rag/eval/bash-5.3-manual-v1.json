@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "name": "GNU Bash 5.3 manual lexical gate",
+  "description": "Stable-document-ID retrieval gate for core Bash syntax, expansion, execution, interactive, and control features.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "parameter-001", "query": "parameter expansion", "query_type": "expansion", "relevance": {"bash-5.3-manual:00d43bfaf66efe3dd3a809e4": 3}},
+    {"id": "quoting-001", "query": "shell quoting", "query_type": "syntax", "relevance": {"bash-5.3-manual:725ef68bb21a858b07003b6d": 3}},
+    {"id": "redirect-001", "query": "redirection here document", "query_type": "io", "relevance": {"bash-5.3-manual:ca4041481717d6fe7bcf4553": 3}},
+    {"id": "array-001", "query": "arrays associative", "query_type": "data", "relevance": {"bash-5.3-manual:33b804a988afb771b32f54d3": 3}},
+    {"id": "jobs-001", "query": "job control", "query_type": "execution", "relevance": {"bash-5.3-manual:f9734b801d17d51aba5bcb12": 3}},
+    {"id": "command-sub-001", "query": "command substitution", "query_type": "expansion", "relevance": {"bash-5.3-manual:10df12fd7b593cfa2aa327f2": 3}},
+    {"id": "conditional-001", "query": "conditional expressions", "query_type": "syntax", "relevance": {"bash-5.3-manual:603d85c1c7bde44f47c6a369": 3}},
+    {"id": "readline-001", "query": "readline key bindings", "query_type": "interactive", "relevance": {"bash-5.3-manual:d86efa759363386b7c71472f": 3}},
+    {"id": "history-001", "query": "history expansion", "query_type": "interactive", "relevance": {"bash-5.3-manual:33ae6e889f2861ab74df5cf3": 3}},
+    {"id": "signal-001", "query": "trap signals", "query_type": "execution", "relevance": {"bash-5.3-manual:86faa84d5dda06ff1651c9f7": 3}},
+    {"id": "function-001", "query": "shell functions", "query_type": "syntax", "relevance": {"bash-5.3-manual:6dad86b6d01967713e550299": 3}},
+    {"id": "process-sub-001", "query": "process substitution", "query_type": "expansion", "relevance": {"bash-5.3-manual:cc71d5111fdd0c26c196ea3e": 3}}
+  ]
+}

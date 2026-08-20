@@ -40,11 +40,15 @@ if ($dataset.acquisition.PSObject.Properties.Name -contains 'source_url_template
     $importArguments += @('--source-url-template', ([string]$dataset.acquisition.source_url_template))
 }
 if ($dataset.PSObject.Properties.Name -contains 'ingestion') {
-    foreach ($pattern in @($dataset.ingestion.include_globs)) {
-        $importArguments += @('--include-glob', ([string]$pattern))
+    if ($dataset.ingestion.PSObject.Properties.Name -contains 'include_globs') {
+        foreach ($pattern in @($dataset.ingestion.include_globs)) {
+            $importArguments += @('--include-glob', ([string]$pattern))
+        }
     }
-    foreach ($pattern in @($dataset.ingestion.exclude_globs)) {
-        $importArguments += @('--exclude-glob', ([string]$pattern))
+    if ($dataset.ingestion.PSObject.Properties.Name -contains 'exclude_globs') {
+        foreach ($pattern in @($dataset.ingestion.exclude_globs)) {
+            $importArguments += @('--exclude-glob', ([string]$pattern))
+        }
     }
 }
 if ($PSBoundParameters.ContainsKey('MaxFiles')) { $importArguments += @('--max-files', $MaxFiles) }

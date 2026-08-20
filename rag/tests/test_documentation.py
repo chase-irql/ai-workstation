@@ -458,6 +458,34 @@ Protocol text.
             self.assertEqual(document["attributes"]["relative_path"], "_Exit.2")
             self.assertEqual(document["source_url"], "https://example.test/_Exit.2?h=v1")
 
+    def test_case_distinct_upstream_paths_receive_unique_stable_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".archive-name-encoding-v1.json").write_text(
+                '{"schema_version":1,"encoded_members":2}\n', encoding="utf-8"
+            )
+            (root / "%49ndex.html").write_text(
+                "<title>Capital Index</title><p>Capital-case index documentation.</p>", encoding="utf-8"
+            )
+            (root / "index.html").write_text(
+                "<title>Lower Index</title><p>Lower-case index documentation.</p>", encoding="utf-8"
+            )
+            output = root / "processed"
+            import_documentation(
+                root,
+                output,
+                corpus="case-test",
+                source_version="1",
+                license_name="test",
+                source_url_template="https://example.test/{relative_path}",
+            )
+            documents = [json.loads(line) for line in (output / "documents.jsonl").read_text().splitlines()]
+            self.assertEqual(len({item["document_id"] for item in documents}), 2)
+            self.assertEqual([item["attributes"]["relative_path"] for item in documents], ["Index.html", "index.html"])
+            self.assertEqual(
+                sum(bool(item["attributes"].get("case_distinct_path_collision")) for item in documents), 1
+            )
+
     def test_existing_and_unrecognized_output_protection(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

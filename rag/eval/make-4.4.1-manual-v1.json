@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "name": "GNU Make 4.4.1 manual lexical gate",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "automatic-001", "query": "automatic variables target prerequisite", "query_type": "variables", "relevance": {"make-4.4.1-manual:2da29d57cd984b0e48ea85b8": 3}},
+    {"id": "pattern-001", "query": "pattern rules", "query_type": "rules", "relevance": {"make-4.4.1-manual:e45bc5741dbaaef8ff5ef083": 3}},
+    {"id": "phony-001", "query": "phony targets", "query_type": "targets", "relevance": {"make-4.4.1-manual:5b16cf8f4437bf324adb889f": 3}},
+    {"id": "recursive-001", "query": "recursive sub-make", "query_type": "execution", "relevance": {"make-4.4.1-manual:10ad0918cb56ef805fcbbdcd": 3}},
+    {"id": "conditional-001", "query": "conditional syntax", "query_type": "syntax", "relevance": {"make-4.4.1-manual:eb955ee438c92c98411c4318": 3}},
+    {"id": "wildcard-001", "query": "wildcard function", "query_type": "functions", "relevance": {"make-4.4.1-manual:841acc8327ebacd8fffe6cdf": 3}}
+  ]
+}

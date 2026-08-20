@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "name": "GNU Awk 5.4 manual lexical gate",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "fields-001", "query": "field splitting regular expressions", "query_type": "input", "relevance": {"gawk-5.4-manual:0ed38cc54ccfa379b0d63564": 3}},
+    {"id": "arrays-001", "query": "associative arrays", "query_type": "data", "relevance": {"gawk-5.4-manual:f7473ee79982c36afc3f3132": 3}},
+    {"id": "begin-001", "query": "awk BEGIN END", "query_type": "patterns", "relevance": {"gawk-5.4-manual:35a475530d6a6ca824f53191": 3}},
+    {"id": "getline-001", "query": "getline input", "query_type": "input", "relevance": {"gawk-5.4-manual:16467a6dfeac9da5692fb2f4": 3}},
+    {"id": "namespace-001", "query": "gawk namespaces", "query_type": "advanced", "relevance": {"gawk-5.4-manual:7a5a26ea01238be92384c2b5": 3}},
+    {"id": "printf-001", "query": "printf format", "query_type": "output", "relevance": {"gawk-5.4-manual:ab4edc5244ba885004cfbf05": 3}}
+  ]
+}

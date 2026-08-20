@@ -35,6 +35,11 @@ These corpora are implemented and verified in the current development installati
 | RFC Editor | 2026-08-19 snapshot | 9,822 RFCs, 348,831 chunks | BM25 + chunk-level hybrid |
 | IANA protocol registries | 2026-08-19 snapshot | 4,256 registries, 114,590 chunks | Structured BM25 |
 | SQLite documentation | SQLite 3.53.4 | 765 documents, 4,384 chunks | BM25 + chunk-level hybrid |
+| GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
+| GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |
+| GNU Awk user's guide | Gawk 5.4, 2026-02-22 generation | 502 documents, 1,332 chunks | BM25 |
+| GNU Grep manual | Grep 3.12, 2025-04-11 generation | 31 documents, 82 chunks | BM25 |
+| GNU Make manual | Make 4.4.1, 2023-02-26 generation | 173 documents, 444 chunks | BM25 |
 | DevOps Stack Exchange | 2026-06-30 community dump | 11,877 retained posts, 13,531 chunks | BM25 + experimental chunk-level hybrid |
 | Information Security Stack Exchange | 2026-06-30 community dump | 171,041 retained posts, 188,770 chunks | BM25 + chunk-level hybrid |
 | Network Engineering Stack Exchange | 2026-06-30 community dump | 39,592 retained posts, 44,174 chunks | BM25; semantic generation published |

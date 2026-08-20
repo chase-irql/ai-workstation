@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "name": "GNU Coreutils 9.11 manual lexical gate",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "sort-001", "query": "sort version order", "query_type": "text", "relevance": {"coreutils-9.11-manual:5072c725846b35294a382704": 3}},
+    {"id": "cp-001", "query": "cp sparse files", "query_type": "files", "relevance": {"coreutils-9.11-manual:69313ed29101c58daa6fbe6a": 3}},
+    {"id": "chmod-001", "query": "chmod symbolic mode permissions", "query_type": "permissions", "relevance": {"coreutils-9.11-manual:3f87f4611aac413cdc4e6f90": 3}},
+    {"id": "date-001", "query": "date input formats", "query_type": "date", "relevance": {"coreutils-9.11-manual:7a8193c9b727e4608caa7c37": 3}},
+    {"id": "du-001", "query": "du apparent size", "query_type": "storage", "relevance": {"coreutils-9.11-manual:9a82726d0b9f67680d588608": 3}},
+    {"id": "chown-001", "query": "chown user group ownership", "query_type": "permissions", "relevance": {"coreutils-9.11-manual:f6442439b31e105c2d6bf567": 3}}
+  ]
+}

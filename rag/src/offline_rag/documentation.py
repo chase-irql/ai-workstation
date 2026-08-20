@@ -754,7 +754,7 @@ def _source_files(
         if any(fnmatch.fnmatchcase(relative_name, pattern) for pattern in exclude_globs):
             continue
         files.append(path)
-    files.sort(key=lambda item: item.relative_to(root).as_posix().casefold())
+    files.sort(key=lambda item: (item.relative_to(root).as_posix().casefold(), item.relative_to(root).as_posix()))
     return files[:max_files] if max_files is not None else files
 
 
@@ -794,6 +794,14 @@ def _read_source(path: Path) -> tuple[str, str]:
 
 def _stable_id(corpus: str, relative: str) -> str:
     digest = hashlib.sha256(relative.casefold().encode("utf-8")).hexdigest()[:24]
+    return f"{corpus}:{digest}"
+
+
+def _case_collision_id(corpus: str, relative: str) -> str:
+    """Disambiguate rare case-distinct upstream paths without changing ordinary stable IDs."""
+
+    identity = f"case-sensitive-path\0{relative}"
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
     return f"{corpus}:{digest}"
 
 
@@ -894,6 +902,7 @@ def import_documentation(
     skipped_empty = 0
     source_bytes = 0
     formats: dict[str, int] = {}
+    document_paths_by_id: dict[str, str] = {}
     started = datetime.now(timezone.utc)
     try:
         with documents_path.open("w", encoding="utf-8", newline="\n") as documents_stream, chunks_path.open(
@@ -914,6 +923,17 @@ def import_documentation(
                     skipped_empty += 1
                     continue
                 document_id = _stable_id(corpus, relative)
+                prior_relative = document_paths_by_id.get(document_id)
+                case_collision = prior_relative is not None and prior_relative != relative
+                if case_collision:
+                    document_id = _case_collision_id(corpus, relative)
+                    conflicting_relative = document_paths_by_id.get(document_id)
+                    if conflicting_relative is not None and conflicting_relative != relative:
+                        raise ValueError(
+                            "Stable document ID collision between "
+                            f"{conflicting_relative!r} and {relative!r}"
+                        )
+                document_paths_by_id[document_id] = relative
                 document_text = "\n\n".join(value for _, value, _ in chunk_values)
                 encoded_relative = quote(relative, safe="/")
                 if source_url_template:
@@ -933,6 +953,7 @@ def import_documentation(
                         "relative_path": relative,
                         "source_sha256": source_sha256,
                         "format": parsed.format,
+                        **({"case_distinct_path_collision": True} if case_collision else {}),
                         **(_rfc_metadata(text) if parsed.format == "rfc-text" else {}),
                     },
                 )

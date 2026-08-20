@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "name": "GNU Grep 3.12 manual lexical gate",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id": "recursive-001", "query": "recursive directories symlinks", "query_type": "files", "relevance": {"grep-3.12-manual:04a7e12824d51302d69830d2": 3}},
+    {"id": "regex-001", "query": "regular expression syntax", "query_type": "regex", "relevance": {"grep-3.12-manual:bb8d0ef587d6fe28390938fe": 3}},
+    {"id": "binary-001", "query": "binary files", "query_type": "files", "relevance": {"grep-3.12-manual:04a7e12824d51302d69830d2": 3}},
+    {"id": "context-001", "query": "context line control", "query_type": "output", "relevance": {"grep-3.12-manual:d9cf849e1116def267378242": 3}},
+    {"id": "exclude-001", "query": "exclude directories", "query_type": "files", "relevance": {"grep-3.12-manual:04a7e12824d51302d69830d2": 3}},
+    {"id": "status-001", "query": "exit status", "query_type": "behavior", "relevance": {"grep-3.12-manual:24f0d0216e8f9ccc5fdbba17": 3}}
+  ]
+}
