@@ -28,6 +28,8 @@ Corpora have different licenses, attribution rules, update schedules, and redist
 
 Users should acquire each corpus from its official publisher with the scripts and pinned metadata in `config/datasets.json`. This keeps provenance and checksums reproducible without making this repository a mirror of third-party data.
 
+Hesperian Health Guides is an explicit example: its official PDFs may be retained in this private installation, but its Open Copyright Policy requires attribution and written permission for digital reuse or redistribution. Neither those PDFs nor derived text/index artifacts may be bundled with this code repository.
+
 ## Optional artifact releases
 
 A prebuilt corpus or index may be released separately only after a corpus-specific review records:

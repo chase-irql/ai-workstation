@@ -660,9 +660,17 @@ def _acquire_http_catalog_file_set(dataset: DatasetDefinition, raw: Path) -> dic
     maximum = int(dataset.acquisition["asset_max_bytes"])
     magic_value = dataset.acquisition.get("asset_magic")
     magic = str(magic_value).encode("utf-8") if magic_value is not None else None
+    destinations: dict[str, Path] = {}
+    # Resolve and create every parent before worker threads start. On Windows,
+    # resolving a path while another thread creates the same parent can race
+    # with final-path normalization and produce a false containment failure.
+    for asset in assets:
+        candidate = files_root.joinpath(*PurePosixPath(asset["relative_path"]).parts)
+        candidate.parent.mkdir(parents=True, exist_ok=True)
+        destinations[asset["relative_path"]] = _safe_archive_member(files_root, asset["relative_path"])
 
     def acquire_one(asset: dict[str, str]) -> dict[str, object]:
-        destination = _safe_archive_member(files_root, asset["relative_path"])
+        destination = destinations[asset["relative_path"]]
         bounded = replace(
             dataset,
             acquisition={"method": "http", "location": asset["url"]},

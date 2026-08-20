@@ -52,6 +52,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `doe-fundamentals-handbooks` | DOE-HDBK-1010-92 through DOE-HDBK-1019-93, Revision 0 archived sequence | Distribution Statement A; retain all document notices; historical/canceled training material | 22 volumes; 2,842 pages; 5,533 chunks | Page-aware BM25 |
 | `faa-amt-airframe-powerplant-2023` | FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant (2023) | U.S. Government works; handbook notices govern third-party material | 2 volumes; 1,552 pages; 3,498 chunks | Page-aware BM25 |
+| `hesperian-english-health-guides-20260820` | Official English PDF catalog snapshot (2026-08-20); 16 guide editions dated 2000–2026 | Copyright Hesperian Health Guides; private local use only; no redistribution | 432 chapter PDFs; 7,039 pages; 9,731 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
 | `gawk-5.4-manual` | GNU Awk 5.4 split-HTML manual, generated 2026-02-22 | GFDL 1.3 or later with stated invariant and cover texts | 502 documents; 1,332 chunks | BM25 |
@@ -211,6 +212,16 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - PDF title/author metadata, outline hierarchy, page labels, source digest, release, license, and canonical URL are retained. Rotated table and diagram text is included even where spacing is degraded.
 - The 14-topic lexical suite passes every cutoff. Because the pilot contains one document, this is a coverage gate rather than a claim about inter-document ranking; sampled citations correctly resolve topics including Ohm's law (page 12-17), eddy-current inspection (page 10-20), corrosion (page 8-10), and torque-wrench calibration (page 11-6).
 - Table-of-contents/front-matter chunks remain searchable but rank behind matching body evidence. OCR remains an explicit future preprocessing step for low-text scans.
+
+### Hesperian English health guides
+
+- Acquisition snapshots the official English catalog and follows only its registered HTTPS PDF prefix. The 88,739-byte catalog is pinned by SHA-256 `2bf4b4639050a3c42711ec03121e5201ceec17c89daef38025acc867422fa17c`.
+- Of 434 catalog links, 432 PDFs are reachable and total 316,963,376 bytes. Every file has a local SHA-256; Hesperian supplies no adjacent publisher digests. Two named 2026 back-matter links return HTTP 404 and remain explicit exclusions rather than disappearing from provenance.
+- Catalog labels provide a reviewed 432-entry title map (SHA-256 `432ef8e8acb841d1c09ac993551ee9ce494b0d2194eb777563344bb677612c37`) across 16 guide editions.
+- Page-aware import examined 7,039 pages: 7,017 contain searchable text, 14 are image-only, and 8 are blank. It records 42 parser-warning pages and 41 rotated-text pages for targeted QA; no page reports an uninterpretable font.
+- The 9,731 chunks occupy a verified 50,995,200-byte FTS5 database. A 48-topic stable-ID gate, with three topics from each guide collection, passes every configured Success, Recall, MRR, and nDCG cutoff at `1.0`; p50 latency is 1.569 ms and p95 is 2.242 ms.
+- Three malformed bookmark destinations in one Workers' Guide file are ignored while all page text remains indexed. Citations retain the exact edition, chapter, physical page, canonical PDF URL, and local source digest.
+- Hesperian retains copyright. The PDFs, processed text, indexes, and catalog-derived data remain private local artifacts and are not distributed by this repository. The material is reference information, not current clinical guidance or a replacement for emergency services, local protocols, or qualified care.
 
 ### CMake 4.4 documentation
 

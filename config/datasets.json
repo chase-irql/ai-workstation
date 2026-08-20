@@ -1095,8 +1095,8 @@
         "index": "indexes/health/hesperian-english-health-guides-20260820.sqlite3",
         "semantic_index": "indexes/semantic/hesperian-english-health-guides-20260820"
       },
-      "status": "planned",
-      "notes": "The official catalog currently exposes 434 chapter links totaling about 317 MB by origin ETag size; two named 2026 back-matter links return HTTP 404, leaving 432 selected PDFs. This is copyrighted medical reference material, not a public-domain corpus and not a substitute for diagnosis, emergency services, current clinical guidance, local protocols, or professional care. Generated corpora and indexes remain local and are not distributed with the source repository."
+      "status": "evaluated",
+      "notes": "The 88,739-byte official catalog snapshot (SHA-256 2bf4b4639050a3c42711ec03121e5201ceec17c89daef38025acc867422fa17c) exposed 434 chapter links. Two declared 2026 back-matter links returned HTTP 404 and were excluded, leaving 432 locally SHA-256-pinned PDFs totaling 316,963,376 bytes; Hesperian provides no adjacent publisher digests. The catalog-derived 432-title map is pinned by SHA-256 432ef8e8acb841d1c09ac993551ee9ce494b0d2194eb777563344bb677612c37. Page-aware import examined 7,039 pages: 7,017 have text, 14 are image-only, and 8 are blank; 42 pages report PDF parser warnings, 41 contain rotated text, and none report uninterpretable fonts. It published 9,731 chunks in a verified 50,995,200-byte BM25 database. A 48-topic stable-ID gate spanning all 16 guide collections achieved every Success, Recall, MRR, and nDCG cutoff at 1.0 (p50 1.569 ms; p95 2.242 ms). Three broken bookmark destinations in one Workers' Guide PDF were ignored without losing page text. This copyrighted material remains private local data and is not a substitute for diagnosis, emergency services, current clinical guidance, local protocols, or professional care."
     },
     {
       "dataset_id": "cmake-4.4-docs",

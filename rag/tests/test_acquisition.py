@@ -116,10 +116,11 @@ class AcquisitionTests(unittest.TestCase):
                 <a href="https://publisher.example/files/book_a/book_a_broken.pdf">Broken Link</a>
                 <a href="https://elsewhere.invalid/not-selected.pdf">Ignore Me</a>
             </body></html>"""
+            parent_states = []
 
             def fake_download(definition, destination):
                 payload = b"%PDF-x"
-                destination.parent.mkdir(parents=True, exist_ok=True)
+                parent_states.append(destination.parent.is_dir())
                 destination.write_bytes(payload)
                 return {
                     "path": destination,
@@ -149,6 +150,7 @@ class AcquisitionTests(unittest.TestCase):
             )
             self.assertEqual(titles["book_a/book_a_one.pdf"], "Book A — Chapter One")
             self.assertTrue((root / "raw/catalog-manuals/files/book_b/book_b_two.pdf").is_file())
+            self.assertTrue(all(parent_states))
 
     def test_existing_http_file_must_still_satisfy_registered_size_bounds(self):
         with tempfile.TemporaryDirectory() as directory:

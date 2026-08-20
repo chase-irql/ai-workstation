@@ -25,13 +25,15 @@ Every corpus moves through these observable states:
 
 ## Ranked acquisition queue
 
-### Planned practical-health extension: Hesperian English guides
+### Completed practical-health extension: Hesperian English guides
 
-The next bounded corpus is the official Hesperian English chapter-PDF catalog. The 2026-08-20 discovery snapshot lists 434 links across 16 named guide editions; 432 are currently reachable and total about 317 MB, while two named 2026 back-matter links return HTTP 404 and are recorded as explicit exclusions. Coverage includes community health, first aid, oral health, midwifery, disability, mental health, environmental health, occupational safety, and health-worker education.
+The official Hesperian English chapter-PDF catalog is acquired and evaluated. The 2026-08-20 discovery snapshot lists 434 links across 16 named guide editions; 432 are reachable and total 316,963,376 bytes, while two named 2026 back-matter links return HTTP 404 and are recorded as explicit exclusions. Coverage includes community health, first aid, oral health, midwifery, disability, mental health, environmental health, occupational safety, and health-worker education.
 
 This milestone introduces `http-catalog-file-set`: a bounded acquisition mode that snapshots and hashes the publisher's HTML catalog, permits only one registered HTTPS asset prefix and anchored relative-path pattern, enforces discovery-count and per-file size limits, downloads with bounded concurrency, validates PDF magic bytes, hashes every local file, and derives reviewed document titles from catalog labels. It refuses stale extra files rather than silently mixing snapshots. The catalog and generated title map are local provenance artifacts.
 
 Hesperian retains copyright. Its Open Copyright Policy requires attribution and written permission for digital reuse or redistribution, so source PDFs, extracted records, indexes, and catalog-derived content remain private local data and are never included in the Git repository. The corpus is reference material only: citations must expose the edition, and answers must not present it as diagnosis, emergency care, current clinical guidance, or a replacement for local protocols and qualified professionals.
+
+The page-aware importer examined 7,039 pages: 7,017 contain searchable text, 14 are image-only, and 8 are blank. It produced 9,731 chunks and an atomic, verified 50,995,200-byte BM25 database. The structured QA record retains 42 parser-warning pages and 41 rotated-text pages; three malformed bookmark destinations in one Workers' Guide file do not affect page text. A 48-topic stable-ID suite sampling every guide collection passes all configured metrics at `1.0`, with p50 retrieval latency of 1.569 ms and p95 of 2.242 ms. Semantic indexing remains deferred until a separately judged paraphrase suite demonstrates value beyond this lexical baseline.
 
 ### Completed repair-handbook extension: FAA Airframe and Powerplant
 
