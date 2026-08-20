@@ -2019,6 +2019,96 @@
       "notes": "Pinned to immutable official commit 716383a4c6c16037b14d75a156c65145e75e895e. The 452,199,473-byte archive has local SHA-256 e53cc279a599c751f65bdbb6dbb5b0b84c36d47c27d3e32cdc6032bfcb9d38e4; safe extraction produced 1,153 files / 538,916,603 bytes with no links. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 198 modules resolve to distinct stable documents and 4,590 chunks in a verified 12,288,000-byte index. The 42-topic stable-ID gate covers foundations and every major human organ system and passes all configured metrics at 1.0. This dated educational textbook is foundational reference material, not current clinical guidance or a substitute for professional medical judgment."
     },
     {
+      "dataset_id": "openstax-foundational-algebra",
+      "name": "OpenStax Prealgebra, Elementary Algebra, and Intermediate Algebra 2e",
+      "description": "Three complete OpenStax prerequisite mathematics sequences covering arithmetic, fractions, decimals, ratios, geometry, signed numbers, equations, inequalities, graphs, polynomials, factoring, rational and radical expressions, quadratics, exponential and logarithmic functions, and conic sections.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/prealgebra-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-prealgebra-bundle main commit 38cae454e644abf9f0a623e876994553881597c9, 2026-06-29",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Prealgebra 2e, Elementary Algebra 2e, and Intermediate Algebra 2e manifests and referenced CNXML modules from the immutable official snapshot",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-prealgebra-bundle/archive/38cae454e644abf9f0a623e876994553881597c9.tar.gz",
+        "source_commit": "38cae454e644abf9f0a623e876994553881597c9",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-prealgebra-bundle/blob/38cae454e644abf9f0a623e876994553881597c9/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-prealgebra-bundle-38cae454e644abf9f0a623e876994553881597c9",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "solve quadratic equation factoring"
+      },
+      "storage": {"download_min_bytes": 100000000, "download_max_bytes": 500000000, "extracted_max_bytes": 2000000000, "indexed_max_bytes": 500000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-foundational-algebra", "processed": "corpora/processed/textbooks/openstax-foundational-algebra", "index": "indexes/textbooks/openstax-foundational-algebra.sqlite3", "semantic_index": "indexes/semantic/openstax-foundational-algebra"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Repository and all three collection licenses must be validated after extraction."
+    },
+    {
+      "dataset_id": "openstax-college-algebra",
+      "name": "OpenStax College Algebra, Algebra and Trigonometry, and Precalculus 2e",
+      "description": "Complete OpenStax college mathematics bundle containing Algebra and Trigonometry 2e, College Algebra 2e, College Algebra with Corequisite Support 2e, and Precalculus 2e.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/precalculus-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-college-algebra-bundle main commit 789b54099106b071d1d32bfcee454fed72eb4768, 2026-06-12",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Algebra and Trigonometry 2e, College Algebra 2e, College Algebra Corequisite Support 2e, and Precalculus 2e manifests and referenced CNXML modules",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-college-algebra-bundle/archive/789b54099106b071d1d32bfcee454fed72eb4768.tar.gz",
+        "source_commit": "789b54099106b071d1d32bfcee454fed72eb4768",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-college-algebra-bundle/blob/789b54099106b071d1d32bfcee454fed72eb4768/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-college-algebra-bundle-789b54099106b071d1d32bfcee454fed72eb4768",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "trigonometric identities unit circle"
+      },
+      "storage": {"download_min_bytes": 75000000, "download_max_bytes": 400000000, "extracted_max_bytes": 1500000000, "indexed_max_bytes": 500000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-college-algebra", "processed": "corpora/processed/textbooks/openstax-college-algebra", "index": "indexes/textbooks/openstax-college-algebra.sqlite3", "semantic_index": "indexes/semantic/openstax-college-algebra"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Repository and all four collection licenses must be validated after extraction."
+    },
+    {
+      "dataset_id": "openstax-introductory-statistics",
+      "name": "OpenStax Introductory Statistics 2e and Introductory Business Statistics 2e",
+      "description": "Complete OpenStax introductory statistics sequences covering descriptive statistics, probability, random variables, distributions, sampling, confidence intervals, hypothesis testing, regression, chi-square tests, ANOVA, and business applications.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/introductory-statistics-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-introductory-statistics-bundle main commit 1f6a35825395bb4aa2834cf1eca37512655f920c, 2026-07-07",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Introductory Statistics 2e and Introductory Business Statistics 2e manifests and referenced CNXML modules from the immutable official snapshot",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-introductory-statistics-bundle/archive/1f6a35825395bb4aa2834cf1eca37512655f920c.tar.gz",
+        "source_commit": "1f6a35825395bb4aa2834cf1eca37512655f920c",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-introductory-statistics-bundle/blob/1f6a35825395bb4aa2834cf1eca37512655f920c/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-introductory-statistics-bundle-1f6a35825395bb4aa2834cf1eca37512655f920c",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "confidence interval population mean"
+      },
+      "storage": {"download_min_bytes": 30000000, "download_max_bytes": 250000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 400000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-introductory-statistics", "processed": "corpora/processed/textbooks/openstax-introductory-statistics", "index": "indexes/textbooks/openstax-introductory-statistics.sqlite3", "semantic_index": "indexes/semantic/openstax-introductory-statistics"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official unsigned commit; GitHub supplies no adjacent archive digest, so local integrity will be recorded without claiming publisher verification. Both collection licenses and overlapping module identities must be validated after extraction."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
