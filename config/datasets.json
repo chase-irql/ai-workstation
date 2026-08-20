@@ -1656,7 +1656,7 @@
       "attribution": "Podman and Containers contributors",
       "release": "v6.1.0 commit cade97a52ebdf9dbf9e81de8009015776837a074",
       "update_frequency": "each Podman stable release",
-      "scope": "official documentation source tree from the signed v6.1.0 release tag; source code, tests, generated binaries, and website build output excluded from text retrieval but retained raw",
+      "scope": "official command manuals, configuration references, tutorials, and guides from the signed v6.1.0 release tag; reusable option/link fragments, source code, tests, generated binaries, and website build output excluded from text retrieval but retained raw",
       "formats": ["Markdown", "reStructuredText", "tar.gz"],
       "acquisition": {
         "method": "http",
@@ -1670,8 +1670,8 @@
       },
       "ingestion": {
         "content_subdirectory": "podman-6.1.0",
-        "include_globs": ["docs/*.md", "docs/**/*.md", "docs/*.rst", "docs/**/*.rst"],
-        "exclude_globs": ["docs/cncf/**"],
+        "include_globs": ["docs/*.md", "docs/**/*.md", "docs/*.md.in", "docs/**/*.md.in", "docs/*.rst", "docs/**/*.rst"],
+        "exclude_globs": ["docs/cncf/**", "docs/source/markdown/options/**", "docs/source/markdown/links/**"],
         "smoke_query": "podman auto-update systemd labels"
       },
       "storage": {
@@ -1686,8 +1686,8 @@
         "index": "indexes/documentation/podman-6.1.sqlite3",
         "semantic_index": "indexes/semantic/podman-6.1-docs"
       },
-      "status": "planned",
-      "notes": "Pinned to Podman's official signed v6.1.0 annotated tag and its resolved immutable commit. GitHub does not publish an adjacent digest for tag archives, so acquisition will record a local SHA-256 and validate archive structure and extracted member counts without claiming publisher-checksum verification."
+      "status": "evaluated",
+      "notes": "Pinned to Podman's official signed v6.1.0 annotated tag and immutable commit cade97a52ebdf9dbf9e81de8009015776837a074. GitHub provides no publisher digest for the tag archive, so the acquisition pins local SHA-256 e086183db2f852476a7fa2580d0276cef32086b4cf17ae7020948f06eb613e0d without claiming publisher-checksum verification. Safe extraction validated the 20,956,524-byte archive as 10,195 files / 93,605,870 bytes, skipped 8 links, and reversibly encoded 1,170 Windows-incompatible members. Retrieval excludes reusable option/link fragments and contains 223 independently citable manuals/guides with 2,484 chunks in a 3,604,480-byte verified BM25 database. Pandoc manual title blocks are preserved for useful citations. Its 40-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

@@ -136,6 +136,8 @@
         "--index",
         "go-1.26.7-docs=indexes\\documentation\\go-1.26.7.sqlite3",
         "--index",
+        "podman-6.1-docs=indexes\\documentation\\podman-6.1.sqlite3",
+        "--index",
         "cpp-16.2-manual=indexes\\documentation\\cpp-16.2.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",

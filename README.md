@@ -52,6 +52,7 @@ These corpora are implemented and verified in the current development installati
 | Linux kernel documentation | Linux 7.2 release source | 4,154 documents, 29,142 chunks | BM25 |
 | LLVM Project documentation | LLVM 22.1.8 coordinated release | 2,352 documents, 18,655 chunks | BM25 |
 | Go documentation and standard library | Go 1.26.7 stable source | 1,320 documents, 18,647 chunks | BM25 |
+| Podman documentation | Podman 6.1.0 signed release | 223 manuals/guides, 2,484 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |

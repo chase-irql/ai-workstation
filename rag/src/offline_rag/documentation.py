@@ -82,6 +82,7 @@ def _supported_source(path: Path) -> bool:
     name = path.name.casefold()
     return (
         path.suffix.casefold() in SUPPORTED_SUFFIXES
+        or name.endswith((".md.in", ".markdown.in"))
         or name.endswith(".pod.in")
         or name.endswith(SUPPORTED_COMPOUND_SUFFIXES)
     )
@@ -415,6 +416,15 @@ def parse_markdown(text: str, fallback_title: str) -> ParsedDocument:
     shortcode_comment = False
     title = ""
     index = 0
+    # Pandoc title blocks are commonly used by projects that maintain manual
+    # pages in Markdown (for example, ``% podman-run 1``).  Treat the first
+    # field as the document title instead of allowing the generic ``NAME``
+    # section to become every page's title.  The trailing manual section is
+    # metadata, not part of the title users should see in citations.
+    if lines and re.fullmatch(r"\s*%\s+\S.*", lines[0]):
+        pandoc_title = lines[0].strip()[1:].strip()
+        title = re.sub(r"\s+[1-9]\s*$", "", pandoc_title).strip()
+        index = 1
     if lines and lines[0].strip() == "---":
         closing = next((candidate for candidate in range(1, len(lines)) if lines[candidate].strip() == "---"), None)
         if closing is not None:
@@ -1397,7 +1407,7 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
         if path.name.casefold() in go_titles and path.parent.name.casefold() == "doc":
             return ParsedDocument(go_titles[path.name.casefold()], parsed.blocks, parsed.format)
         return parsed
-    if suffix in {".md", ".markdown"}:
+    if suffix in {".md", ".markdown"} or path.name.casefold().endswith((".md.in", ".markdown.in")):
         return parse_markdown(text, fallback)
     if suffix == ".rst":
         return parse_rst(text, fallback)

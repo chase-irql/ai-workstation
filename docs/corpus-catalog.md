@@ -32,6 +32,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `linux-kernel-7.2-docs` | Linux 7.2 official source documentation | GPL-2.0-only and per-file SPDX licenses retained | 4,154 documents; 29,142 chunks | BM25 |
 | `llvm-project-22.1.8-docs` | LLVM Project 22.1.8 coordinated source release | Apache-2.0 with LLVM Exceptions; per-file notices retained | 2,352 documents; 18,655 chunks | BM25 |
 | `go-1.26.7-docs` | Go 1.26.7 stable source release | BSD 3-Clause; per-file notices retained | 1,320 documents; 18,647 chunks | BM25 |
+| `podman-6.1-docs` | Podman 6.1.0 signed release tag | Apache-2.0 | 223 manuals/guides; 2,484 chunks | BM25 |
 | `cpp-16.2-manual` | GNU C Preprocessor 16.2 manual | GFDL 1.3 or later with stated cover texts | 76 documents; 183 chunks | BM25 |
 | `faa-amt-general-2023` | FAA-H-8083-30B Aviation Maintenance Technician Handbook — General (2023) | U.S. Government work; handbook notices govern any third-party material | 677 pages; 1,837 chunks | Page-aware BM25 |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
@@ -133,6 +134,15 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - A deterministic Go lexer/parser extracts package prose, exported generic and non-generic functions, methods, types and public type bodies, grouped constants and variables, and declaration signatures. It strips implementation bodies and does not execute downloaded toolchain programs.
 - Internal packages, vendored dependencies, tests, testdata, and the initial-development history are excluded. Of 2,059 scoped source files, 1,320 contained public documentation and produced 18,647 chunks; 739 implementation-only files were skipped.
 - The 29,020,160-byte FTS5 database passes source-manifest, row-count, foreign-key, FTS, integrity, smoke-query, and citation verification. Its 45-topic stable-ID gate covers language rules, the toolchain, generics, concurrency, networking, HTTP, cryptography, encodings, databases, runtime, testing, filesystems, templates, compression, and archives with every metric cutoff at `1.0`.
+
+### Podman documentation
+
+- Official archive: Podman 6.1.0 source from the signed `v6.1.0` annotated tag, resolved to commit `cade97a52ebdf9dbf9e81de8009015776837a074`.
+- GitHub does not publish a digest for tag archives. The acquisition therefore pins local SHA-256 `e086183db2f852476a7fa2580d0276cef32086b4cf17ae7020948f06eb613e0d`, records the signed tag object, and does not claim publisher-checksum verification.
+- Safe extraction validated the 20,956,524-byte archive as 10,195 regular files / 93,605,870 bytes, skipped 8 archive links, and reversibly encoded 1,170 Windows-incompatible member names.
+- Retrieval includes canonical command manuals, configuration references, tutorials, Quadlet, Kubernetes interoperability, remote operation, and administration. Reusable option/link fragments are excluded because their material is already expanded into the canonical manual pages.
+- Pandoc manual title blocks such as `% podman-run 1` are recognized, preventing generic `NAME` headings from degrading titles and citations. The generation contains 223 documents and 2,484 chunks in a 3,604,480-byte verified BM25 database.
+- Its 40-topic stable-ID lexical gate covers lifecycle, images, registries, networks, volumes, pods, systemd/Quadlet, Kubernetes, machines, rootless operation, secrets, checkpoints, remote APIs, Compose, manifests, and farm builds; every metric cutoff is `1.0`.
 
 ### Linux man-pages
 

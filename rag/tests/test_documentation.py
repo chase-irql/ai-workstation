@@ -169,6 +169,20 @@ func internalHelper() { panic("skip") }
         self.assertFalse(any("Keyboard shortcuts" in block.text for block in parsed.blocks))
 
     def test_markdown_rst_and_man_structure(self):
+        pandoc_manual = parse_markdown(
+            "% podman-container-restore 1\n\n## NAME\npodman-container-restore - Restore containers.\n",
+            "fallback",
+        )
+        self.assertEqual(pandoc_manual.title, "podman-container-restore")
+        self.assertEqual(pandoc_manual.blocks[0].heading_path, ("NAME",))
+        self.assertFalse(any(block.text.startswith("% ") for block in pandoc_manual.blocks))
+        generated_manual = parse_document(
+            Path("podman-run.1.md.in"),
+            "% podman-run 1\n\n## NAME\npodman-run - Run a container.\n",
+        )
+        self.assertEqual(generated_manual.format, "markdown")
+        self.assertEqual(generated_manual.title, "podman-run")
+
         markdown = parse_markdown(
             """# Build Guide
 
