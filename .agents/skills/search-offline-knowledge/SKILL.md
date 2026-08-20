@@ -36,6 +36,7 @@ retry the query, not permission to bypass it.
 ## Identifier and citation integrity
 
 - Cite claims with each result's `citation_reference` (for example, `[S1]`). At the end, copy the corresponding `copy_ready_citations.sources[].citation_markdown` value verbatim into a Sources list.
+- Cite only evidence actually used in the answer. Every `[S#]` appearing in prose must have its matching `citation_markdown` line in the final Sources list; never emit dangling references.
 - Treat `citation_markdown` as an opaque, server-generated artifact. Do not regenerate its label, URL, underscores, punctuation, or path from any other field.
 - Copy `knowledge_corpus`, `document_id`, `chunk_id`, `title`, `source_url`, page/heading, and `citation` exactly as returned.
 - Never shorten, reconstruct, normalize, or manually retype an identifier or URL.
@@ -50,7 +51,9 @@ retry the query, not permission to bypass it.
 - Verify every reported quantity digit-for-digit against a directly supporting passage. Treat flattened tables with run-together columns as ambiguous; find a clean prose passage or another authoritative local source instead.
 - Prefer numbered, sequential prose over visual tables whenever a procedure has multiple methods. Do not transfer alternatives, parentheticals, warnings, or preparation steps from one method to another.
 - Before answering a safety-sensitive procedure, verify separately that each ingredient, amount, unit, alternative, and action occurs within the same method-specific evidence block. If that association is unclear, search again or report that it could not be verified.
-- For an oral-rehydration preparation question, search Hesperian with BM25 using `rehydration drink cereal sugar salt`; prefer the clean numbered instructions over a two-column recipe page.
+- When evidence contains mutually exclusive methods, select one complete method-specific result and keep its steps isolated. Do not combine alternatives into one synthesized procedure.
+- If the first evidence uses a different authoritative term for the user's subject but does not contain the requested steps, refine the query with that source term. Do not rely on a question-specific canned query.
+- Prefer results marked `evidence_kind="procedure_method"` for procedural answers. Each method described in the final answer must be supported by its own method-specific evidence block. If method-specific evidence is unavailable, state that the association could not be verified rather than combining a full-page presentation.
 - Quote sparingly; otherwise paraphrase without changing technical meaning.
 - If multiple sources disagree, report the disagreement and identify their versions.
 - Do not claim the local corpus is current beyond its recorded source version.

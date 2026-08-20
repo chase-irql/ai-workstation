@@ -43,12 +43,13 @@ def add_copy_ready_citations(
         if position is None:
             position = len(sources) + 1
             source_positions[key] = position
+            reference = f"S{position}"
             sources.append(
                 {
-                    "reference": f"S{position}",
+                    "reference": reference,
                     "citation": citation,
                     "source_url": source_url,
-                    "citation_markdown": copy_ready_citation(item),
+                    "citation_markdown": f"[{reference}] {copy_ready_citation(item)}",
                 }
             )
         item["citation_reference"] = f"S{position}"

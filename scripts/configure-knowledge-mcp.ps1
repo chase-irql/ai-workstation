@@ -34,12 +34,21 @@ $mcpCommand = @(
     '--index', "wikipedia=$wikipediaDatabase"
 )
 $semanticMappings = @()
+$queryAliasMappings = @()
 foreach ($dataset in $evaluated) {
     $database = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.index)))
     if (-not (Test-Path -LiteralPath $database -PathType Leaf)) {
         throw "Dataset '$($dataset.dataset_id)' is marked evaluated but its index is missing: $database"
     }
     $mcpCommand += @('--index', "$($dataset.dataset_id)=$database")
+    if ($dataset.PSObject.Properties['ingestion'] -and $dataset.ingestion.PSObject.Properties['query_aliases']) {
+        foreach ($alias in @($dataset.ingestion.query_aliases)) {
+            if (-not $alias.from -or -not $alias.to) {
+                throw "Dataset '$($dataset.dataset_id)' has an invalid ingestion.query_aliases entry."
+            }
+            $queryAliasMappings += @('--query-alias', "$($dataset.dataset_id)=$([string]$alias.from)=>$([string]$alias.to)")
+        }
+    }
     if ($dataset.paths.PSObject.Properties['semantic_index']) {
         $semantic = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.semantic_index)))
         if (Test-Path -LiteralPath (Join-Path $semantic 'manifest.json') -PathType Leaf) {
@@ -47,6 +56,7 @@ foreach ($dataset in $evaluated) {
         }
     }
 }
+$mcpCommand += $queryAliasMappings
 
 if ($WikipediaRetrieval -ne 'bm25') {
     if (-not (Test-Path -LiteralPath (Join-Path $wikipediaVectors 'manifest.json') -PathType Leaf)) {

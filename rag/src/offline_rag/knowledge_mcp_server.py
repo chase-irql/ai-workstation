@@ -150,6 +150,17 @@ def _mapping(values: Sequence[str], option: str) -> dict[str, Path]:
     return result
 
 
+def _query_aliases(values: Sequence[str], corpus_ids: Sequence[str]) -> dict[str, tuple[tuple[str, str], ...]]:
+    aliases: dict[str, list[tuple[str, str]]] = {corpus_id: [] for corpus_id in corpus_ids}
+    for value in values:
+        corpus_id, separator, rule = value.partition("=")
+        source, arrow, target = rule.partition("=>")
+        if not separator or not arrow or corpus_id not in aliases or not source.strip() or not target.strip():
+            raise ValueError("--query-alias must use an existing CORPUS=SOURCE=>TARGET mapping")
+        aliases[corpus_id].append((source.strip(), target.strip()))
+    return {corpus_id: tuple(items) for corpus_id, items in aliases.items()}
+
+
 def _provider_factories(
     vector_indexes: dict[str, Path],
     *,
@@ -209,6 +220,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     parser.add_argument("--default-vector-retrieval", choices=RETRIEVAL_MODES, default="hybrid")
     parser.add_argument("--query-cache-size", type=int, default=256)
+    parser.add_argument(
+        "--query-alias",
+        action="append",
+        default=[],
+        metavar="CORPUS=SOURCE=>TARGET",
+        help="Repeatable corpus-owned terminology rewrite applied before retrieval",
+    )
     return parser
 
 
@@ -227,6 +245,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     unknown_vectors = sorted(set(vector_indexes) - set(indexes))
     if unknown_vectors:
         raise ValueError(f"Semantic vector mappings name unknown corpora: {', '.join(unknown_vectors)}")
+    query_aliases = _query_aliases(args.query_alias, tuple(indexes))
     provider_factories = _provider_factories(
         vector_indexes,
         models=args.models,
@@ -241,6 +260,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             vector_directory=vector_indexes.get(corpus_id),
             provider_factory=provider_factories.get(corpus_id),
             default_retrieval=args.default_vector_retrieval if corpus_id in vector_indexes else "bm25",
+            query_aliases=query_aliases[corpus_id],
         )
         for corpus_id, database in indexes.items()
     ]

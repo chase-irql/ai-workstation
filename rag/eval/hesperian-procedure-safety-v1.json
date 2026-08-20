@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "name": "Hesperian method-specific procedure safety gate",
+  "description": "Checks that mutually exclusive rehydration-drink methods remain independently retrievable. This retrieval gate does not replace clinical review or current professional guidance.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "rehydration-sugar-method-001",
+      "query": "rehydration drink sugar salt liter teaspoons",
+      "query_type": "practical-procedure-sugar-method",
+      "relevance": {
+        "hesperian-english-health-guides-20260820:33acea83242df7317834a139": 3,
+        "hesperian-english-health-guides-20260820:a0e6afb593c064272040b256": 2
+      }
+    },
+    {
+      "id": "rehydration-cereal-method-001",
+      "query": "rehydration drink powdered cereal salt boil",
+      "query_type": "practical-procedure-cereal-method",
+      "relevance": {
+        "hesperian-english-health-guides-20260820:a0e6afb593c064272040b256": 3
+      }
+    }
+  ]
+}

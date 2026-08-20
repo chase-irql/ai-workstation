@@ -17,13 +17,31 @@ from offline_rag.bm25 import build_index
 from offline_rag.chunk_vector_index import build_chunk_vector_index
 from offline_rag.documentation import import_documentation
 from offline_rag.knowledge import KnowledgeCorpus, KnowledgeRuntime
-from offline_rag.knowledge_mcp_server import _provider_factories, close_knowledge_mcp_server, create_knowledge_mcp_server
+from offline_rag.knowledge_mcp_server import (
+    _provider_factories,
+    _query_aliases,
+    close_knowledge_mcp_server,
+    create_knowledge_mcp_server,
+)
 from offline_rag.retrieval_runtime import CachedEmbeddingProvider
 from offline_rag.vector_index import build_vector_index
 from offline_rag.wikipedia_dump import extract
 
 
 class KnowledgeMCPTests(unittest.TestCase):
+    def test_query_alias_parser_validates_corpus_owned_mappings(self):
+        aliases = _query_aliases(
+            ["health=oral rehydration solution=>rehydration drink"],
+            ["health", "docs"],
+        )
+        self.assertEqual(
+            aliases["health"],
+            (("oral rehydration solution", "rehydration drink"),),
+        )
+        self.assertEqual(aliases["docs"], ())
+        with self.assertRaisesRegex(ValueError, "CORPUS=SOURCE=>TARGET"):
+            _query_aliases(["missing=old=>new"], ["health"])
+
     def test_corpus_vector_manifests_select_matching_embedding_profiles(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -210,6 +228,7 @@ Connection migration allows an endpoint to move to a new network path.
                 ).structured_content
                 source = result["copy_ready_citations"]["sources"][0]
                 self.assertEqual(source["source_url"], "https://example.test/docs/protocol_reference.md")
+                self.assertTrue(source["citation_markdown"].startswith("[S1] "))
                 self.assertIn("(<https://example.test/docs/protocol_reference.md>)", source["citation_markdown"])
                 self.assertEqual(result["results"][0]["citation_markdown"], source["citation_markdown"])
             finally:
@@ -243,6 +262,32 @@ Connection migration allows an endpoint to move to a new network path.
                 self.assertTrue(state["fallback"])
                 self.assertEqual(state["used"], "bm25")
                 self.assertIn("embedding provider is offline", state["fallback_reason"])
+            finally:
+                runtime.close()
+
+    def test_corpus_query_aliases_resolve_terminology_without_skill_prompts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            _, documentation = self.prepare(Path(directory))
+            runtime = KnowledgeRuntime(
+                [
+                    KnowledgeCorpus(
+                        "test-docs",
+                        documentation,
+                        query_aliases=(("moving connection", "connection migration"),),
+                    )
+                ]
+            )
+            try:
+                result = runtime.search(
+                    "moving connection preparation instructions",
+                    corpus_ids=["test-docs"],
+                    retrieval="bm25",
+                )
+                self.assertEqual(result["resolved_queries"]["test-docs"], "connection migration preparation instructions")
+                self.assertEqual(result["results"][0]["title"], "Test Transport Protocol")
+                self.assertEqual(result["results"][0]["query"], "moving connection preparation instructions")
+                self.assertEqual(result["results"][0]["knowledge_query"], "connection migration preparation instructions")
+                self.assertEqual(runtime.status()["corpora"]["test-docs"]["query_alias_count"], 1)
             finally:
                 runtime.close()
 

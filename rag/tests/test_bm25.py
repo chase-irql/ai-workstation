@@ -120,6 +120,8 @@ class BM25Tests(unittest.TestCase):
         self.assertTrue(underscored.normalized_terms[0].startswith("ident"))
         question = plan_query("What was the Apollo Guidance Computer?", "and")
         self.assertEqual(question.normalized_terms, ("apollo", "guidance", "computer"))
+        procedural = plan_query("preparation recipe instructions rehydration drink", "and")
+        self.assertEqual(procedural.normalized_terms, ("rehydration", "drink"))
         self.assertEqual(
             plan_query("What was Apollo", "phrase").normalized_terms,
             ("what", "was", "apollo"),

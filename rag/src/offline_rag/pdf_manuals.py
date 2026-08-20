@@ -157,6 +157,136 @@ class _PdfWarningCollector(logging.Handler):
 
 
 PdfTextExtractionMode = Literal["layout", "plain"]
+PdfSectioningProfile = Literal["page", "hesperian-procedures"]
+HESPERIAN_METHOD_HEADING_RE = re.compile(r"^(?:\d+\.\s*)?with\s+(.+)$", re.IGNORECASE)
+HESPERIAN_SHARED_INSTRUCTIONS_RE = re.compile(
+    r"^(?:if possible,\s*add|to either drink\b|important\s*:\s*adapt|"
+    r"give (?:a|the) .*\bsips\b|warning\s*:)",
+    re.IGNORECASE,
+)
+
+
+def _procedure_block(
+    page_heading: tuple[str, ...],
+    title: str,
+    lines: Sequence[str],
+    page_attributes: Mapping[str, Any],
+    *,
+    method_specific: bool = True,
+) -> ContentBlock:
+    attributes = dict(page_attributes)
+    attributes["derived_evidence"] = True
+    if method_specific:
+        attributes.update({"evidence_kind": "procedure_method", "procedure_method": title})
+    else:
+        attributes.update({"evidence_kind": "procedure_shared", "procedure_shared": True})
+    return ContentBlock(
+        page_heading + ("Rehydration drink", title),
+        "\n".join(lines).strip(),
+        "pdf-procedure-method",
+        attributes,
+    )
+
+
+def _valid_hesperian_method(title: str, lines: Sequence[str]) -> bool:
+    """Reject short or visibly interleaved method fragments from visual recipe pages."""
+
+    text = "\n".join(lines).casefold()
+    flattened = re.sub(r"\s+", " ", text)
+    if len(text) < 80 or "salt" not in text or not re.search(r"\b(?:half|1/2|½|8)\b", text):
+        return False
+    title_folded = title.casefold()
+    if "sugar" in title_folded:
+        return "sugar" in text and "boil" not in text and "powdered cereal" not in text
+    if "cereal" in title_folded:
+        return "cereal" in text and "boil" in text and "sugar" not in flattened
+    return True
+
+
+def _hesperian_procedure_blocks(
+    page_heading: tuple[str, ...],
+    text: str,
+    page_attributes: Mapping[str, Any],
+) -> tuple[ContentBlock, ...]:
+    """Derive method-specific evidence from clearly linear Hesperian procedures.
+
+    The original page remains available for faithful reading. Derived blocks are
+    emitted only when ingredient/step associations are unambiguous; visually
+    interleaved two-column pages deliberately fall back to the original page.
+    """
+
+    original = ContentBlock(page_heading, text, "pdf-page", dict(page_attributes))
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    derived: list[ContentBlock] = []
+
+    headings = [
+        (index, match.group(0).strip())
+        for index, line in enumerate(lines)
+        if (match := HESPERIAN_METHOD_HEADING_RE.fullmatch(line))
+    ]
+    if len(headings) >= 2 and re.search(r"\b(?:2|two)\s+ways\b", text, re.IGNORECASE):
+        shared_start = len(lines)
+        for index in range(headings[-1][0] + 1, len(lines)):
+            if HESPERIAN_SHARED_INSTRUCTIONS_RE.match(lines[index]):
+                shared_start = index
+                break
+        boundaries = [index for index, _ in headings] + [shared_start]
+        method_blocks: list[ContentBlock] = []
+        for position, (start, title) in enumerate(headings):
+            end = boundaries[position + 1]
+            method_lines = lines[start:end]
+            if _valid_hesperian_method(title, method_lines):
+                method_blocks.append(_procedure_block(page_heading, title, method_lines, page_attributes))
+        derived.extend(method_blocks)
+        if method_blocks and shared_start < len(lines):
+            shared_lines = lines[shared_start:]
+            if len("\n".join(shared_lines)) >= 80:
+                derived.append(
+                    _procedure_block(
+                        page_heading,
+                        "Shared procedure instructions",
+                        shared_lines,
+                        page_attributes,
+                        method_specific=False,
+                    )
+                )
+
+    # New Where There Is No Doctor presents a clean sugar method followed by
+    # an explicit cereal alternative without repeating a "With ..." heading.
+    sugar_start = next(
+        (index for index, line in enumerate(lines) if line.casefold() == "salt and sugar drink"),
+        None,
+    )
+    if sugar_start is not None:
+        alternative_start = next(
+            (
+                index
+                for index in range(sugar_start + 1, len(lines))
+                if lines[index].casefold().startswith("or, instead of sugar")
+            ),
+            None,
+        )
+        if alternative_start is not None:
+            sugar_lines = lines[sugar_start:alternative_start]
+            if _valid_hesperian_method("Salt and sugar drink", sugar_lines):
+                derived.append(
+                    _procedure_block(page_heading, "Salt and sugar drink", sugar_lines, page_attributes)
+                )
+
+    return (original, *derived)
+
+
+def _page_content_blocks(
+    page_heading: tuple[str, ...],
+    text: str,
+    page_attributes: Mapping[str, Any],
+    sectioning_profile: PdfSectioningProfile,
+) -> tuple[ContentBlock, ...]:
+    if sectioning_profile == "page":
+        return (ContentBlock(page_heading, text, "pdf-page", dict(page_attributes)),)
+    if sectioning_profile == "hesperian-procedures":
+        return _hesperian_procedure_blocks(page_heading, text, page_attributes)
+    raise ValueError("sectioning_profile must be 'page' or 'hesperian-procedures'")
 
 
 def _extract_page_text(
@@ -227,6 +357,7 @@ def import_pdf_manuals(
     min_chars: int = 300,
     min_searchable_ratio: float = 0.5,
     extraction_mode: PdfTextExtractionMode = "layout",
+    sectioning_profile: PdfSectioningProfile = "page",
     max_files: int | None = None,
     force: bool = False,
 ) -> dict[str, object]:
@@ -251,6 +382,8 @@ def import_pdf_manuals(
         raise ValueError("min_searchable_ratio must be between zero and one")
     if extraction_mode not in {"layout", "plain"}:
         raise ValueError("extraction_mode must be 'layout' or 'plain'")
+    if sectioning_profile not in {"page", "hesperian-procedures"}:
+        raise ValueError("sectioning_profile must be 'page' or 'hesperian-procedures'")
     if max_files is not None and max_files < 1:
         raise ValueError("max_files must be positive")
     if output.exists() and not force:
@@ -342,7 +475,7 @@ def import_pdf_manuals(
                         }
                         if ROMAN_PAGE_LABEL_RE.fullmatch(label):
                             page_attributes["front_matter"] = True
-                        blocks = (ContentBlock(page_heading, text, "pdf-page", page_attributes),)
+                        blocks = _page_content_blocks(page_heading, text, page_attributes, sectioning_profile)
                         chunks = chunk_blocks(blocks, max_chars=max_chars, min_chars=min_chars)
                     else:
                         chunks = []
@@ -495,6 +628,7 @@ def import_pdf_manuals(
                 "min_chars": min_chars,
                 "min_searchable_ratio": min_searchable_ratio,
                 "text_extraction_mode": extraction_mode,
+                "sectioning_profile": sectioning_profile,
                 "max_files": max_files,
                 "ocr": False,
                 "title_overrides": len(normalized_title_overrides),
@@ -542,6 +676,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-chars", type=int, default=300)
     parser.add_argument("--min-searchable-ratio", type=float, default=0.5)
     parser.add_argument("--extraction-mode", choices=("layout", "plain"), default="layout")
+    parser.add_argument("--sectioning-profile", choices=("page", "hesperian-procedures"), default="page")
     parser.add_argument("--max-files", type=int)
     parser.add_argument("--force", action="store_true")
     return parser
@@ -569,6 +704,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         min_chars=args.min_chars,
         min_searchable_ratio=args.min_searchable_ratio,
         extraction_mode=args.extraction_mode,
+        sectioning_profile=args.sectioning_profile,
         max_files=args.max_files,
         force=args.force,
     )

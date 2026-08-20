@@ -36,8 +36,13 @@ QUERY_STOP_WORDS = frozenset(
         "does",
         "how",
         "is",
+        "instructions",
         "me",
         "of",
+        "preparation",
+        "prepare",
+        "preparing",
+        "recipe",
         "tell",
         "the",
         "was",
@@ -657,6 +662,11 @@ def _search_v2(
         item["section_index"] = attributes.get("section_index")
         item["chunk_index"] = attributes.get("chunk_index")
         item["front_matter"] = bool(attributes.get("front_matter", False))
+        item["derived_evidence"] = bool(attributes.get("derived_evidence", False))
+        item["procedure_method"] = attributes.get("procedure_method")
+        item["evidence_kind"] = attributes.get("evidence_kind") or (
+            "procedure_method" if item["procedure_method"] else "source_chunk"
+        )
         item["score"] = item["raw_score"]
         item["query"] = plan.original_query
         item["query_mode"] = plan.mode

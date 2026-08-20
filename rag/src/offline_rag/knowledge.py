@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections import OrderedDict
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -21,6 +22,17 @@ class KnowledgeCorpus:
     vector_directory: Path | None = None
     provider_factory: Callable[[], EmbeddingProvider] | None = None
     default_retrieval: str = "bm25"
+    query_aliases: tuple[tuple[str, str], ...] = ()
+
+
+def _rewrite_query(query: str, aliases: Sequence[tuple[str, str]]) -> str:
+    """Apply deterministic, corpus-owned terminology aliases to a query."""
+
+    rewritten = query
+    for source, target in sorted(aliases, key=lambda pair: (-len(pair[0]), pair[0].casefold())):
+        pattern = re.compile(rf"(?<!\w){re.escape(source)}(?!\w)", re.IGNORECASE)
+        rewritten = pattern.sub(lambda _: target, rewritten)
+    return " ".join(rewritten.split())
 
 
 class KnowledgeRuntime:
@@ -30,6 +42,7 @@ class KnowledgeRuntime:
         if not corpora:
             raise ValueError("at least one knowledge corpus is required")
         self._runtimes: OrderedDict[str, RetrievalRuntime] = OrderedDict()
+        self._query_aliases: dict[str, tuple[tuple[str, str], ...]] = {}
         seen_databases: set[Path] = set()
         for corpus in corpora:
             corpus_id = corpus.corpus_id.strip()
@@ -39,6 +52,21 @@ class KnowledgeRuntime:
             if database in seen_databases:
                 raise ValueError(f"database registered more than once: {database}")
             seen_databases.add(database)
+            normalized_aliases: list[tuple[str, str]] = []
+            seen_aliases: set[str] = set()
+            for source, target in corpus.query_aliases:
+                source = source.strip()
+                target = target.strip()
+                if not source or not target or source.casefold() == target.casefold():
+                    raise ValueError(f"invalid query alias for {corpus_id!r}: {source!r} -> {target!r}")
+                if len(source) > 200 or len(target) > 200:
+                    raise ValueError(f"query alias exceeds 200 characters for {corpus_id!r}")
+                folded = source.casefold()
+                if folded in seen_aliases:
+                    raise ValueError(f"duplicate query alias for {corpus_id!r}: {source!r}")
+                seen_aliases.add(folded)
+                normalized_aliases.append((source, target))
+            self._query_aliases[corpus_id] = tuple(normalized_aliases)
             self._runtimes[corpus_id] = RetrievalRuntime(
                 database,
                 vector_directory=corpus.vector_directory,
@@ -97,13 +125,16 @@ class KnowledgeRuntime:
         fused: list[dict[str, Any]] = []
         retrieval_state: dict[str, dict[str, Any]] = {}
         candidate_documents: dict[str, int] = {}
+        resolved_queries: dict[str, str] = {}
         for corpus_id in selected:
             runtime = self._runtimes[corpus_id]
+            corpus_query = _rewrite_query(query, self._query_aliases[corpus_id])
+            resolved_queries[corpus_id] = corpus_query
             available = set(runtime.status()["available_modes"])
             route_reason = None
             if retrieval == "auto":
                 route = route_query(
-                    query,
+                    corpus_query,
                     corpus_id=corpus_id,
                     available_modes=tuple(available),
                     query_mode=mode,
@@ -118,7 +149,7 @@ class KnowledgeRuntime:
                 fallback_reason = f"{requested} is not configured for this corpus"
             try:
                 response = runtime.search(
-                    query,
+                    corpus_query,
                     limit=per_corpus_limit,
                     query_mode=mode,
                     retrieval_mode=selected_mode,
@@ -131,7 +162,7 @@ class KnowledgeRuntime:
                 fallback_reason = str(error)
                 selected_mode = "bm25"
                 response = runtime.search(
-                    query,
+                    corpus_query,
                     limit=per_corpus_limit,
                     query_mode=mode,
                     retrieval_mode="bm25",
@@ -152,6 +183,8 @@ class KnowledgeRuntime:
                 item = dict(value)
                 source_fusion_score = item.get("fusion_score")
                 item["knowledge_corpus"] = corpus_id
+                item["knowledge_query"] = corpus_query
+                item["query"] = query
                 item["corpus_rank"] = rank
                 item["corpus_retrieval"] = selected_mode
                 item["source_fusion_score"] = source_fusion_score
@@ -183,6 +216,7 @@ class KnowledgeRuntime:
             "ranking_unit": "document",
             "fusion": "reciprocal_rank_per_corpus",
             "corpora_searched": selected,
+            "resolved_queries": resolved_queries,
             "candidate_documents": candidate_documents,
             "retrieval_by_corpus": retrieval_state,
             "reranker": "deterministic-evidence-v2" if apply_rerank else None,
@@ -223,7 +257,11 @@ class KnowledgeRuntime:
             "ready": True,
             "corpus_count": len(self._runtimes),
             "corpora": {
-                corpus_id: {**runtime.lexical_status, "retrieval": runtime.status()}
+                corpus_id: {
+                    **runtime.lexical_status,
+                    "query_alias_count": len(self._query_aliases[corpus_id]),
+                    "retrieval": runtime.status(),
+                }
                 for corpus_id, runtime in self._runtimes.items()
             },
         }

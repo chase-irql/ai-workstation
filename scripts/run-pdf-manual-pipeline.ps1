@@ -6,6 +6,7 @@ param(
     [ValidateRange(0, 20000)][int]$MinChars = 300,
     [ValidateRange(0.0, 1.0)][double]$MinSearchableRatio = 0.5,
     [ValidateSet('layout', 'plain')][string]$ExtractionMode,
+    [ValidateSet('page', 'hesperian-procedures')][string]$SectioningProfile,
     [ValidateRange(1, 1000000)][int]$MaxFiles,
     [switch]$Force
 )
@@ -39,6 +40,13 @@ $resolvedExtractionMode = if ($ExtractionMode) {
 } else {
     'layout'
 }
+$resolvedSectioningProfile = if ($SectioningProfile) {
+    $SectioningProfile
+} elseif ($dataset.ingestion -and $dataset.ingestion.PSObject.Properties.Name -contains 'pdf_sectioning_profile') {
+    [string]$dataset.ingestion.pdf_sectioning_profile
+} else {
+    'page'
+}
 
 $importArguments = @(
     '-m', 'offline_rag.pdf_manuals',
@@ -52,6 +60,7 @@ $importArguments = @(
     '--min-chars', $MinChars,
     '--min-searchable-ratio', $MinSearchableRatio.ToString([Globalization.CultureInfo]::InvariantCulture)
     '--extraction-mode', $resolvedExtractionMode
+    '--sectioning-profile', $resolvedSectioningProfile
 )
 if ($dataset.acquisition.PSObject.Properties.Name -contains 'source_url_template') {
     $importArguments += @('--source-url-template', ([string]$dataset.acquisition.source_url_template))

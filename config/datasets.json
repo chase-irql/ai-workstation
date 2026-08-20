@@ -1082,6 +1082,12 @@
       "ingestion": {
         "smoke_query": "oral rehydration drink dehydration diarrhea",
         "pdf_text_extraction_mode": "plain",
+        "pdf_sectioning_profile": "hesperian-procedures",
+        "query_aliases": [
+          {"from": "oral rehydration solution", "to": "rehydration drink"},
+          {"from": "oral rehydration salts", "to": "rehydration drink"},
+          {"from": "ORS", "to": "rehydration drink"}
+        ],
         "title_overrides_from_acquisition": true
       },
       "storage": {
@@ -1092,12 +1098,12 @@
       },
       "paths": {
         "raw": "corpora/raw/health/hesperian-english-health-guides-20260820",
-        "processed": "corpora/processed/health/hesperian-english-health-guides-20260820-plain-v2",
-        "index": "indexes/health/hesperian-english-health-guides-20260820-plain-v2.sqlite3",
+        "processed": "corpora/processed/health/hesperian-english-health-guides-20260820-procedure-v6",
+        "index": "indexes/health/hesperian-english-health-guides-20260820-procedure-v6.sqlite3",
         "semantic_index": "indexes/semantic/hesperian-english-health-guides-20260820"
       },
       "status": "evaluated",
-      "notes": "The 88,739-byte official catalog snapshot (SHA-256 2bf4b4639050a3c42711ec03121e5201ceec17c89daef38025acc867422fa17c) exposed 434 chapter links. Two declared 2026 back-matter links returned HTTP 404 and were excluded, leaving 432 locally SHA-256-pinned PDFs totaling 316,963,376 bytes; Hesperian provides no adjacent publisher digests. The catalog-derived 432-title map is pinned by SHA-256 432ef8e8acb841d1c09ac993551ee9ce494b0d2194eb777563344bb677612c37. The plain-v2 page-aware import uses content-stream order to prevent adjacent procedure columns from being merged. It examined 7,039 pages and published 7,382 chunks in a verified 35,819,520-byte BM25 database. A 49-case stable-ID gate spanning all 16 guide collections plus a safety-sensitive rehydration-recipe case achieved Success@5/10 and Recall@5/10/50 of 1.0, Success@1 0.979592, MRR@10 0.989796, and nDCG@10 0.991567 (p50 1.426 ms; p95 2.123 ms). The recipe case ranks a clean sequential passage first. This copyrighted material remains private local data and is not a substitute for diagnosis, emergency services, current clinical guidance, local protocols, or professional care."
+      "notes": "The 88,739-byte official catalog snapshot (SHA-256 2bf4b4639050a3c42711ec03121e5201ceec17c89daef38025acc867422fa17c) exposed 434 chapter links. Two declared 2026 back-matter links returned HTTP 404 and were excluded, leaving 432 locally SHA-256-pinned PDFs totaling 316,963,376 bytes; Hesperian provides no adjacent publisher digests. The catalog-derived 432-title map is pinned by SHA-256 432ef8e8acb841d1c09ac993551ee9ce494b0d2194eb777563344bb677612c37. The procedure-v6 import uses content-stream order plus conservative Hesperian method sectioning: original page chunks remain available, clearly linear alternatives receive separate evidence chunks, visibly interleaved fragments are rejected, and shared notes cannot displace a complete method. Reviewed query aliases bridge source/user terminology without storing canned prompts or answers in the skill. It examined 7,039 pages and published 7,386 chunks in a verified 35,819,520-byte BM25 database. The unchanged 49-case gate achieved Success@5/10 and Recall@5/10/50 of 1.0, Success@1 0.979592, MRR@10 0.989796, and nDCG@10 0.991567. A separate two-method procedure gate achieved 1.0 on every metric; sugar and cereal queries rank isolated method chunks first. This copyrighted material remains private local data and is not a substitute for diagnosis, emergency services, current clinical guidance, local protocols, or professional care."
     },
     {
       "dataset_id": "cmake-4.4-docs",

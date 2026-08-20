@@ -72,7 +72,7 @@ These corpora are implemented and verified in the current development installati
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | DOE Fundamentals Handbooks | DOE-HDBK-1010-92 through 1019-93, Revision 0 archive | 22 volumes, 2,842 pages, 5,533 chunks | Page-aware BM25 |
 | FAA AMT Handbooks — Airframe and Powerplant | FAA-H-8083-31B and FAA-H-8083-32B, 2023 | 2 volumes, 1,552 pages, 3,498 chunks | Page-aware BM25 |
-| Hesperian English health guides | Official 2026-08-20 English catalog; editions 2000–2026 | 432 chapter PDFs, 7,039 pages, 7,382 plain-order chunks | Page-aware BM25 |
+| Hesperian English health guides | Official 2026-08-20 English catalog; editions 2000–2026 | 432 chapter PDFs, 7,039 pages, 7,386 page/method chunks | Procedure-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |
 | GNU Awk user's guide | Gawk 5.4, 2026-02-22 generation | 502 documents, 1,332 chunks | BM25 |

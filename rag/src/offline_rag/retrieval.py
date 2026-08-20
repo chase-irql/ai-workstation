@@ -104,6 +104,11 @@ def search_documents(
         for candidate in candidates:
             document_id = str(candidate["document_id"])
             if document_id in seen:
+                existing = representatives.get(document_id)
+                if candidate.get("evidence_kind") == "procedure_method" and (
+                    (existing or {}).get("evidence_kind") != "procedure_method"
+                ):
+                    representatives[document_id] = candidate
                 continue
             seen.add(document_id)
             document_rank += 1

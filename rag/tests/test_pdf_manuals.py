@@ -15,7 +15,8 @@ from reportlab.pdfgen import canvas
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from offline_rag.bm25 import build_index, search
-from offline_rag.pdf_manuals import _extract_page_text, import_pdf_manuals
+from offline_rag.pdf_manuals import _extract_page_text, _page_content_blocks, import_pdf_manuals
+from offline_rag.retrieval import search_documents
 from offline_rag.verify import verify_database
 
 
@@ -55,7 +56,113 @@ def _write_mixed_scan(path: Path) -> None:
     pdf.save()
 
 
+def _write_rehydration_methods(path: Path) -> None:
+    pdf = canvas.Canvas(str(path))
+    text = pdf.beginText(72, 740)
+    for line in (
+        "2 ways to make rehydration drink",
+        "With sugar and salt",
+        "In 1 liter of clean water, mix:",
+        "half a level teaspoon of salt",
+        "8 level teaspoons of sugar",
+        "With powdered cereal and salt",
+        "In 1 liter of clean water, mix:",
+        "half a level teaspoon of salt",
+        "8 heaping teaspoons of powdered cereal",
+        "Boil for 5 to 7 minutes to form a watery porridge.",
+        "If possible, add half a cup of fruit juice to either drink.",
+        "Give frequent small sips and seek help if danger signs appear.",
+    ):
+        text.textLine(line)
+    pdf.drawText(text)
+    pdf.save()
+
+
 class PdfManualImportTests(unittest.TestCase):
+    def test_hesperian_procedure_sectioning_keeps_alternative_steps_separate(self):
+        text = """2 ways to make rehydration drink
+With sugar and salt
+In 1 liter of clean water, mix:
+half a level teaspoon of salt
+8 level teaspoons of sugar
+With powdered cereal and salt
+In 1 liter of clean water, mix:
+half a level teaspoon of salt
+8 heaping teaspoons of powdered cereal
+Boil for 5 to 7 minutes to form a watery porridge.
+If possible, add half a cup of fruit juice to either drink.
+Give frequent small sips and seek help if danger signs appear.
+"""
+        blocks = _page_content_blocks(
+            ("Page 7",),
+            text,
+            {"page_number": 7, "page_label": "7"},
+            "hesperian-procedures",
+        )
+        by_heading = {block.heading_path[-1]: block for block in blocks}
+        sugar = by_heading["With sugar and salt"]
+        cereal = by_heading["With powdered cereal and salt"]
+        shared = by_heading["Shared procedure instructions"]
+        self.assertNotIn("boil", sugar.text.casefold())
+        self.assertNotIn("cereal", sugar.text.casefold())
+        self.assertIn("boil", cereal.text.casefold())
+        self.assertNotIn("level teaspoons of sugar", cereal.text.casefold())
+        self.assertIn("either drink", shared.text.casefold())
+        self.assertTrue(sugar.attributes["derived_evidence"])
+        self.assertIn("Rehydration drink", sugar.heading_path)
+        self.assertEqual(sugar.attributes["evidence_kind"], "procedure_method")
+        self.assertEqual(shared.attributes["evidence_kind"], "procedure_shared")
+
+    def test_hesperian_sectioning_rejects_interleaved_recipe_columns(self):
+        text = """2 WAYS TO MAKE HOME MIX REHYDRATION DRINK
+1. WITH SUGAR AND SALT
+2. WITH POWDERED CEREAL AND SALT
+In 1 liter of water put half a teaspoon of salt and 8 heaping teaspoons of powdered cereal.
+In 1 liter of water put half a teaspoon of salt and 8 level
+teaspoons of sugar.
+Boil for 5 to 7 minutes.
+"""
+        blocks = _page_content_blocks(("Page 152",), text, {"page_number": 2}, "hesperian-procedures")
+        self.assertEqual([block.kind for block in blocks], ["pdf-page"])
+
+    def test_document_retrieval_prefers_method_specific_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manual = root / "methods.pdf"
+            _write_rehydration_methods(manual)
+            output = root / "processed"
+            import_pdf_manuals(
+                manual,
+                output,
+                corpus="health-guides",
+                source_version="1",
+                license_name="test",
+                sectioning_profile="hesperian-procedures",
+                extraction_mode="plain",
+            )
+            database = root / "methods.sqlite3"
+            build_index(output, database)
+
+            sugar = search_documents(
+                database,
+                "rehydration drink",
+                limit=1,
+                allow_relaxation=False,
+            )["results"][0]
+            self.assertEqual(sugar["evidence_kind"], "procedure_method")
+            self.assertEqual(sugar["procedure_method"], "With sugar and salt")
+            self.assertNotIn("boil", sugar["text"].casefold())
+            self.assertNotIn("cereal", sugar["text"].casefold())
+
+            cereal = search_documents(
+                database,
+                "rehydration drink powdered cereal salt boil",
+                limit=1,
+                allow_relaxation=False,
+            )["results"][0]
+            self.assertEqual(cereal["procedure_method"], "With powdered cereal and salt")
+            self.assertNotIn("sugar", cereal["text"].casefold())
+
     def test_pypdf_page_warnings_are_collected_without_changing_text(self):
         class WarningPage:
             def extract_text(self, **_: object) -> str:
