@@ -162,6 +162,8 @@
         "--index",
         "openstax-microbiology=indexes\\textbooks\\openstax-microbiology.sqlite3",
         "--index",
+        "openstax-astronomy=indexes\\textbooks\\openstax-astronomy.sqlite3",
+        "--index",
         "cpp-16.2-manual=indexes\\documentation\\cpp-16.2.sqlite3",
         "--corpus-vector",
         "wikipedia=indexes\\wikipedia\\enwiki-20260801-semantic-full",

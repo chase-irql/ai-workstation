@@ -31,7 +31,7 @@ The complete official OpenStax Microbiology source at immutable main commit `633
 
 ### Active textbook extension: astronomy
 
-The next registered textbook is the complete official OpenStax Astronomy 2e source at immutable main commit `dff6acf8…` (2026-07-21). It adds a coherent path from naked-eye observation and orbital mechanics through stellar evolution, galaxies, cosmology, and astrobiology. GitHub reports the commit unsigned and no publisher archive digest, so the acquisition will record local SHA-256 integrity, validate archive structure, enforce a 500 MB download ceiling and 1.5 GB extraction ceiling, confirm the collection license, and preserve its source hierarchy and figures through the existing CNXML adapter.
+The complete official OpenStax Astronomy 2e source at immutable main commit `dff6acf8…` (2026-07-21) is acquired and evaluated. It adds a coherent path from naked-eye observation and orbital mechanics through stellar evolution, galaxies, cosmology, and astrobiology. Its locally pinned 190,331,982-byte archive safely expands to 945 files / 208,705,787 bytes; repository and collection notices confirm CC BY-NC-SA 4.0. All 199 modules yield 2,095 chunks in a verified 9,064,448-byte database, and a 54-topic stable-ID gate passes every configured metric. GitHub reports the source commit unsigned and supplies no adjacent archive digest, so only local integrity is claimed.
 
 ### Wave 1: operational Stack Exchange sites
 

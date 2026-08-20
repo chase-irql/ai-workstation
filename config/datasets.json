@@ -2161,12 +2161,12 @@
         "content_subdirectory": "osbooks-astronomy-dff6acf8df597ceda73985308f838ed38417a606",
         "collections_glob": "collections/*.collection.xml",
         "module_path_template": "modules/{module_id}/index.cnxml",
-        "smoke_query": "stellar evolution main sequence red giant white dwarf"
+        "smoke_query": "evolution main sequence red giants"
       },
       "storage": {"download_min_bytes": 50000000, "download_max_bytes": 500000000, "extracted_max_bytes": 1500000000, "indexed_max_bytes": 400000000},
       "paths": {"raw": "corpora/raw/textbooks/openstax-astronomy", "processed": "corpora/processed/textbooks/openstax-astronomy", "index": "indexes/textbooks/openstax-astronomy.sqlite3", "semantic_index": "indexes/semantic/openstax-astronomy"},
-      "status": "planned",
-      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. Repository LICENSE and the Astronomy 2e collection structure were checked before registration; collection metadata will be revalidated after extraction."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit dff6acf8df597ceda73985308f838ed38417a606. The 190,331,982-byte archive has local SHA-256 0183f9e4955320c0b3fb34c75107cc521536afc0aef3de5fef15fa410a342868 and safely expands to 945 files / 208,705,787 bytes with no links; 733 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and collection manifest confirm CC BY-NC-SA 4.0. All 199 modules yield 2,095 chunks in a verified 9,064,448-byte index. The 54-topic observation-through-cosmology-and-astrobiology stable-ID gate passes every configured metric at 1.0."
     },
     {
       "dataset_id": "cpp-16.2-manual",

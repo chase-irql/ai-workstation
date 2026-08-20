@@ -26,6 +26,8 @@ Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection 
 
 `openstax-microbiology` contains Microbiology from official repository commit `633850257fbd3ccf6187b9428c55e80b69236382` (2026-07-08). Its 329,184,733-byte archive has locally measured SHA-256 `ba89936e92a84cc964c66df73b805ac8a0a9dfb23057ad57ca40097625cf8ab8` and safely expands to 1,047 files totaling 362,279,562 bytes with no links. Its 159-module collection states CC BY-NC-SA 4.0. Treat the infectious-disease and antimicrobial material as dated educational foundation, not current clinical guidance or medical advice.
 
+`openstax-astronomy` contains Astronomy 2e from official repository commit `dff6acf8df597ceda73985308f838ed38417a606` (2026-07-21). Its 190,331,982-byte archive has locally measured SHA-256 `0183f9e4955320c0b3fb34c75107cc521536afc0aef3de5fef15fa410a342868` and safely expands to 945 files totaling 208,705,787 bytes with no links. Its 199-module collection states CC BY-NC-SA 4.0.
+
 ## Structure retained
 
 The adapter preserves:
@@ -90,5 +92,7 @@ The college-algebra index has 138 documents, 17,596 chunks and FTS rows, valid f
 The introductory-statistics index has 179 documents, 6,011 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 11,792,384 bytes. The 51-case lexical suite has every reported rank metric at 1.0.
 
 The Microbiology index has 159 documents, 4,115 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 11,165,696 bytes. The 57-case lexical suite has every reported rank metric at 1.0.
+
+The Astronomy 2e index has 199 documents, 2,095 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 9,064,448 bytes. The 54-case lexical suite has every reported rank metric at 1.0.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.
