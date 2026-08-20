@@ -37,6 +37,10 @@ The complete official OpenStax Astronomy 2e source at immutable main commit `dff
 
 The official OpenStax Principles of Economics bundle at immutable main commit `d5cadb40…` (2026-07-09) is acquired and evaluated. Five collection manifests provide Principles of Economics 3e, microeconomics, macroeconomics, and AP curricular paths. Its locally pinned 132,754,792-byte archive safely expands to 1,027 files / 174,919,048 bytes; all manifests confirm CC BY-NC-SA 4.0. Substantial intentional reuse turns 603 curricular occurrences into 190 stable documents and 2,787 chunks in a verified 8,994,816-byte database while retaining every occurrence in provenance. A 53-topic gate spans markets, firms, labor, market failures, inequality, GDP, growth, money and banking, monetary and fiscal policy, trade, foreign exchange, and personal finance and passes every configured metric.
 
+### Active textbook extension: psychology
+
+The next registered textbook is the official OpenStax Psychology 2e source at immutable main commit `de7e40c9…` (2026-07-09). It supplies a structured introduction to research methods, neuroscience and behavior, perception, learning, memory, cognition, development, motivation, personality, social and organizational psychology, disorders, and therapy. Acquisition is bounded to 300 MB compressed and 1 GB extracted, records a local SHA-256, validates archive structure and the collection license, and labels mental-health content as educational rather than current clinical guidance.
+
 ### Wave 1: operational Stack Exchange sites
 
 These reuse the bounded-memory Stack Exchange importer and therefore have the lowest implementation risk.

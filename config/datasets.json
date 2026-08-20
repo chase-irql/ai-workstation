@@ -2199,6 +2199,36 @@
       "notes": "Pinned to immutable official commit d5cadb403718ff88078259a300eddc20d38563d5. The 132,754,792-byte archive has local SHA-256 b2c1670f41c0b7fc2c29b682c2e89ae4df52618d519d568449a05ab89822e89c and safely expands to 1,027 files / 174,919,048 bytes with no links; 752 Windows-hostile paths were encoded portably. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all five collection manifests confirm CC BY-NC-SA 4.0. The 603 ordered curricular occurrences deduplicate by stable module ID into 190 documents and 2,787 chunks in a verified 8,994,816-byte index. The 53-topic microeconomics-through-macroeconomics-and-finance stable-ID gate passes every configured metric at 1.0."
     },
     {
+      "dataset_id": "openstax-psychology",
+      "name": "OpenStax Psychology 2e",
+      "description": "Complete OpenStax Psychology 2e textbook covering research methods, biological psychology, consciousness, sensation and perception, learning, memory, cognition, development, motivation, personality, social psychology, industrial-organizational psychology, psychological disorders, and therapy.",
+      "category": "open-textbooks",
+      "official_source_url": "https://openstax.org/details/books/psychology-2e",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International; collection and repository notices retained",
+      "attribution": "OpenStax, Rice University, and named book contributors",
+      "release": "openstax/osbooks-psychology main commit de7e40c91813dabdc2875df9d0709fc4f46080bb, 2026-07-09",
+      "update_frequency": "quarterly snapshot or documented OpenStax revision",
+      "scope": "complete English Psychology 2e manifest and referenced CNXML modules from the immutable official snapshot",
+      "formats": ["CNXML", "CollXML", "images", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/openstax/osbooks-psychology/archive/de7e40c91813dabdc2875df9d0709fc4f46080bb.tar.gz",
+        "source_commit": "de7e40c91813dabdc2875df9d0709fc4f46080bb",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/openstax/osbooks-psychology/blob/de7e40c91813dabdc2875df9d0709fc4f46080bb/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "osbooks-psychology-de7e40c91813dabdc2875df9d0709fc4f46080bb",
+        "collections_glob": "collections/*.collection.xml",
+        "module_path_template": "modules/{module_id}/index.cnxml",
+        "smoke_query": "memory encoding storage retrieval"
+      },
+      "storage": {"download_min_bytes": 25000000, "download_max_bytes": 300000000, "extracted_max_bytes": 1000000000, "indexed_max_bytes": 300000000},
+      "paths": {"raw": "corpora/raw/textbooks/openstax-psychology", "processed": "corpora/processed/textbooks/openstax-psychology", "index": "indexes/textbooks/openstax-psychology.sqlite3", "semantic_index": "indexes/semantic/openstax-psychology"},
+      "status": "planned",
+      "notes": "Pinned before acquisition to the current official main commit resolved through GitHub's repository API. GitHub reports the commit unsigned and supplies no adjacent archive digest, so publisher verification will not be claimed. Repository LICENSE and the Psychology 2e collection structure were checked before registration; collection metadata will be revalidated after extraction. Mental-health material will be labeled educational rather than current clinical guidance."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",
