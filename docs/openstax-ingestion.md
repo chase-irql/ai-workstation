@@ -14,6 +14,8 @@ Safe extraction produced 2,084 files totaling 217,389,281 bytes. The collection 
 
 `openstax-chemistry` contains Chemistry 2e and Chemistry: Atoms First 2e from official repository commit `3be4b60ff501f29a445f0cacf003e5f5cc16244d` (2026-07-08). Its 279,761,314-byte archive has locally measured SHA-256 `59b329660c5c06e12c86301d5a631ba5fd2a04c9eb122c68d384cf42406233af` and safely expands to 1,731 files totaling 340,181,560 bytes. Both 149-module collections state CC BY-NC-SA 4.0. Their 122 shared module IDs reduce 298 ordered occurrences to 176 unique documents while preserving both curricular sequences.
 
+`openstax-biology` contains Biology 2e, Biology for AP Courses, and Concepts of Biology from official repository commit `63f8b6f8d129dd1582989bb755011e9a6d523471` (2026-07-22). Its 687,639,648-byte archive has locally measured SHA-256 `20ce209a097b576a3121eb98f7e656fd04e4d91e8895139bb9568e25a0f0c33d` and safely expands to 3,043 files totaling 749,160,433 bytes. All three collections state CC BY-NC-SA 4.0. They reference 575 modules but share only one literal module ID, resulting in 574 stable documents. Similar curriculum pages with different module IDs are deliberately not merged; content IDs remain available for downstream cache and evidence deduplication.
+
 ## Structure retained
 
 The adapter preserves:
@@ -66,5 +68,7 @@ The current index has 133 documents, 11,807 chunks, 11,807 FTS rows, valid forei
 The University Physics index has 322 documents, 8,870 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 21,135,360 bytes. The 46-case lexical suite likewise has every reported rank metric at 1.0.
 
 The Chemistry index has 176 documents, 4,499 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 12,296,192 bytes. The 46-case lexical suite has every reported rank metric at 1.0.
+
+The Biology index has 574 documents, 10,795 chunks and FTS rows, valid foreign keys, and a successful SQLite quick check. Its database is 30,928,896 bytes. The 52-case lexical suite has every reported rank metric at 1.0.
 
 The gate primarily verifies named curriculum topics and parser/index stability; it is not yet a difficult paraphrase benchmark. Semantic indexing should be added only after the existing overnight embedding queue completes and a judged conceptual suite demonstrates enough hybrid-retrieval benefit to justify its GPU time and storage.

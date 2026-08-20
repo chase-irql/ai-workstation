@@ -1975,8 +1975,8 @@
         "index": "indexes/textbooks/openstax-biology.sqlite3",
         "semantic_index": "indexes/semantic/openstax-biology"
       },
-      "status": "planned",
-      "notes": "Pinned to current official commit 63f8b6f8d129dd1582989bb755011e9a6d523471 before acquisition. GitHub reports the commit unsigned and provides no adjacent archive digest, so publisher verification will not be claimed. The repository license is CC BY-NC-SA 4.0; all three collection manifests must be validated after extraction. Shared modules across the comprehensive, AP, and introductory sequences will be stored once while every curriculum occurrence remains in provenance."
+      "status": "evaluated",
+      "notes": "Pinned to immutable official commit 63f8b6f8d129dd1582989bb755011e9a6d523471. The 687,639,648-byte archive has local SHA-256 20ce209a097b576a3121eb98f7e656fd04e4d91e8895139bb9568e25a0f0c33d; safe extraction produced 3,043 files / 749,160,433 bytes with no links. GitHub supplies no adjacent digest and reports the commit unsigned, so publisher verification is not claimed. Repository and all three collection manifests confirm CC BY-NC-SA 4.0. The collections contain 259, 209, and 107 modules respectively; only one stable module ID is literally shared, producing 575 occurrences and 574 documents. Related curricula frequently use different IDs, which are correctly preserved as distinct cited documents while content IDs support downstream embedding caching/evidence deduplication. The verified index contains 10,795 chunks in 30,928,896 bytes. The 52-topic stable-ID lexical gate passes every configured metric at 1.0, including explicitly multi-relevant alternate pages where appropriate."
     },
     {
       "dataset_id": "cpp-16.2-manual",
