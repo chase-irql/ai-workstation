@@ -5,6 +5,7 @@ import copy
 import fnmatch
 import hashlib
 import html
+import html.entities
 import json
 import os
 import posixpath
@@ -850,6 +851,119 @@ def _prepare_docbook_xml(text: str) -> str:
     )
 
 
+def _prepare_nginx_xml(text: str) -> str:
+    """Resolve HTML named entities used by nginx.org without loading its network DTD."""
+
+    def replace(match: re.Match[str]) -> str:
+        name = match.group(1)
+        if name in DOCBOOK_BUILTIN_ENTITIES:
+            return match.group(0)
+        value = html.entities.html5.get(f"{name};")
+        return value if value is not None else name
+
+    return DOCBOOK_ENTITY_RE.sub(replace, text)
+
+
+def _nginx_inline(element: ET.Element) -> str:
+    """Render NGINX documentation inline XML, retaining useful empty links."""
+
+    name = _xml_local_name(element.tag)
+    if name == "br":
+        return "\n"
+    parts = [element.text or ""]
+    for child in element:
+        rendered = _nginx_inline(child)
+        if not rendered and _xml_local_name(child.tag) == "link":
+            rendered = child.get("id") or Path(child.get("doc", "")).stem
+        parts.extend((rendered, child.tail or ""))
+    return "".join(parts)
+
+
+def parse_nginx_xml(text: str, fallback_title: str) -> ParsedDocument:
+    """Parse nginx.org's article/module XML into directive-aware evidence blocks."""
+
+    try:
+        root = ET.fromstring(_prepare_nginx_xml(text))
+    except ET.ParseError as error:
+        raise ValueError(f"invalid NGINX documentation XML: {error}") from error
+    root_name = _xml_local_name(root.tag)
+    if root_name not in {"article", "module"}:
+        raise ValueError(f"unsupported NGINX documentation root: {root_name}")
+    title = _clean_text(root.get("name", "")) or fallback_title
+    blocks: list[ContentBlock] = []
+
+    def attrs(element: ET.Element) -> dict[str, Any]:
+        values = {key: value for key, value in element.attrib.items() if key in {"id", "name", "rev"} and value}
+        return values
+
+    def append(element: ET.Element, headings: tuple[str, ...], kind: str, *, preserve: bool = False) -> None:
+        value = _clean_text(_nginx_inline(element), preserve=preserve)
+        if value:
+            blocks.append(ContentBlock(headings, value, kind, attrs(element)))
+
+    def visit(element: ET.Element, headings: tuple[str, ...]) -> None:
+        name = _xml_local_name(element.tag)
+        if name == "section":
+            label = _clean_text(element.get("name", ""))
+            nested = headings + ((label,) if label else ())
+            for child in element:
+                visit(child, nested)
+            return
+        if name == "directive":
+            directive = _clean_text(element.get("name", "")) or "Directive"
+            nested = headings + (directive,)
+            syntax = [_clean_text(_nginx_inline(child)) for child in element if _xml_local_name(child.tag) == "syntax"]
+            defaults = [_clean_text(_nginx_inline(child)) for child in element if _xml_local_name(child.tag) == "default"]
+            contexts = [_clean_text(_nginx_inline(child)) for child in element if _xml_local_name(child.tag) == "context"]
+            versions = [_clean_text(_nginx_inline(child)) for child in element if _xml_local_name(child.tag) == "appeared-in"]
+            metadata = [directive + (" " + " | ".join(item for item in syntax if item) if any(syntax) else "")]
+            if any(defaults):
+                metadata.append("Default: " + "; ".join(item for item in defaults if item))
+            if any(contexts):
+                metadata.append("Context: " + ", ".join(item for item in contexts if item))
+            if any(versions):
+                metadata.append("Appeared in: " + ", ".join(item for item in versions if item))
+            blocks.append(ContentBlock(nested, ". ".join(metadata), "definition", attrs(element)))
+            for child in element:
+                if _xml_local_name(child.tag) not in {"syntax", "default", "context", "appeared-in"}:
+                    visit(child, nested)
+            return
+        if name in {"para", "header"}:
+            append(element, headings, "paragraph")
+            for child in element:
+                if _xml_local_name(child.tag) in {"example", "programlisting", "note", "security", "migration"}:
+                    visit(child, headings)
+            return
+        if name in {"example", "programlisting", "c-def"}:
+            append(element, headings, "code", preserve=True)
+            return
+        if name in {"note", "security", "migration"}:
+            append(element, headings, "admonition")
+            return
+        if name in {"list", "itemizedlist", "orderedlist"}:
+            for child in element:
+                visit(child, headings)
+            return
+        if name in {"listitem", "item"}:
+            append(element, headings, "list_item")
+            return
+        if name == "table":
+            for row in element.iter():
+                if _xml_local_name(row.tag) != "tr":
+                    continue
+                cells = [_clean_text(_nginx_inline(cell)) for cell in row if _xml_local_name(cell.tag) in {"td", "th"}]
+                value = " | ".join(cell for cell in cells if cell)
+                if value:
+                    blocks.append(ContentBlock(headings, value, "table_row", attrs(row)))
+            return
+        for child in element:
+            visit(child, headings)
+
+    for child in root:
+        visit(child, ())
+    return ParsedDocument(title, tuple(blocks), "nginx-xml")
+
+
 def _docbook_element_id(element: ET.Element) -> str | None:
     return element.get(XML_ID) or element.get("id")
 
@@ -1422,6 +1536,8 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
     if suffix == ".pod" or path.name.casefold().endswith(".pod.in"):
         return parse_pod(text, fallback)
     if suffix == ".xml":
+        if re.search(r"<\s*(?:article|module)\b", text):
+            return parse_nginx_xml(text, fallback)
         return parse_docbook(text, fallback, path)
     if suffix == ".go":
         return parse_go(path, text, fallback)

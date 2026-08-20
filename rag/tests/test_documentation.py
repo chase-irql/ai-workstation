@@ -17,6 +17,7 @@ from offline_rag.documentation import (
     parse_go,
     parse_man,
     parse_markdown,
+    parse_nginx_xml,
     parse_pod,
     parse_document,
     parse_docbook,
@@ -426,6 +427,30 @@ Load trusted certificates from C<file>.
         self.assertTrue(any("--no-pager" in block.text and "pager" in block.text for block in parsed.blocks))
         self.assertTrue(any(block.kind == "code" and "systemctl restart" in block.text for block in parsed.blocks))
         self.assertTrue(any(block.kind == "table_row" and "active | running" in block.text for block in parsed.blocks))
+
+    def test_nginx_xml_preserves_directive_metadata_sections_code_and_entities(self):
+        text = """<?xml version='1.0'?>
+<!DOCTYPE module SYSTEM 'module.dtd'>
+<module name='Module ngx_http_demo_module' link='/en/docs/http/ngx_http_demo_module.html' rev='3'>
+  <section id='directives' name='Directives'>
+    <directive name='demo_pass'>
+      <syntax><value>URL</value> | <literal>off</literal></syntax>
+      <default><literal>off</literal></default>
+      <context>http</context><context>server</context><appeared-in>1.2.3</appeared-in>
+      <para>Passes requests to an upstream&mdash;see <link id='upstream'/>.
+        <example>demo_pass http://backend;</example></para>
+    </directive>
+  </section>
+</module>"""
+        parsed = parse_nginx_xml(text, "fallback")
+        self.assertEqual(parsed.title, "Module ngx_http_demo_module")
+        self.assertEqual(parsed.format, "nginx-xml")
+        definition = next(block for block in parsed.blocks if block.kind == "definition")
+        self.assertEqual(definition.heading_path, ("Directives", "demo_pass"))
+        self.assertIn("Context: http, server", definition.text)
+        self.assertIn("Appeared in: 1.2.3", definition.text)
+        self.assertTrue(any("upstream—see upstream" in block.text for block in parsed.blocks))
+        self.assertTrue(any(block.kind == "code" and "demo_pass" in block.text for block in parsed.blocks))
 
     def test_oversized_content_and_short_trailing_chunks(self):
         from offline_rag.documentation import ContentBlock

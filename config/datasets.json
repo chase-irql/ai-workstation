@@ -1778,6 +1778,47 @@
       "notes": "Pinned to official dotnet/docs commit e2fe6aca79d1a7296241f144a43dbccf42d58a47 observed on 2026-08-20. GitHub supplies no commit-archive digest, so the 274,457,692-byte archive is locally pinned as SHA-256 6a65c4abc3f9b55a3612ee069ca2d2ef7149b59bf0c7461c0bade7ff15aced30 without claiming publisher verification. Safe extraction validated 23,578 files / 382,589,198 bytes, no links, and 9,161 reversibly encoded Windows-incompatible names. Retrieval contains 13,225 canonical Markdown pages and 77,212 chunks in a 167,247,872-byte verified BM25 database. Local DocFX includes are expanded with cycle/traversal protection and excluded as standalone citations; 15 unavailable cross-repository include targets affecting 7 pages are removed and explicitly recorded. Its 50-topic stable-ID lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0."
     },
     {
+      "dataset_id": "nginx-docs-20260820",
+      "name": "NGINX Open Source Documentation Snapshot",
+      "description": "Official NGINX installation, configuration, operations, development, HTTP, stream, mail, module, directive, load-balancing, caching, TLS, QUIC, and troubleshooting documentation.",
+      "category": "web-server-documentation",
+      "official_source_url": "https://nginx.org/en/docs/",
+      "license": "NGINX 2-clause BSD-like license; repository notice retained",
+      "attribution": "Igor Sysoev, Nginx, Inc., and NGINX contributors",
+      "release": "main commit df444293ce3b9761809b16313e78ea7322ce97fe, 2026-08-20",
+      "update_frequency": "monthly snapshot or each stable NGINX release",
+      "scope": "English canonical documentation XML under xml/en/docs from the immutable nginx.org source snapshot; translated pages, website chrome, generated HTML, binaries, images, and build tooling excluded from retrieval but retained raw",
+      "formats": ["NGINX documentation XML", "tar.gz"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://github.com/nginx/nginx.org/archive/df444293ce3b9761809b16313e78ea7322ce97fe.tar.gz",
+        "source_commit": "df444293ce3b9761809b16313e78ea7322ce97fe",
+        "source_commit_verified": false,
+        "source_url_template": "https://github.com/nginx/nginx.org/blob/df444293ce3b9761809b16313e78ea7322ce97fe/{relative_path}"
+      },
+      "ingestion": {
+        "content_subdirectory": "nginx.org-df444293ce3b9761809b16313e78ea7322ce97fe",
+        "include_globs": ["xml/en/docs/*.xml", "xml/en/docs/**/*.xml"],
+        "exclude_globs": ["xml/en/docs/**/*_head.xml"],
+        "smoke_query": "proxy_pass",
+        "parser_profile": "nginx-documentation-xml"
+      },
+      "storage": {
+        "download_min_bytes": 1000000,
+        "download_max_bytes": 100000000,
+        "extracted_max_bytes": 500000000,
+        "indexed_max_bytes": 500000000
+      },
+      "paths": {
+        "raw": "corpora/raw/documentation/nginx-docs-20260820",
+        "processed": "corpora/processed/documentation/nginx-docs-20260820",
+        "index": "indexes/documentation/nginx-docs-20260820.sqlite3",
+        "semantic_index": "indexes/semantic/nginx-docs-20260820"
+      },
+      "status": "evaluated",
+      "notes": "Pinned to the official nginx/nginx.org source repository at immutable commit df444293ce3b9761809b16313e78ea7322ce97fe. GitHub supplies no commit-archive digest and the selected commit is unsigned, so the 5,320,648-byte archive is locally pinned as SHA-256 01ea62a2a34c5445e7ce24d423114c632a46903add747eec6babbd027fe30694 without claiming publisher verification. Safe extraction validated 524 files / 20,566,988 bytes, skipped one link, and reversibly encoded 72 Windows-incompatible names. The incomplete generated ngx_http_api_module_head.xml fragment is excluded in favor of its canonical complete page. A dedicated NGINX XML parser preserves module/article titles, directive syntax/default/context/version metadata, heading hierarchy, code, tables, admonitions, and empty-link targets. The 149 canonical documents produced 1,669 chunks in a 4,296,704-byte verified BM25 database; its 40-topic stable-ID lexical gate achieved every metric cutoff at 1.0."
+    },
+    {
       "dataset_id": "cpp-16.2-manual",
       "name": "GNU C Preprocessor 16.2 Manual",
       "description": "Official GNU preprocessor reference covering include resolution, macro expansion, conditionals, diagnostics, pragmas, binary resource inclusion, invocation, and implementation details.",

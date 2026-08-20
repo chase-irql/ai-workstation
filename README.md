@@ -55,6 +55,7 @@ These corpora are implemented and verified in the current development installati
 | Podman documentation | Podman 6.1.0 signed release | 223 manuals/guides, 2,484 chunks | BM25 |
 | GNU Binutils documentation | Binutils 2.47 official HTML manuals | 8 manuals, 1,807 chunks | BM25 |
 | .NET documentation | Official `dotnet/docs` snapshot at `e2fe6aca…` | 13,225 pages, 77,212 chunks | BM25 |
+| NGINX documentation | Official `nginx/nginx.org` snapshot at `df444293…` | 149 documents, 1,669 chunks | BM25 |
 | GNU C Preprocessor manual | GCC 16.2 release documentation | 76 documents, 183 chunks | BM25 |
 | FAA AMT Handbook — General | FAA-H-8083-30B, 2023 | 677 pages, 1,837 chunks | Page-aware BM25 |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |

@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 55)
+        self.assertEqual(len(datasets), 56)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -42,6 +42,7 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("podman-6.1-docs", dataset_ids)
         self.assertIn("binutils-2.47-docs", dataset_ids)
         self.assertIn("dotnet-docs-20260820", dataset_ids)
+        self.assertIn("nginx-docs-20260820", dataset_ids)
         self.assertTrue(
             {
                 "coreutils-9.11-manual",
@@ -79,7 +80,7 @@ class DatasetRegistryTests(unittest.TestCase):
             }.issubset(dataset_ids)
         )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 9_000_000_000)
+        self.assertLess(summary["download_max_bytes"], 9_250_000_000)
         self.assertLess(summary["indexed_max_bytes"], 120_000_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
