@@ -15,6 +15,7 @@ retry the query, not permission to bypass it.
 
 1. Choose the most authoritative likely corpus before searching when the subject makes that clear.
    - Practical health, first aid, sanitation, and community medicine: `hesperian-english-health-guides-20260820`.
+   - Device repair, disassembly, maintenance, parts, and tools: `ifixit-english-2025-12`.
    - Internet standards and protocol behavior: `rfc-editor-text`; exact assignments: `iana-protocol-registries`.
    - General encyclopedic questions: `wikipedia`.
    - Use `knowledge_index_status` to discover other exact corpus IDs rather than guessing.

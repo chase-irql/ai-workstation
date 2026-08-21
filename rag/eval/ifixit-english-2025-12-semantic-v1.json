@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "name": "iFixit English 2025-12 paraphrase retrieval gate",
+  "description": "Natural-language repair requests for comparing strict BM25, semantic, and hybrid retrieval against stable iFixit guide IDs. Cases intentionally avoid copying guide titles verbatim.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id":"iphone-rear-panel-para-001","query":"replace shattered rear panel on base iPhone 15","query_type":"phone","relevance":{"ifixit-english-2025-12:guide:165686":3}},
+    {"id":"galaxy-power-cell-para-001","query":"swap worn power cell in a Samsung S23","query_type":"phone","relevance":{"ifixit-english-2025-12:guide:174225":3}},
+    {"id":"pixel-display-para-001","query":"install a new display on a Pixel 8","query_type":"phone","relevance":{"ifixit-english-2025-12:guide:166152":3}},
+    {"id":"lightning-lint-para-001","query":"phone will not charge because lint is packed in the Lightning connector","query_type":"phone-maintenance","relevance":{"ifixit-english-2025-12:guide:164631":3}},
+    {"id":"macbook-runtime-para-001","query":"change the worn battery in a late 2023 M3 14 inch MacBook","query_type":"computer","relevance":{"ifixit-english-2025-12:guide:167548":3}},
+    {"id":"asus-compound-para-001","query":"remove the heat sink and renew processor cooling compound on an Asus N551JQ","query_type":"computer-maintenance","relevance":{"ifixit-english-2025-12:guide:98410":3}},
+    {"id":"steamdeck-storage-para-001","query":"upgrade the internal solid state storage in Valve's handheld gaming PC","query_type":"gaming","relevance":{"ifixit-english-2025-12:guide:148989":3}},
+    {"id":"switch-overheat-para-001","query":"Nintendo handheld game console overheats and needs a new cooling blower","query_type":"gaming","relevance":{"ifixit-english-2025-12:guide:113058":3}},
+    {"id":"joycon-drift-para-001","query":"fix drift by changing the left analog stick in a Joy-Con 2","query_type":"gaming","relevance":{"ifixit-english-2025-12:guide:188976":3}},
+    {"id":"ps5-cooling-para-001","query":"Sony console runs hot and needs its cooling blower changed","query_type":"gaming","relevance":{"ifixit-english-2025-12:guide:141723":3}},
+    {"id":"dyson-runtime-para-001","query":"cordless V8 Absolute vacuum no longer holds a charge","query_type":"appliance","relevance":{"ifixit-english-2025-12:guide:100091":3}},
+    {"id":"roomba-runtime-para-001","query":"robot vacuum i7 has short runtime and needs a new power pack","query_type":"appliance","relevance":{"ifixit-english-2025-12:guide:131450":3}},
+    {"id":"washer-drain-para-001","query":"Samsung WA80U3 washer will not empty water and needs a new pump","query_type":"appliance","relevance":{"ifixit-english-2025-12:guide:111136":3}},
+    {"id":"fridge-ice-para-001","query":"LG refrigerator stopped making ice; change the upper assembly","query_type":"appliance","relevance":{"ifixit-english-2025-12:guide:167676":3}},
+    {"id":"mixer-grinding-para-001","query":"K45SSWH stand mixer grinds and needs its sacrificial gear renewed","query_type":"appliance","relevance":{"ifixit-english-2025-12:guide:31411":3}},
+    {"id":"coffee-cold-para-001","query":"DCC-1100 coffee brewer water stays cold because the heater failed","query_type":"appliance","relevance":{"ifixit-english-2025-12:guide:104848":3}},
+    {"id":"drill-holder-para-001","query":"replace the damaged bit holder on a DeWalt DW997 cordless drill","query_type":"tool","relevance":{"ifixit-english-2025-12:guide:74069":3}},
+    {"id":"civic-lamp-para-001","query":"change a front lamp bulb on a tenth generation Honda Civic","query_type":"vehicle","relevance":{"ifixit-english-2025-12:guide:142206":3}},
+    {"id":"single-gear-chain-para-001","query":"fit a new chain to a bicycle with one gear","query_type":"bicycle","relevance":{"ifixit-english-2025-12:guide:170180":3}},
+    {"id":"camera-corrosion-para-001","query":"clean a corroded AAA battery compartment in a Maxxum camera","query_type":"repair-safety","relevance":{"ifixit-english-2025-12:guide:150512":3}}
+  ]
+}

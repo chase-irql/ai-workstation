@@ -30,6 +30,8 @@ Users should acquire each corpus from its official publisher with the scripts an
 
 Hesperian Health Guides is an explicit example: its official PDFs may be retained in this private installation, but its Open Copyright Policy requires attribution and written permission for digital reuse or redistribution. Neither those PDFs nor derived text/index artifacts may be bundled with this code repository.
 
+iFixit is another explicit example: its repair content is CC BY-NC-SA 3.0, requires attribution and source links, is restricted to noncommercial use without separate permission, and may not be used to train a model under iFixit's terms. The Kiwix ZIM, normalized records, SQLite index, and vectors remain local and are not bundled with this code repository.
+
 ## Optional artifact releases
 
 A prebuilt corpus or index may be released separately only after a corpus-specific review records:

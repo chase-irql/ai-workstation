@@ -53,6 +53,7 @@ This catalog is the human-readable inventory of every corpus currently published
 | `doe-fundamentals-handbooks` | DOE-HDBK-1010-92 through DOE-HDBK-1019-93, Revision 0 archived sequence | Distribution Statement A; retain all document notices; historical/canceled training material | 22 volumes; 2,842 pages; 5,533 chunks | Page-aware BM25 |
 | `faa-amt-airframe-powerplant-2023` | FAA-H-8083-31B Airframe and FAA-H-8083-32B Powerplant (2023) | U.S. Government works; handbook notices govern third-party material | 2 volumes; 1,552 pages; 3,498 chunks | Page-aware BM25 |
 | `hesperian-english-health-guides-20260820` | Official English PDF catalog snapshot (2026-08-20); 16 guide editions dated 2000–2026 | Copyright Hesperian Health Guides; private local use only; no redistribution | 432 chapter PDFs; 7,039 pages; 7,382 plain-order chunks | Page-aware BM25 |
+| `ifixit-english-2025-12` | Kiwix complete English iFixit snapshot, published 2025-12-23 | CC BY-NC-SA 3.0; noncommercial, attribution and share-alike terms; no model training | 57,118 guides/teardowns; 643,871 procedure chunks | Step-aware BM25 + 256-dim semantic/hybrid |
 | `bash-5.3-manual` | GNU Bash 5.3 split-HTML manual, generated 2025-07-04 | GFDL 1.3 or later, with no invariant or cover texts | 132 documents; 386 chunks | BM25 |
 | `coreutils-9.11-manual` | GNU Coreutils 9.11 split-HTML manual, generated 2026-04-20 | GFDL; exact notices retained | 253 documents; 639 chunks | BM25 |
 | `gawk-5.4-manual` | GNU Awk 5.4 split-HTML manual, generated 2026-02-22 | GFDL 1.3 or later with stated invariant and cover texts | 502 documents; 1,332 chunks | BM25 |
@@ -224,6 +225,14 @@ The 14 Stack Exchange generations total 4,511,100 retained post documents, 5,007
 - The 9,731 chunks occupy a verified 50,995,200-byte FTS5 database. A 48-topic stable-ID gate, with three topics from each guide collection, passes every configured Success, Recall, MRR, and nDCG cutoff at `1.0`; p50 latency is 1.569 ms and p95 is 2.242 ms.
 - Three malformed bookmark destinations in one Workers' Guide file are ignored while all page text remains indexed. Citations retain the exact edition, chapter, physical page, canonical PDF URL, and local source digest.
 - Hesperian retains copyright. The PDFs, processed text, indexes, and catalog-derived data remain private local artifacts and are not distributed by this repository. The material is reference information, not current clinical guidance or a replacement for emergency services, local protocols, or qualified care.
+
+### iFixit English repair guides
+
+- The versioned Kiwix/openZIM archive is `3,570,695,757` bytes and passed both its adjacent publisher SHA-256 (`9bb5f3408707fd0300c6ef47a425c3217187f144cd9154a928183816aa72eead`) and its internal ZIM checksum. It retains the complete offline image/media collection without expanding it onto NVMe.
+- The structure-aware importer examined 58,393 Guide/Teardown candidates and published 55,345 guides plus 1,773 teardowns. It preserves ordered steps, nested directions, warning-marker colors, tools, parts, device/category context, neighbor links, image references, exact source URLs, and stable guide IDs in 643,871 chunks.
+- The normalized records occupy 759,748,126 bytes and the validated SQLite FTS5 database occupies 913,608,704 bytes. The 25-case lexical gate covers phones, computers, game systems, appliances, tools, a vehicle, a bicycle, safety-sensitive cleanup, and teardowns; every Success, MRR, Recall, and nDCG cutoff is `1.0`, with about 10 ms mean query latency on the development machine.
+- A source-verified 256-dimensional Qwen3-Embedding generation covers every chunk in 980,915,084 bytes. On 20 deliberately non-title paraphrases, strict-AND BM25 found no target, while semantic/hybrid retrieval reached Success@1 `0.4`, Success@5 `0.6`, Success@10 `0.75`, Recall@50 `0.9`, and MRR@10 `0.482222`. Deterministic reranking raised Success@1 to `0.55` and MRR@10 to `0.585615` without changing the other cutoffs. The five top-10 misses remain in the report as a tuning target rather than being removed from the suite.
+- iFixit content remains CC BY-NC-SA 3.0 and may not be used commercially without permission. iFixit's terms prohibit model training. The archive, processed records, indexes, and vectors remain private local artifacts; this repository publishes only acquisition metadata, code, tests, and evaluation judgments.
 
 ### CMake 4.4 documentation
 

@@ -73,6 +73,7 @@ These corpora are implemented and verified in the current development installati
 | DOE Fundamentals Handbooks | DOE-HDBK-1010-92 through 1019-93, Revision 0 archive | 22 volumes, 2,842 pages, 5,533 chunks | Page-aware BM25 |
 | FAA AMT Handbooks — Airframe and Powerplant | FAA-H-8083-31B and FAA-H-8083-32B, 2023 | 2 volumes, 1,552 pages, 3,498 chunks | Page-aware BM25 |
 | Hesperian English health guides | Official 2026-08-20 English catalog; editions 2000–2026 | 432 chapter PDFs, 7,039 pages, 7,386 page/method chunks | Procedure-aware BM25 |
+| iFixit English repair guides | Kiwix complete English snapshot, 2025-12 | 57,118 guides/teardowns, 643,871 procedure chunks | Step-aware BM25 + chunk-level hybrid |
 | GNU Bash reference manual | Bash 5.3, 2025-07-04 generation | 132 documents, 386 chunks | BM25 |
 | GNU Coreutils manual | Coreutils 9.11, 2026-04-20 generation | 253 documents, 639 chunks | BM25 |
 | GNU Awk user's guide | Gawk 5.4, 2026-02-22 generation | 502 documents, 1,332 chunks | BM25 |
@@ -101,7 +102,7 @@ These corpora are implemented and verified in the current development installati
 | Super User Stack Exchange | 2026-06-30 community dump | 1,030,135 retained posts, 1,110,380 chunks | BM25 |
 | Ask Ubuntu Stack Exchange | 2026-06-30 community dump | 789,887 retained posts, 901,300 chunks | BM25 |
 
-The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md), [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md), and [openstax-ingestion.md](docs/openstax-ingestion.md).
+The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md), [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md), [openstax-ingestion.md](docs/openstax-ingestion.md), and [ifixit-ingestion.md](docs/ifixit-ingestion.md).
 
 ## Architecture
 
@@ -342,7 +343,7 @@ Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and re
 
 This is working software under active development, not a turnkey archive download. It is currently optimized for one Windows workstation and has not yet been packaged as a cross-platform installer. The retrieval components are intentionally independent of Ollama, Codex, OpenCode, and any hosted model provider so those integrations can change without invalidating the knowledge library.
 
-The bounded-memory Stack Exchange XML adapter is now validated across 14 sites totaling 4,511,100 retained posts and 5,007,715 chunks. The next major adapter should target manuals/PDFs or textbooks; JATS scientific literature and other high-value sources likewise require structure-preserving importers rather than a generic document loader.
+The bounded-memory Stack Exchange XML adapter is validated across 14 sites totaling 4,511,100 retained posts and 5,007,715 chunks. The iFixit ZIM adapter now adds 57,118 structured guides and teardowns without extracting or duplicating the archive's image tree. A strong next adapter is JATS scientific literature; it likewise requires structure-preserving ingestion rather than a generic document loader.
 
 ## License
 

@@ -5,3 +5,4 @@ pypdf==6.16.1
 mcp==2.0.0
 numpy==2.5.2
 faiss-cpu==1.15.0
+libzim==3.12.0

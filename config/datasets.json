@@ -2446,6 +2446,47 @@
       },
       "status": "evaluated",
       "notes": "Pinned to GCC's official 16.2 release documentation page. The 109,792-byte archive has local SHA-256 b96bc25f0a16619a99b91fcc6f3cefdefcc859a1ebff9f99ab804ba560e89dae; GCC supplied no adjacent archive digest, so tar structure and 80 extracted files / 625,629 bytes were validated. Retrieval excludes the duplicate top page and generated directive, option, and concept indexes. The remaining 76 manual nodes produced 183 chunks and a 659,456-byte verified BM25 database. The 30-topic lexical gate covers preprocessing phases, headers, macros, conditionals, directives, output, compatibility, implementation, and invocation, with every metric cutoff at 1.0."
+    },
+    {
+      "dataset_id": "ifixit-english-2025-12",
+      "name": "iFixit English Offline Archive",
+      "description": "Complete English iFixit repair-guide snapshot packaged by Kiwix, including structured procedure pages and their offline media assets.",
+      "category": "repair-guides",
+      "official_source_url": "https://www.ifixit.com/",
+      "license": "Creative Commons Attribution-NonCommercial-ShareAlike 3.0; noncommercial use only; attribution, source links, and share-alike terms retained; model training is prohibited by iFixit's terms",
+      "attribution": "iFixit and the named guide contributors; offline snapshot produced by Kiwix/openZIM",
+      "release": "Kiwix English all snapshot 2025-12, published 2025-12-23",
+      "update_frequency": "use the newest complete English Kiwix snapshot after validating a versioned replacement",
+      "scope": "complete English iFixit Kiwix archive; guide procedure text, ordered steps, warnings, tools, parts, device/category context, source URLs, and media references are indexed; image binaries remain in the ZIM and are not duplicated into the text index",
+      "formats": ["ZIM", "HTML", "images"],
+      "acquisition": {
+        "method": "http",
+        "location": "https://download.kiwix.org/zim/ifixit/ifixit_en_all_2025-12.zim",
+        "publisher_checksum": "9bb5f3408707fd0300c6ef47a425c3217187f144cd9154a928183816aa72eead",
+        "checksum_manifest": "https://download.kiwix.org/zim/ifixit/ifixit_en_all_2025-12.zim.sha256",
+        "source_url_template": "https://www.ifixit.com/{article_path}"
+      },
+      "ingestion": {
+        "smoke_query": "iPhone battery replacement adhesive connector",
+        "language": "en",
+        "retain_media_in_zim": true,
+        "index_article_prefixes": ["Guide/", "Teardown/"],
+        "exclude_namespaces": ["User", "Answers", "News"]
+      },
+      "storage": {
+        "download_min_bytes": 3570000000,
+        "download_max_bytes": 3580000000,
+        "extracted_max_bytes": 12000000000,
+        "indexed_max_bytes": 12000000000
+      },
+      "paths": {
+        "raw": "corpora/raw/repair/ifixit-english-2025-12",
+        "processed": "corpora/processed/repair/ifixit-english-2025-12",
+        "index": "indexes/repair/ifixit-english-2025-12.sqlite3",
+        "semantic_index": "indexes/semantic/ifixit-english-2025-12"
+      },
+      "status": "evaluated",
+      "notes": "The 3,570,695,757-byte Kiwix archive passed its adjacent publisher SHA-256 and internal ZIM checksum. The structure-aware import examined 58,393 Guide/Teardown candidates and published 55,345 guides plus 1,773 teardowns as 57,118 stable documents and 643,871 ordered procedure chunks; normalized records occupy 759,748,126 bytes and the validated BM25 database occupies 913,608,704 bytes. The 25-case lexical gate achieved every Success, MRR, Recall, and nDCG cutoff at 1.0 with 10.066 ms mean latency. A source-verified 256-dimensional Qwen3-Embedding generation covers every chunk in 980,915,084 bytes. On 20 deliberately non-title paraphrases, strict-AND BM25 found no target, semantic/hybrid retrieval achieved Success@1 0.4, Success@5 0.6, Success@10 0.75, Recall@50 0.9, and MRR@10 0.482222; deterministic reranking raised Success@1 to 0.55 and MRR@10 to 0.585615 while preserving the other cutoffs. Exact identifiers and procedures remain BM25-first while conceptual repair questions can use hybrid retrieval. The raw archive supplies offline images without duplication. This corpus is noncommercial offline reference, is not redistributed, and must not be used to train a model."
     }
   ]
 }
