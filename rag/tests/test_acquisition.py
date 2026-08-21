@@ -92,6 +92,8 @@ class AcquisitionTests(unittest.TestCase):
                     "asset_max_bytes": 20,
                     "asset_magic": "%PDF-",
                     "max_concurrency": 2,
+                    "adjacent_checksum_suffix": ".md5",
+                    "adjacent_checksum_algorithm": "md5",
                     "excluded_relative_paths": ["book_a/book_a_broken.pdf"],
                     "collection_titles": {"book_a": "Book A", "book_b": "Book B"},
                 },
@@ -127,7 +129,7 @@ class AcquisitionTests(unittest.TestCase):
                     "sha256": hashlib.sha256(payload).hexdigest(),
                     "bytes": len(payload),
                     "reused": False,
-                    "publisher_checksum": None,
+                    "publisher_checksum": definition.acquisition.get("publisher_checksum"),
                 }
 
             with (
@@ -136,6 +138,10 @@ class AcquisitionTests(unittest.TestCase):
                     return_value=(catalog, "https://publisher.example/catalog.html"),
                 ),
                 patch("offline_rag.acquisition._download_http", side_effect=fake_download),
+                patch(
+                    "offline_rag.acquisition._fetch_adjacent_checksum",
+                    return_value=hashlib.md5(b"%PDF-x").hexdigest(),
+                ),
             ):
                 manifest = acquire_dataset(registry, "catalog-manuals", root)
             self.assertEqual(manifest["status"], "validated")
@@ -151,6 +157,7 @@ class AcquisitionTests(unittest.TestCase):
             self.assertEqual(titles["book_a/book_a_one.pdf"], "Book A — Chapter One")
             self.assertTrue((root / "raw/catalog-manuals/files/book_b/book_b_two.pdf").is_file())
             self.assertTrue(all(parent_states))
+            self.assertEqual(manifest["integrity"]["publisher_checksums_verified"], 2)
 
     def test_existing_http_file_must_still_satisfy_registered_size_bounds(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -299,6 +306,67 @@ class AcquisitionTests(unittest.TestCase):
                 result = _download_http(dataset, destination)
                 self.assertEqual(destination.read_bytes(), payload)
                 self.assertTrue(result["reused"])
+                self.assertFalse(partial.exists())
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+    def test_http_download_publishes_checksum_verified_complete_partial_without_range_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            payload = b"publisher verified complete partial\n" * 4096
+            requests = 0
+
+            class Handler(BaseHTTPRequestHandler):
+                def do_GET(self):
+                    nonlocal requests
+                    requests += 1
+                    self.send_response(416)
+                    self.end_headers()
+
+                def log_message(self, format, *args):
+                    return
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                dataset = DatasetDefinition(
+                    dataset_id="publisher-partial-fixture",
+                    name="Publisher partial fixture",
+                    description="Fixture",
+                    category="docs",
+                    official_source_url="https://example.invalid",
+                    license="test",
+                    attribution="test",
+                    release="1",
+                    update_frequency="never",
+                    scope="fixture",
+                    formats=("binary",),
+                    acquisition={
+                        "method": "http",
+                        "location": f"http://127.0.0.1:{server.server_port}/docs.bin",
+                        "publisher_checksum_algorithm": "md5",
+                        "publisher_checksum": hashlib.md5(payload).hexdigest(),
+                    },
+                    storage={
+                        "download_min_bytes": len(payload),
+                        "download_max_bytes": len(payload),
+                        "extracted_max_bytes": len(payload),
+                        "indexed_max_bytes": len(payload),
+                    },
+                    paths={"raw": "raw", "processed": "processed", "index": "index"},
+                    status="planned",
+                    notes="",
+                )
+                destination = root / "docs.bin"
+                partial = destination.with_suffix(".bin.partial")
+                partial.write_bytes(payload)
+                result = _download_http(dataset, destination)
+                self.assertEqual(destination.read_bytes(), payload)
+                self.assertTrue(result["reused"])
+                self.assertEqual(requests, 0)
                 self.assertFalse(partial.exists())
             finally:
                 server.shutdown()

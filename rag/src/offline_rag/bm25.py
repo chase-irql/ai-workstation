@@ -8,7 +8,7 @@ import re
 import sqlite3
 import tempfile
 import time
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +21,9 @@ from .records import CommonChunk, chunk_records_to_common, document_record_to_co
 
 INDEX_SCHEMA_VERSION = 2
 TOKENIZER_CONFIGURATION = "unicode61 remove_diacritics 2"
+INSERT_BATCH_SIZE = 5_000
+BUILD_COMMIT_INTERVAL = 1_000_000
+FTS_BUILD_BATCH_SIZE = 250_000
 QUERY_MODES = ("and", "or", "phrase", "exact")
 QUERY_STOP_WORDS = frozenset(
     {
@@ -429,6 +432,7 @@ def build_index(
     database: Path,
     overwrite: bool = False,
     allow_incomplete: bool = False,
+    progress: Callable[[dict[str, object]], None] | None = None,
 ) -> dict[str, object]:
     """Build and validate beside the destination, then atomically publish it."""
 
@@ -452,20 +456,34 @@ def build_index(
     try:
         connection = sqlite3.connect(temporary)
         connection.execute("PRAGMA foreign_keys=ON")
-        connection.execute("PRAGMA journal_mode=WAL")
-        connection.execute("PRAGMA synchronous=NORMAL")
+        # This database is an unpublished scratch artifact until every count,
+        # foreign key, FTS row, and smoke-query check succeeds. Avoid WAL write
+        # amplification during very large first-generation builds; atomic
+        # replacement still protects any existing destination database.
+        connection.execute("PRAGMA journal_mode=OFF")
+        connection.execute("PRAGMA synchronous=OFF")
+        connection.execute("PRAGMA temp_store=MEMORY")
+        connection.execute("PRAGMA cache_size=-262144")
+        connection.execute("PRAGMA locking_mode=EXCLUSIVE")
         connection.executescript(SCHEMA)
+        if progress is not None:
+            progress({"event": "bm25_build_progress", "phase": "documents", "completed": 0})
         document_sql = "INSERT INTO documents VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        for batch in _batched(_document_rows(inputs.documents)):
+        for batch in _batched(_document_rows(inputs.documents), INSERT_BATCH_SIZE):
             connection.executemany(document_sql, batch)
             document_count += len(batch)
+            if progress is not None and document_count % 1_000_000 == 0:
+                progress({"event": "bm25_build_progress", "phase": "documents", "completed": document_count})
         connection.commit()
+        if progress is not None:
+            progress({"event": "bm25_build_progress", "phase": "documents", "completed": document_count})
+            progress({"event": "bm25_build_progress", "phase": "chunks", "completed": 0})
         chunk_sql = (
             "INSERT INTO chunks(chunk_instance_id, content_id, document_id, parent_chunk_id, ordinal, "
             "heading_path, text, character_count, token_count, previous_chunk_id, next_chunk_id, attributes_json) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
-        for batch in _batched(_chunk_rows(inputs.chunks)):
+        for batch in _batched(_chunk_rows(inputs.chunks), INSERT_BATCH_SIZE):
             connection.executemany(chunk_sql, batch)
             chunk_count += len(batch)
             if smoke_expression is None:
@@ -473,14 +491,20 @@ def build_index(
                 terms, _ = query_terms(candidate_text)
                 if terms:
                     smoke_expression = f'"{terms[0]}"'
-            if chunk_count % 10_000 == 0:
+            if chunk_count % BUILD_COMMIT_INTERVAL == 0:
                 connection.commit()
+            if progress is not None and chunk_count % 1_000_000 == 0:
+                progress({"event": "bm25_build_progress", "phase": "chunks", "completed": chunk_count})
         connection.commit()
+        if progress is not None:
+            progress({"event": "bm25_build_progress", "phase": "chunks", "completed": chunk_count})
         if chunk_count == 0 or smoke_expression is None:
             raise ValueError("Cannot build a searchable index with no searchable chunks")
         connection.create_function("technical_normalized", 1, technical_normalized_text, deterministic=True)
-        for first_row in range(1, chunk_count + 1, 10_000):
-            last_row = min(chunk_count, first_row + 9_999)
+        if progress is not None:
+            progress({"event": "bm25_build_progress", "phase": "fts", "completed": 0})
+        for first_row in range(1, chunk_count + 1, FTS_BUILD_BATCH_SIZE):
+            last_row = min(chunk_count, first_row + FTS_BUILD_BATCH_SIZE - 1)
             connection.execute(
                 """
                 INSERT INTO chunks_fts(rowid, title, heading_path, text, technical_normalized)
@@ -493,7 +517,12 @@ def build_index(
                 """,
                 (first_row, last_row),
             )
-            connection.commit()
+            if last_row % BUILD_COMMIT_INTERVAL == 0 or last_row == chunk_count:
+                connection.commit()
+            if progress is not None and last_row % 1_000_000 == 0:
+                progress({"event": "bm25_build_progress", "phase": "fts", "completed": last_row})
+        if progress is not None:
+            progress({"event": "bm25_build_progress", "phase": "fts", "completed": chunk_count})
         final_sizes = _input_sizes(inputs)
         if final_sizes != initial_sizes:
             raise RuntimeError("Input JSONL files changed during index construction")
@@ -769,7 +798,10 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Iterable[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "build":
-        result = build_index(args.input, args.database, args.overwrite, args.allow_incomplete)
+        def report(value: dict[str, object]) -> None:
+            print("BM25_PROGRESS " + json.dumps(value, sort_keys=True), flush=True)
+
+        result = build_index(args.input, args.database, args.overwrite, args.allow_incomplete, progress=report)
     else:
         result = search(args.database, args.query, args.limit, args.mode)
     print(json.dumps(result, ensure_ascii=False, indent=2))

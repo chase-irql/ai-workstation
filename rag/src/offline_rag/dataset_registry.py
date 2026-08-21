@@ -23,7 +23,7 @@ ACQUISITION_METHODS = (
     "official-export",
     "manual",
 )
-PUBLISHER_CHECKSUM_ALGORITHMS = {"sha256": 64, "sha3-256": 64}
+PUBLISHER_CHECKSUM_ALGORITHMS = {"md5": 32, "sha256": 64, "sha3-256": 64}
 
 
 @dataclass(frozen=True)
@@ -180,8 +180,22 @@ def validate_dataset(item: Mapping[str, Any]) -> DatasetDefinition:
             raise ValueError(f"Dataset {dataset_id!r} HTTP catalog min_assets exceeds max_assets")
         if acquisition["asset_min_bytes"] > acquisition["asset_max_bytes"]:
             raise ValueError(f"Dataset {dataset_id!r} HTTP catalog asset_min_bytes exceeds asset_max_bytes")
-        if acquisition["max_concurrency"] > 16:
-            raise ValueError(f"Dataset {dataset_id!r} HTTP catalog max_concurrency must not exceed 16")
+            if acquisition["max_concurrency"] > 16:
+                raise ValueError(f"Dataset {dataset_id!r} HTTP catalog max_concurrency must not exceed 16")
+            checksum_suffix = acquisition.get("adjacent_checksum_suffix")
+            if checksum_suffix is not None:
+                if (
+                    not isinstance(checksum_suffix, str)
+                    or not checksum_suffix
+                    or "/" in checksum_suffix
+                    or "\\" in checksum_suffix
+                    or "?" in checksum_suffix
+                    or "#" in checksum_suffix
+                ):
+                    raise ValueError(f"Dataset {dataset_id!r} has an invalid adjacent checksum suffix")
+                checksum_algorithm = acquisition.get("adjacent_checksum_algorithm", "sha256")
+                if checksum_algorithm not in PUBLISHER_CHECKSUM_ALGORITHMS:
+                    raise ValueError(f"Dataset {dataset_id!r} has an unsupported adjacent checksum algorithm")
         excluded = acquisition.get("excluded_relative_paths", [])
         if not isinstance(excluded, list) or any(not isinstance(value, str) for value in excluded):
             raise ValueError(f"Dataset {dataset_id!r} HTTP catalog excluded_relative_paths must be a string array")

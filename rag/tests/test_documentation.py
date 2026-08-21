@@ -617,6 +617,28 @@ class DocumentationImportTests(unittest.TestCase):
             verification = verify_database(database, output, smoke_queries=("integrity_check pragma",))
             self.assertTrue(verification["verified"])
 
+    def test_mdx_files_are_imported_as_structured_markdown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            (source / "routing.mdx").write_text(
+                "# Framework Routing\n\nUse nested layouts for shared user interface.\n",
+                encoding="utf-8",
+            )
+            output = root / "processed"
+            result = import_documentation(
+                source,
+                output,
+                corpus="framework-docs",
+                source_version="commit-1",
+                license_name="CC-BY-4.0",
+            )
+            self.assertEqual(result["documents"], 1)
+            document = json.loads((output / "documents.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            self.assertEqual(document["title"], "Framework Routing")
+            self.assertEqual(document["attributes"]["format"], "markdown")
+
     def test_file_limit_is_explicitly_incomplete(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

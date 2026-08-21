@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"MDN JavaScript/Web API paraphrase retrieval gate","description":"Natural browser and JavaScript tasks without API-title wording.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"wait-every-promise","query":"wait until every promise finishes including rejected operations","query_type":"paraphrase","relevance":{"mdn-javascript-20260820:13ff169b16b0ac1b46dc5663":3}},
+{"id":"cancel-fetch","query":"cancel an in progress fetch request with a signal","query_type":"paraphrase","relevance":{"mdn-javascript-20260820:d2ed806acacf1e330b7b5d94":3}},
+{"id":"deep-copy-transfer","query":"deep copy object while moving an ArrayBuffer ownership","query_type":"paraphrase","relevance":{"mdn-javascript-20260820:487d8adacdb86c0ca09881b9":3}},
+{"id":"browser-database","query":"start a readwrite transaction in browser object database","query_type":"paraphrase","relevance":{"mdn-javascript-20260820:0d2ddfd6cf4b6c978f4460f8":3}},
+{"id":"runtime-module","query":"load an ECMAScript module conditionally at runtime","query_type":"paraphrase","relevance":{"mdn-javascript-20260820:703efd70f9ff5f2c2d8f1406":3}},
+{"id":"hidden-state","query":"declare class state inaccessible outside its class body","query_type":"paraphrase","relevance":{"mdn-javascript-20260820:49c395723ae60d0d78e0411d":3}}
+]}

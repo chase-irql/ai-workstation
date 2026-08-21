@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"Kotlin documentation paraphrase retrieval gate","description":"Natural Kotlin tasks without documentation-title wording.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"safe-missing-value","query":"call member when value may be absent and provide fallback","query_type":"paraphrase","relevance":{"kotlin-docs-20260820:51cce362c87ffe04ede032d2":3}},
+{"id":"stop-coroutine","query":"stop running coroutine cooperatively when parent job is cancelled","query_type":"paraphrase","relevance":{"kotlin-docs-20260820:501b4ef0a69b5c2648f63434":3}},
+{"id":"property-storage","query":"delegate property storage to reusable lazy observable implementation","query_type":"paraphrase","relevance":{"kotlin-docs-20260820:22a78caadc1c9bb89ecd2d83":3}},
+{"id":"runtime-generic-type","query":"access generic type at runtime from inline function","query_type":"paraphrase","relevance":{"kotlin-docs-20260820:8faed9158b750ac031b16360":3}},
+{"id":"platform-declarations","query":"declare common API with platform specific implementations","query_type":"paraphrase","relevance":{"kotlin-docs-20260820:a7e6a3859e36a1b622670ddb":3}},
+{"id":"java-functional-interface","query":"pass lambda where Java single abstract method interface expected","query_type":"paraphrase","relevance":{"kotlin-docs-20260820:50a57c281099fa6fd7d2651e":3}}
+]}

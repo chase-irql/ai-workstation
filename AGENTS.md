@@ -9,3 +9,6 @@
 - Use deterministic test commands where possible. Do not score a run as successful only because the harness exited with code zero.
 - When a request mentions the offline library, Knowledge Ark, RAG, local corpora, or source-backed local research, load the `search-offline-knowledge` skill before calling the `offline-knowledge` MCP.
 - Use the unified `offline-knowledge` MCP for local research. Do not fall back to the legacy `offline-wikipedia` MCP when a unified search times out; narrow the corpus and retry.
+
+# Alerting User
+- Fire the discord webhook in the file WEBHOOK.txt for progress updates or prompt work completion.

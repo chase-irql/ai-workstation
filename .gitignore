@@ -36,6 +36,7 @@ node_modules/
 *.key
 credentials*.json
 secrets*.json
+/WEBHOOK.txt
 
 # Large model, database, vector, and archive formats
 *.faiss

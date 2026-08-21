@@ -16,6 +16,8 @@ class _Handler(BaseHTTPRequestHandler):
         "/docs/": b'<html><body><h1>Root</h1><a href="a.html">A</a><a href="/outside.html">outside</a></body></html>',
         "/docs/a.html": b'<html><body><h1>A</h1><a href="sub/">Sub</a><a href="missing.html">missing</a><a href="#same">same</a></body></html>',
         "/docs/sub/": b"<html><body><h1>Sub</h1></body></html>",
+        "/docs/swiftui.md": b"# SwiftUI\n\n[View](/docs/swiftui/view)\n\n![Image](/docs/swiftui/image.png)\n",
+        "/docs/swiftui/view.md": b"# View\n\n[Root](/docs/swiftui)\n",
     }
 
     def do_GET(self) -> None:  # noqa: N802
@@ -24,7 +26,8 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
+        content_type = "text/markdown" if self.path.endswith(".md") else "text/html"
+        self.send_header("Content-Type", f"{content_type}; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -95,6 +98,25 @@ class SiteMirrorTests(unittest.TestCase):
                     max_concurrency=1,
                 )
             self.assertEqual(unrelated.read_text(encoding="utf-8"), "keep")
+
+    def test_markdown_variant_crawls_only_the_documentation_namespace(self) -> None:
+        with TemporaryDirectory() as directory:
+            output = Path(directory) / "mirror"
+            namespace = f"http://127.0.0.1:{self.server.server_port}/docs/swiftui"
+            manifest = mirror_site(
+                location=f"{namespace}.md",
+                allowed_prefix=namespace,
+                output=output,
+                max_files=10,
+                max_bytes=100_000,
+                max_concurrency=2,
+                content_variant="markdown",
+            )
+            self.assertEqual(manifest["document_count"], 2)
+            self.assertEqual(manifest["content_variant"], "markdown")
+            self.assertTrue((output / "extracted" / "index.md").is_file())
+            self.assertTrue((output / "extracted" / "view.md").is_file())
+            self.assertFalse((output / "extracted" / "image.png.md").exists())
 
     def test_failed_forced_rebuild_preserves_published_mirror(self) -> None:
         with TemporaryDirectory() as directory:

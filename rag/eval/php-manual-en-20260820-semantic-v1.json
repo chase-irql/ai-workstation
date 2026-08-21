@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"PHP manual paraphrase retrieval gate","description":"Natural PHP development tasks without manual-page titles.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"metadata-reflection","query":"inspect language metadata attached to class using reflection","query_type":"paraphrase","relevance":{"php-manual-en-20260820:044293eca86997d0dc697b54":3}},
+{"id":"cooperative-functions","query":"pause and resume full stack function without generator yield","query_type":"paraphrase","relevance":{"php-manual-en-20260820:dae9bfa8eb93249fa5c13565":3}},
+{"id":"scalar-enum","query":"associate string or integer scalar with enum case","query_type":"paraphrase","relevance":{"php-manual-en-20260820:491356348d421d61e641438e":3}},
+{"id":"expression-branch","query":"select return value with strict comparison expression instead of switch","query_type":"paraphrase","relevance":{"php-manual-en-20260820:da48e7e5449dfbebd6d9edd1":3}},
+{"id":"immutable-property","query":"prevent initialized object property from being modified","query_type":"paraphrase","relevance":{"php-manual-en-20260820:18f4881ca7c9569aa2a48f76":3}},
+{"id":"database-atomic","query":"commit or roll back several PDO database changes atomically","query_type":"paraphrase","relevance":{"php-manual-en-20260820:7746bcc1c3d38efa5ce796d5":3}}
+]}

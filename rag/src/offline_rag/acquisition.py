@@ -35,7 +35,7 @@ WINDOWS_RESERVED_NAMES = frozenset(
 )
 
 
-HASHLIB_ALGORITHMS = {"sha256": "sha256", "sha3-256": "sha3_256"}
+HASHLIB_ALGORITHMS = {"md5": "md5", "sha256": "sha256", "sha3-256": "sha3_256"}
 
 
 def _checksums(path: Path, algorithms: Iterable[str]) -> dict[str, str]:
@@ -184,6 +184,21 @@ def _download_http(dataset: DatasetDefinition, destination: Path, retries: int =
                 else None
             ),
         }
+
+    # A previous run can finish receiving a file but stop before atomically
+    # publishing it (for example, because a conservative size bound rejected
+    # the otherwise valid payload).  Issuing ``Range: bytes=<size>-`` for such
+    # a complete partial produces HTTP 416 on standards-compliant servers.
+    # When a publisher checksum is available, recognize and publish the
+    # complete partial before attempting another network request.  A truncated
+    # partial cannot pass this check and continues through normal range resume.
+    if partial.is_file() and publisher:
+        partial_size = partial.stat().st_size
+        if dataset.storage["download_min_bytes"] <= partial_size <= dataset.storage["download_max_bytes"]:
+            partial_checksum = _checksums(partial, (publisher[0],))[publisher[0]]
+            if partial_checksum == publisher[1]:
+                return _publish_http_partial(dataset, partial, destination, publisher, reused=True)
+
     partial.parent.mkdir(parents=True, exist_ok=True)
     for attempt in range(1, retries + 1):
         existing = partial.stat().st_size if partial.exists() else 0
@@ -573,6 +588,48 @@ def _catalog_relative_path(prefix: str, absolute_url: str) -> str | None:
     return path.as_posix()
 
 
+def _fetch_adjacent_checksum(
+    url: str,
+    algorithm: str,
+    *,
+    timeout: float = 30.0,
+    retries: int = 6,
+) -> str:
+    """Fetch and parse a small publisher checksum sidecar."""
+
+    if algorithm not in PUBLISHER_CHECKSUM_ALGORITHMS:
+        raise ValueError(f"Unsupported adjacent checksum algorithm: {algorithm}")
+    payload: bytes | None = None
+    for attempt in range(retries):
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/plain"})
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                advertised = response.headers.get("Content-Length")
+                if advertised is not None and int(advertised) > 4096:
+                    raise ValueError(f"Checksum sidecar exceeds 4096 bytes: {url}")
+                payload = response.read(4097)
+            break
+        except urllib.error.HTTPError as error:
+            if error.code != 429 or attempt + 1 >= retries:
+                raise
+            retry_after = error.headers.get("Retry-After")
+            delay = float(retry_after) if retry_after and retry_after.isdigit() else min(2**attempt, 30)
+            time.sleep(delay)
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if attempt + 1 >= retries:
+                raise
+            time.sleep(min(2**attempt, 30))
+    if payload is None:
+        raise RuntimeError(f"Checksum sidecar fetch exhausted retries: {url}")
+    if len(payload) > 4096:
+        raise ValueError(f"Checksum sidecar exceeds 4096 bytes: {url}")
+    expected_length = hashlib.new(algorithm).digest_size * 2
+    match = re.search(rf"(?i)(?<![0-9a-f])([0-9a-f]{{{expected_length}}})(?![0-9a-f])", payload.decode("ascii", errors="strict"))
+    if match is None:
+        raise ValueError(f"Checksum sidecar contains no {algorithm} digest: {url}")
+    return match.group(1).lower()
+
+
 def _discover_catalog_assets(
     dataset: DatasetDefinition,
     catalog: bytes,
@@ -671,9 +728,17 @@ def _acquire_http_catalog_file_set(dataset: DatasetDefinition, raw: Path) -> dic
 
     def acquire_one(asset: dict[str, str]) -> dict[str, object]:
         destination = destinations[asset["relative_path"]]
+        acquisition: dict[str, object] = {"method": "http", "location": asset["url"]}
+        checksum_suffix = dataset.acquisition.get("adjacent_checksum_suffix")
+        checksum_url: str | None = None
+        if checksum_suffix is not None:
+            checksum_algorithm = str(dataset.acquisition.get("adjacent_checksum_algorithm", "sha256"))
+            checksum_url = f"{asset['url']}{checksum_suffix}"
+            acquisition["publisher_checksum"] = _fetch_adjacent_checksum(checksum_url, checksum_algorithm)
+            acquisition["publisher_checksum_algorithm"] = checksum_algorithm
         bounded = replace(
             dataset,
-            acquisition={"method": "http", "location": asset["url"]},
+            acquisition=acquisition,
             storage={
                 **dataset.storage,
                 "download_min_bytes": minimum,
@@ -694,6 +759,7 @@ def _acquire_http_catalog_file_set(dataset: DatasetDefinition, raw: Path) -> dic
             "sha256": acquired["sha256"],
             "reused": acquired["reused"],
             "publisher_checksum": acquired["publisher_checksum"],
+            "publisher_checksum_url": checksum_url,
         }
 
     with ThreadPoolExecutor(max_workers=int(dataset.acquisition["max_concurrency"])) as executor:
@@ -730,7 +796,9 @@ def _acquire_http_catalog_file_set(dataset: DatasetDefinition, raw: Path) -> dic
         },
         "integrity": {
             "files_hashed": len(acquired_assets),
-            "publisher_checksums_verified": 0,
+            "publisher_checksums_verified": sum(
+                asset["publisher_checksum"] is not None for asset in acquired_assets
+            ),
             "asset_magic_verified": magic is not None,
             "catalog_snapshot_hashed": True,
         },

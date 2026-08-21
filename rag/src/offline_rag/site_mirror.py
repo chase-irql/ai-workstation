@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import posixpath
+import re
 import shutil
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -22,6 +23,7 @@ from .dataset_registry import load_registry
 
 SITE_MIRROR_SCHEMA_VERSION = 1
 USER_AGENT = "OfflineKnowledgeArk/1.0 (+local documentation preservation)"
+MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)(?:\s+['\"][^'\"]*['\"])?\)")
 
 
 class _LinkParser(HTMLParser):
@@ -63,7 +65,7 @@ def _atomic_json(path: Path, value: Any) -> None:
     os.replace(temporary, path)
 
 
-def _canonical_url(url: str, allowed_prefix: str) -> str | None:
+def _canonical_url(url: str, allowed_prefix: str, content_variant: str = "html") -> str | None:
     parsed = urlsplit(url)
     allowed = urlsplit(allowed_prefix)
     if parsed.scheme.casefold() != allowed.scheme.casefold() or parsed.netloc.casefold() != allowed.netloc.casefold():
@@ -71,6 +73,24 @@ def _canonical_url(url: str, allowed_prefix: str) -> str | None:
     path = posixpath.normpath(parsed.path or "/")
     if parsed.path.endswith("/") and not path.endswith("/"):
         path += "/"
+    if content_variant == "markdown":
+        base = allowed.path.rstrip("/")
+        folded_path = path.casefold()
+        folded_base = base.casefold()
+        if folded_path == folded_base:
+            path = f"{path}.md"
+        elif folded_path == f"{folded_base}/":
+            path = f"{path.rstrip('/')}.md"
+        elif folded_path == f"{folded_base}.md":
+            pass
+        elif folded_path.startswith(f"{folded_base}/"):
+            if not folded_path.endswith(".md"):
+                path = f"{path}.md"
+        else:
+            return None
+        if not path.casefold().endswith(".md"):
+            return None
+        return urlunsplit((allowed.scheme, allowed.netloc, path, "", ""))
     if path.casefold().endswith("/index.html"):
         path = path[: -len("index.html")]
     if not path.startswith(allowed.path):
@@ -92,10 +112,16 @@ def _safe_segment(segment: str) -> str:
     return value or "_"
 
 
-def _relative_path(url: str, allowed_prefix: str) -> str:
+def _relative_path(url: str, allowed_prefix: str, content_variant: str = "html") -> str:
     parsed = urlsplit(url)
     allowed = urlsplit(allowed_prefix)
-    relative = parsed.path[len(allowed.path) :]
+    if content_variant == "markdown":
+        base = allowed.path.rstrip("/")
+        if parsed.path.casefold() == f"{base.casefold()}.md":
+            return "index.md"
+        relative = parsed.path[len(base) :].lstrip("/")
+    else:
+        relative = parsed.path[len(allowed.path) :]
     segments = [_safe_segment(segment) for segment in relative.split("/") if segment]
     if parsed.path.endswith("/") or not segments:
         segments.append("index.html")
@@ -105,31 +131,43 @@ def _relative_path(url: str, allowed_prefix: str) -> str:
 
 
 def _fetch_page(
-    url: str, allowed_prefix: str, *, timeout: float = 60.0, retries: int = 3
+    url: str,
+    allowed_prefix: str,
+    *,
+    content_variant: str = "html",
+    timeout: float = 60.0,
+    retries: int = 3,
 ) -> tuple[MirroredPage | SkippedPage, bytes]:
     last_error: Exception | None = None
     for attempt in range(retries):
         try:
-            request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"})
+            accept = "text/markdown,text/plain" if content_variant == "markdown" else "text/html,application/xhtml+xml"
+            request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": accept})
             with urlopen(request, timeout=timeout) as response:
-                final_url = _canonical_url(response.geturl(), allowed_prefix)
+                final_url = _canonical_url(response.geturl(), allowed_prefix, content_variant)
                 if final_url is None:
                     raise ValueError(f"Redirect escaped the configured site prefix: {response.geturl()}")
                 content_type = (response.headers.get_content_type() or "").casefold()
-                if content_type not in {"text/html", "application/xhtml+xml"}:
+                allowed_types = {"text/markdown", "text/plain"} if content_variant == "markdown" else {"text/html", "application/xhtml+xml"}
+                if content_type not in allowed_types:
                     raise ValueError(f"Unexpected content type {content_type!r} for {url}")
                 data = response.read()
                 charset = response.headers.get_content_charset() or "utf-8"
-            parser = _LinkParser()
-            parser.feed(data.decode(charset, errors="replace"))
+            decoded = data.decode(charset, errors="replace")
+            if content_variant == "markdown":
+                discovered = (match.group(1) for match in MARKDOWN_LINK_RE.finditer(decoded))
+            else:
+                parser = _LinkParser()
+                parser.feed(decoded)
+                discovered = iter(parser.links)
             links = {
                 normalized
-                for href in parser.links
-                if (normalized := _canonical_url(urljoin(final_url, href), allowed_prefix)) is not None
+                for href in discovered
+                if (normalized := _canonical_url(urljoin(final_url, href), allowed_prefix, content_variant)) is not None
             }
             return MirroredPage(
                 url=final_url,
-                relative_path=_relative_path(final_url, allowed_prefix),
+                relative_path=_relative_path(final_url, allowed_prefix, content_variant),
                 byte_count=len(data),
                 sha256=hashlib.sha256(data).hexdigest(),
                 links=tuple(sorted(links)),
@@ -166,6 +204,7 @@ def mirror_site(
     max_files: int,
     max_bytes: int,
     max_concurrency: int,
+    content_variant: str = "html",
     force: bool = False,
     stop_after: int | None = None,
 ) -> dict[str, Any]:
@@ -176,7 +215,9 @@ def mirror_site(
     trusts a partially downloaded page.
     """
 
-    location = _canonical_url(location, allowed_prefix) or ""
+    if content_variant not in {"html", "markdown"}:
+        raise ValueError("content_variant must be 'html' or 'markdown'")
+    location = _canonical_url(location, allowed_prefix, content_variant) or ""
     if not location:
         raise ValueError("location must be inside allowed_prefix")
     if max_files < 1 or max_bytes < 1 or not 1 <= max_concurrency <= 16:
@@ -205,7 +246,11 @@ def mirror_site(
         state = json.loads(state_path.read_text(encoding="utf-8"))
         if state.get("schema_version") != SITE_MIRROR_SCHEMA_VERSION:
             raise ValueError("Site mirror checkpoint schema mismatch")
-        if state.get("location") != location or state.get("allowed_prefix") != allowed_prefix:
+        if (
+            state.get("location") != location
+            or state.get("allowed_prefix") != allowed_prefix
+            or state.get("content_variant", "html") != content_variant
+        ):
             raise ValueError("Site mirror checkpoint configuration mismatch")
         state.setdefault("skipped", {})
     else:
@@ -213,6 +258,7 @@ def mirror_site(
             "schema_version": SITE_MIRROR_SCHEMA_VERSION,
             "location": location,
             "allowed_prefix": allowed_prefix,
+            "content_variant": content_variant,
             "pending": [location],
             "pages": {},
             "skipped": {},
@@ -225,7 +271,12 @@ def mirror_site(
         batch = sorted(set(state["pending"][:max_concurrency]))
         state["pending"] = state["pending"][len(batch) :]
         with ThreadPoolExecutor(max_workers=max_concurrency) as executor:
-            fetched = list(executor.map(lambda url: _fetch_page(url, allowed_prefix), batch))
+            fetched = list(
+                executor.map(
+                    lambda url: _fetch_page(url, allowed_prefix, content_variant=content_variant),
+                    batch,
+                )
+            )
         for page, data in fetched:
             if isinstance(page, SkippedPage):
                 state["skipped"][page.url] = {"http_status": page.status}
@@ -278,6 +329,7 @@ def mirror_site(
         "acquired_at": datetime.now(timezone.utc).isoformat(),
         "location": location,
         "allowed_prefix": allowed_prefix,
+        "content_variant": content_variant,
         "document_count": len(inventory),
         "byte_count": state["byte_count"],
         "aggregate_sha256": aggregate.hexdigest(),
@@ -324,13 +376,17 @@ def main(argv: list[str] | None = None) -> int:
     acquisition = dataset.acquisition
     if acquisition.get("method") != "http-site-mirror":
         raise ValueError(f"Dataset {args.dataset!r} is not an HTTP site mirror")
+    content_variant = str(acquisition.get("content_variant", "html"))
+    location = str(acquisition.get("variant_location", acquisition["location"]))
+    allowed_prefix = str(acquisition.get("variant_allowed_prefix", acquisition["allowed_prefix"]))
     manifest = mirror_site(
-        location=str(acquisition["location"]),
-        allowed_prefix=str(acquisition["allowed_prefix"]),
+        location=location,
+        allowed_prefix=allowed_prefix,
         output=(args.project_root / dataset.paths["raw"]),
         max_files=int(acquisition["max_files"]),
         max_bytes=int(acquisition["max_bytes"]),
         max_concurrency=int(acquisition["max_concurrency"]),
+        content_variant=content_variant,
         force=args.force,
     )
     print(json.dumps({key: manifest[key] for key in ("document_count", "byte_count", "aggregate_sha256")}, indent=2))

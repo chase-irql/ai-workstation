@@ -30,7 +30,7 @@ from .records import CommonChunk, CommonDocument, make_content_id, normalize_con
 DOCUMENTATION_MANIFEST_SCHEMA_VERSION = 1
 PORTABLE_NAMES_MARKER = ".archive-name-encoding-v1.json"
 SUPPORTED_SUFFIXES = frozenset(
-    {".html", ".htm", ".md", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod", ".xml", ".go"}
+    {".html", ".htm", ".md", ".mdx", ".markdown", ".rst", ".adoc", ".asciidoc", ".txt", ".man", ".roff", ".pod", ".xml", ".go"}
     | {f".{number}" for number in range(1, 10)}
 )
 SUPPORTED_COMPOUND_SUFFIXES = (".html.en",)
@@ -1549,7 +1549,7 @@ def parse_document(path: Path, text: str) -> ParsedDocument:
         if path.name.casefold() in go_titles and path.parent.name.casefold() == "doc":
             return ParsedDocument(go_titles[path.name.casefold()], parsed.blocks, parsed.format)
         return parsed
-    if suffix in {".md", ".markdown"} or path.name.casefold().endswith((".md.in", ".markdown.in")):
+    if suffix in {".md", ".mdx", ".markdown"} or path.name.casefold().endswith((".md.in", ".markdown.in")):
         return parse_markdown(text, fallback)
     if suffix == ".rst":
         return parse_rst(text, fallback)

@@ -1,0 +1,6 @@
+{"schema_version":2,"name":"ECMAScript 2026 paraphrase chunk smoke gate","description":"Natural semantic questions over the single normative specification document.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"thenable-assimilation","query":"adopt the eventual state of a thenable object","query_type":"paraphrase","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+{"id":"module-suspension","query":"pause module evaluation until asynchronous operation completes","query_type":"paraphrase","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+{"id":"object-interception","query":"intercept fundamental object operations through handler methods","query_type":"paraphrase","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+{"id":"shared-memory-block","query":"block execution until shared integer memory changes","query_type":"paraphrase","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}}
+]}

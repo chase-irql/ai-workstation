@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"Swift language book paraphrase retrieval gate","description":"Natural Swift tasks without chapter-title wording.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"shared-state-serialization","query":"protect mutable shared state by serializing access in concurrent code","query_type":"paraphrase","relevance":{"swift-book-20260820:0f88dcba8e4124a8a148c3f1":3}},
+{"id":"avoid-retain-cycle","query":"reference another object without keeping it alive avoid ownership cycle","query_type":"paraphrase","relevance":{"swift-book-20260820:c2e05ac7d4ad80c76ce178fe":3}},
+{"id":"placeholder-associated","query":"protocol requirement names placeholder type selected by conforming type","query_type":"paraphrase","relevance":{"swift-book-20260820:964f7e91f9761724983a7ac7":3}},
+{"id":"generic-constraints","query":"require two generic parameters share same element type","query_type":"paraphrase","relevance":{"swift-book-20260820:5b686ed9c80500dd1708ea0c":3}},
+{"id":"wrapped-storage","query":"add reusable behavior around stored property declaration","query_type":"paraphrase","relevance":{"swift-book-20260820:9418d8b5135b73c1c0294d28":3}},
+{"id":"hidden-concrete-return","query":"return protocol conforming value while hiding concrete type","query_type":"paraphrase","relevance":{"swift-book-20260820:9a5769daa1cb680b397d1840":3}}
+]}

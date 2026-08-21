@@ -179,6 +179,15 @@ Python's official documentation is a practical first run. It is small enough to 
 
 Those commands use CPU-only BM25 retrieval. No chat model is loaded.
 
+Large corpus adapters use the same publication gates with corpus-specific parsers. For example, the PubMed baseline is publisher-checksum verified, streamed directly from gzip XML into resumable compressed shards, and only then indexed:
+
+```powershell
+.\scripts\acquire-dataset.ps1 -DatasetId pubmed-baseline-2026
+.\scripts\run-pubmed-pipeline.ps1
+```
+
+See [PubMed baseline ingestion](docs/pubmed-ingestion.md) for its record model, recovery behavior, storage layout, and update process.
+
 ### Add semantic retrieval
 
 After the BM25 index passes its evaluation gate, build and evaluate an independent vector generation:

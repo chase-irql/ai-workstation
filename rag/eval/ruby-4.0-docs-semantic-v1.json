@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"Ruby 4.0 documentation paraphrase retrieval gate","description":"Natural Ruby tasks without RDoc page titles.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"destructure-shape","query":"destructure object by shape and require matching keys","query_type":"paraphrase","relevance":{"ruby-4.0-docs:5360ca0ce874078fa4e8a7c1":3}},
+{"id":"callable-semantics","query":"difference between strict anonymous callable and non strict block object","query_type":"paraphrase","relevance":{"ruby-4.0-docs:66d10b59d4c717f02a8f0fc8":3}},
+{"id":"parallel-isolation","query":"execute Ruby code in parallel with isolated shareable objects","query_type":"paraphrase","relevance":{"ruby-4.0-docs:181761d5501885573bfcd83c":3}},
+{"id":"async-io-hook","query":"integrate nonblocking IO event loop with lightweight execution context","query_type":"paraphrase","relevance":{"ruby-4.0-docs:6d952b17ff41d76c90a97978":3}},
+{"id":"scoped-monkey-patch","query":"limit class method modifications to lexical region","query_type":"paraphrase","relevance":{"ruby-4.0-docs:7a9c9c204c6d8528908e556a":3}},
+{"id":"unsafe-deserialize","query":"security risk loading serialized bytes from untrusted source","query_type":"paraphrase","relevance":{"ruby-4.0-docs:b5c591cb81473f859a61fba7":3}}
+]}

@@ -1,0 +1,8 @@
+{"schema_version":2,"name":"Java SE/JDK 26 paraphrase retrieval gate","description":"Natural task descriptions that avoid copying documentation titles.","candidate_chunks":50,"success_cutoffs":[1,5,10],"recall_cutoffs":[5,10,50],"mrr_cutoff":10,"ndcg_cutoff":10,"query_mode":"and","cases":[
+{"id":"lightweight-tasks","query":"launch millions lightweight tasks without dedicated operating system thread","query_type":"paraphrase","relevance":{"java-se-jdk-26-docs:195c18f288c0368337f6b27c":3}},
+{"id":"cancel-siblings","query":"cancel sibling subtasks when one concurrent operation fails","query_type":"paraphrase","relevance":{"java-se-jdk-26-docs:631c01d6d607d73e225025df":3}},
+{"id":"data-carrier","query":"immutable data carrier generated accessors equals hashCode","query_type":"paraphrase","relevance":{"java-se-jdk-26-docs:737c467dd474f9ce08136268":3}},
+{"id":"restricted-inheritance","query":"restrict which classes may inherit from base type","query_type":"paraphrase","relevance":{"java-se-jdk-26-docs:0e70f6d08ce73604b4f26a1d":3}},
+{"id":"switch-binding","query":"test object type bind variable inside switch case","query_type":"paraphrase","relevance":{"java-se-jdk-26-docs:bccece5473e8c8a6df062f81":3}},
+{"id":"stream-intermediate","query":"custom stateful intermediate operation stream pipeline","query_type":"paraphrase","relevance":{"java-se-jdk-26-docs:ceab410b4e714d6859613142":3}}
+]}

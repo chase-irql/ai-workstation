@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 80)
+        self.assertGreaterEqual(len(datasets), 107)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -59,6 +59,45 @@ class DatasetRegistryTests(unittest.TestCase):
         self.assertIn("openstax-principles-economics", dataset_ids)
         self.assertIn("openstax-psychology", dataset_ids)
         self.assertIn("ifixit-english-2025-12", dataset_ids)
+        self.assertIn("swiftui-docs-20260820", dataset_ids)
+        self.assertIn("pubmed-baseline-2026", dataset_ids)
+        self.assertTrue(
+            {
+                "react-docs-20260820",
+                "nextjs-docs-20260820",
+                "vue-docs-20260820",
+                "angular-docs-20260820",
+                "django-docs-20260820",
+                "fastapi-docs-20260820",
+                "flask-docs-20260820",
+                "spring-boot-docs-20260820",
+                "aspnetcore-docs-20260820",
+                "laravel-docs-13",
+                "rails-guides-20260820",
+                "ktor-docs-20260820",
+            }.issubset(dataset_ids)
+        )
+        self.assertTrue(
+            {
+                "windows-server-docs-20260820",
+                "powershell-docs-20260820",
+                "wsl-docs-20260820",
+                "win32-docs-20260820",
+                "sysinternals-docs-20260820",
+            }.issubset(dataset_ids)
+        )
+        self.assertTrue(
+            {
+                "gradle-docs-20260820",
+                "maven-docs-20260820",
+                "npm-docs-20260820",
+                "pnpm-docs-20260820",
+                "yarn-berry-docs-20260820",
+                "composer-docs-20260820",
+                "bundler-docs-20260820",
+                "swiftpm-docs-20260820",
+            }.issubset(dataset_ids)
+        )
         self.assertTrue(
             {
                 "coreutils-9.11-manual",
@@ -96,8 +135,8 @@ class DatasetRegistryTests(unittest.TestCase):
             }.issubset(dataset_ids)
         )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 30_000_000_000)
-        self.assertLess(summary["indexed_max_bytes"], 150_000_000_000)
+        self.assertLess(summary["download_max_bytes"], 650_000_000_000)
+        self.assertLess(summary["indexed_max_bytes"], 650_000_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -170,7 +209,7 @@ class DatasetRegistryTests(unittest.TestCase):
             dataset = load_registry(registry)[0]
             self.assertEqual(dataset.acquisition["publisher_checksum_algorithm"], "sha3-256")
 
-            invalid = {**template, "acquisition": {**template["acquisition"], "publisher_checksum_algorithm": "md5"}}
+            invalid = {**template, "acquisition": {**template["acquisition"], "publisher_checksum_algorithm": "sha1"}}
             registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}))
             with self.assertRaisesRegex(ValueError, "unsupported publisher checksum algorithm"):
                 load_registry(registry)
