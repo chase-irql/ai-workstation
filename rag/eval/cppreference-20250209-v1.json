@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "name": "cppreference C and C++ lexical gate",
+  "description": "Stable-document-ID gate for modern C++ containers, ownership, ranges, concurrency, coroutines, and utility types.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"vector-reserve","query":"vector reserve invalidation","query_type":"containers","relevance":{"cppreference-20250209:b75058485c2df771a8ad0774":3}},
+    {"id":"make-unique","query":"unique_ptr make_unique","query_type":"memory","relevance":{"cppreference-20250209:5efc086b3acbe41ef7799968":3}},
+    {"id":"filter-view","query":"ranges views filter","query_type":"ranges","relevance":{"cppreference-20250209:d9703b6772aa2340813787c6":3}},
+    {"id":"co-await","query":"coroutine co_await","query_type":"language","relevance":{"cppreference-20250209:bceed4862e76a5b74e427aca":3}},
+    {"id":"stop-token","query":"jthread stop_token","query_type":"concurrency","relevance":{"cppreference-20250209:5580635e942105cfcd065282":3}},
+    {"id":"memory-order","query":"memory_order acquire release","query_type":"concurrency","relevance":{"cppreference-20250209:37cb8c815f8a92fa8328aeb2":3}},
+    {"id":"variant-visit","query":"variant visit","query_type":"utilities","relevance":{"cppreference-20250209:b822f952bf3a875fdc78588c":3}},
+    {"id":"filesystem-path","query":"std filesystem path","query_type":"filesystem","relevance":{"cppreference-20250209:9591d6156a38556cf98634f2":3}},
+    {"id":"span","query":"std span","query_type":"containers","relevance":{"cppreference-20250209:dd23063fc553da686e01d3bf":3}},
+    {"id":"expected","query":"expected unexpected","query_type":"utilities","relevance":{"cppreference-20250209:f8483330ce930a8876244a62":3}}
+  ]
+}

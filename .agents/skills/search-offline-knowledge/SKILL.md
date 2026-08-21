@@ -17,6 +17,9 @@ retry the query, not permission to bypass it.
    - Practical health, first aid, sanitation, and community medicine: `hesperian-english-health-guides-20260820`.
    - Device repair, disassembly, maintenance, parts, and tools: `ifixit-english-2025-12`.
    - Internet standards and protocol behavior: `rfc-editor-text`; exact assignments: `iana-protocol-registries`.
+   - Programming questions: prefer the language's official versioned documentation over community answers. Use `java-se-jdk-26-docs`, `kotlin-docs-20260820`, `php-manual-en-20260820`, `ruby-4.0-docs`, or `swift-book-20260820` when the language is explicit.
+   - JavaScript and browser APIs: use `mdn-javascript-20260820` for practical API/language guidance and `ecmascript-2026-spec` when normative language semantics or algorithms matter.
+   - C and C++ library/language reference: use `cppreference-20250209`, while clearly identifying it as community-maintained rather than an ISO standard.
    - General encyclopedic questions: `wikipedia`.
    - Use `knowledge_index_status` to discover other exact corpus IDs rather than guessing.
 2. Form a short retrieval query from two to six distinctive subject terms. Do not copy conversational scaffolding or inject an authority such as WHO unless the user requested it.

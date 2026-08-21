@@ -17,6 +17,7 @@ ACQUISITION_METHODS = (
     "http",
     "http-file-set",
     "http-catalog-file-set",
+    "http-site-mirror",
     "git",
     "rsync",
     "official-export",
@@ -213,6 +214,28 @@ def validate_dataset(item: Mapping[str, Any]) -> DatasetDefinition:
                     or not title.strip()
                 ):
                     raise ValueError(f"Dataset {dataset_id!r} HTTP catalog collection_titles is invalid")
+    if method == "http-site-mirror":
+        allowed_prefix = acquisition.get("allowed_prefix")
+        parsed_prefix = urlparse(allowed_prefix) if isinstance(allowed_prefix, str) else None
+        if (
+            not parsed_prefix
+            or parsed_prefix.scheme != "https"
+            or not parsed_prefix.netloc
+            or parsed_prefix.query
+            or parsed_prefix.fragment
+            or not allowed_prefix.endswith("/")
+        ):
+            raise ValueError(
+                f"Dataset {dataset_id!r} HTTP site mirror allowed_prefix must be a query-free HTTPS directory URL"
+            )
+        if not location.startswith(allowed_prefix):
+            raise ValueError(f"Dataset {dataset_id!r} HTTP site mirror location must be inside allowed_prefix")
+        for field in ("max_files", "max_bytes", "max_concurrency"):
+            value = acquisition.get(field)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise ValueError(f"Dataset {dataset_id!r} HTTP site mirror field {field!r} must be a positive integer")
+        if acquisition["max_concurrency"] > 16:
+            raise ValueError(f"Dataset {dataset_id!r} HTTP site mirror max_concurrency must not exceed 16")
     publisher_checksum = acquisition.get("publisher_checksum")
     publisher_algorithm = acquisition.get("publisher_checksum_algorithm", "sha256")
     if publisher_checksum is not None:

@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "name": "Swift language book lexical gate",
+  "description": "Stable-document-ID gate for Swift concurrency, ownership, protocols, generics, and language syntax.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"actors","query":"actor isolation","query_type":"concurrency","relevance":{"swift-book-20260820:0f88dcba8e4124a8a148c3f1":3}},
+    {"id":"sendable","query":"Sendable protocol","query_type":"concurrency","relevance":{"swift-book-20260820:71c876e72fc5264399ccd9eb":3}},
+    {"id":"arc","query":"automatic reference counting weak unowned","query_type":"memory","relevance":{"swift-book-20260820:c2e05ac7d4ad80c76ce178fe":3}},
+    {"id":"associated-types","query":"associated type protocol","query_type":"protocols","relevance":{"swift-book-20260820:964f7e91f9761724983a7ac7":3}},
+    {"id":"where-clause","query":"generic where clause","query_type":"generics","relevance":{"swift-book-20260820:5b686ed9c80500dd1708ea0c":3}},
+    {"id":"property-wrapper","query":"property wrapper","query_type":"language","relevance":{"swift-book-20260820:9418d8b5135b73c1c0294d28":3}},
+    {"id":"opaque-types","query":"opaque result type","query_type":"types","relevance":{"swift-book-20260820:9a5769daa1cb680b397d1840":3}},
+    {"id":"patterns","query":"switch pattern","query_type":"language","relevance":{"swift-book-20260820:b78a6909acea73fb47300223":3}},
+    {"id":"closures","query":"escaping closure","query_type":"language","relevance":{"swift-book-20260820:cb13271bf18da20085032ad9":3}},
+    {"id":"errors","query":"error handling defer","query_type":"language","relevance":{"swift-book-20260820:501182ae8720dd9e07bdc37e":3}}
+  ]
+}

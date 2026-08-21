@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "name": "ECMAScript 2026 specification lexical smoke gate",
+  "description": "Chunk-retrieval smoke gate for the pinned normative specification. The source is intentionally represented as one specification document, so document-level recall is not a clause-discrimination metric.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"promise-resolve","query":"Promise resolve","query_type":"builtins","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"weakref","query":"WeakRef FinalizationRegistry","query_type":"memory","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"top-level-await","query":"top level await","query_type":"modules","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"proxy","query":"Proxy internal methods","query_type":"objects","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"private-fields","query":"private fields","query_type":"classes","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"async-generator","query":"async generator","query_type":"iteration","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"atomics","query":"Atomics wait","query_type":"concurrency","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}},
+    {"id":"unicode-sets","query":"unicode sets","query_type":"regexp","relevance":{"ecmascript-2026-spec:181371b08d71216599b0accc":3}}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "name": "Kotlin documentation lexical gate",
+  "description": "Stable-document-ID gate for Kotlin language, multiplatform, and coroutine guidance.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"null-safety","query":"null safety nullable types","query_type":"language","relevance":{"kotlin-docs-20260820:51cce362c87ffe04ede032d2":3}},
+    {"id":"coroutine-cancel","query":"coroutine cancellation exceptions","query_type":"coroutines","relevance":{"kotlin-docs-20260820:501b4ef0a69b5c2648f63434":3}},
+    {"id":"delegates","query":"delegated properties lazy","query_type":"language","relevance":{"kotlin-docs-20260820:22a78caadc1c9bb89ecd2d83":3}},
+    {"id":"inline-reified","query":"inline functions reified","query_type":"language","relevance":{"kotlin-docs-20260820:8faed9158b750ac031b16360":3}},
+    {"id":"data-copy","query":"data classes copy","query_type":"language","relevance":{"kotlin-docs-20260820:d3611a794cc2fa6eefb3fea2":3}},
+    {"id":"extensions","query":"extension functions","query_type":"language","relevance":{"kotlin-docs-20260820:9b1a89f55e5aa39f8e552f37":3}},
+    {"id":"expect-actual","query":"expect actual declarations","query_type":"multiplatform","relevance":{"kotlin-docs-20260820:a7e6a3859e36a1b622670ddb":3}},
+    {"id":"lazy-sequence","query":"sequences lazy","query_type":"collections","relevance":{"kotlin-docs-20260820:81db21e0a2621d43cb7dd09f":3}},
+    {"id":"sam","query":"SAM conversions","query_type":"interop","relevance":{"kotlin-docs-20260820:50a57c281099fa6fd7d2651e":3}},
+    {"id":"contracts","query":"contracts smart casts","query_type":"language","relevance":{"kotlin-docs-20260820:8faed9158b750ac031b16360":3}}
+  ]
+}

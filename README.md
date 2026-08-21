@@ -47,6 +47,14 @@ These corpora are implemented and verified in the current development installati
 | Kubernetes documentation | Official snapshot at `5184b9b…` (2026-08-20) | 1,605 documents, 14,164 chunks | BM25 |
 | Rust documentation | Rust 1.97.1 stable | 7,570 documents, 57,178 chunks | BM25 |
 | TypeScript documentation | Official snapshot at `90e92beb…` (2026-08-20) | 77 documents, 935 chunks | BM25 |
+| Java SE and JDK documentation | Java 26 versioned publication (2026-08-20 mirror) | 6,266 documents, 59,627 chunks | BM25 + chunk-level hybrid |
+| MDN JavaScript and Web APIs | Official `mdn/content` snapshot at `69010c9e…` | 9,415 documents, 53,684 chunks | BM25 + chunk-level hybrid |
+| ECMAScript specification | Signed ES2026 errata tag at `d89c03f2…` | 2 documents, 1,783 structural chunks | BM25 + chunk-level hybrid |
+| cppreference C and C++ | Offline HTML book dated 2025-02-09 | 6,635 documents, 49,307 chunks | BM25 + chunk-level hybrid |
+| Kotlin documentation | Official website snapshot at `0f0ac326…` | 303 documents, 4,289 chunks | BM25 + chunk-level hybrid |
+| PHP manual | Official English generated manual, 2026-08-20 | 11,788 documents, 65,592 chunks | BM25 + chunk-level hybrid |
+| Ruby documentation | Ruby 4.0 versioned publication (2026-08-20 mirror) | 1,254 documents, 6,192 chunks | BM25 + chunk-level hybrid |
+| The Swift Programming Language | Official book snapshot at `fb79af5d…` | 43 documents, 769 chunks | BM25 + chunk-level hybrid |
 | GNU GDB manual | GDB 17.2 last-release documentation | 863 documents, 2,225 chunks | BM25 |
 | GNU GCC manual | GCC 16.2 release documentation | 523 documents, 1,695 chunks | BM25 |
 | Linux kernel documentation | Linux 7.2 release source | 4,154 documents, 29,142 chunks | BM25 |
@@ -102,7 +110,7 @@ These corpora are implemented and verified in the current development installati
 | Super User Stack Exchange | 2026-06-30 community dump | 1,030,135 retained posts, 1,110,380 chunks | BM25 |
 | Ask Ubuntu Stack Exchange | 2026-06-30 community dump | 789,887 retained posts, 901,300 chunks | BM25 |
 
-The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md), [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md), [openstax-ingestion.md](docs/openstax-ingestion.md), and [ifixit-ingestion.md](docs/ifixit-ingestion.md).
+The evaluation suites are deliberately small quality gates, not claims of universal retrieval accuracy. Source versions, licenses, checksums, local paths, and update rules for every published corpus are summarized in the [corpus catalog](docs/corpus-catalog.md). Current measurements and limitations are documented in [language-documentation-expansion.md](docs/language-documentation-expansion.md), [corpus-semantic-roadmap.md](docs/corpus-semantic-roadmap.md), [documentation-corpus-ingestion.md](docs/documentation-corpus-ingestion.md), [openstax-ingestion.md](docs/openstax-ingestion.md), and [ifixit-ingestion.md](docs/ifixit-ingestion.md).
 
 ## Architecture
 

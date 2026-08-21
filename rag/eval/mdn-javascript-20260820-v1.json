@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "MDN JavaScript and Web API lexical gate",
+  "description": "Stable-document-ID gate for JavaScript built-ins, browser APIs, modules, and language syntax.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {"id":"promise-allsettled","query":"Promise allSettled","query_type":"javascript","relevance":{"mdn-javascript-20260820:13ff169b16b0ac1b46dc5663":3}},
+    {"id":"abort-controller","query":"AbortController abort","query_type":"web-api","relevance":{"mdn-javascript-20260820:d2ed806acacf1e330b7b5d94":3}},
+    {"id":"structured-clone","query":"structuredClone transfer","query_type":"web-api","relevance":{"mdn-javascript-20260820:487d8adacdb86c0ca09881b9":3}},
+    {"id":"indexeddb","query":"IndexedDB transaction","query_type":"web-api","relevance":{"mdn-javascript-20260820:0d2ddfd6cf4b6c978f4460f8":3}},
+    {"id":"websocket-close","query":"WebSocket close","query_type":"web-api","relevance":{"mdn-javascript-20260820:31beb7bdd500d878e79ffce2":3}},
+    {"id":"intl-segmenter","query":"Intl Segmenter","query_type":"javascript","relevance":{"mdn-javascript-20260820:7631b5eb30c6a74be2746ec7":3}},
+    {"id":"proxy-traps","query":"Proxy handler traps","query_type":"javascript","relevance":{"mdn-javascript-20260820:1340c571ec6cecc02ebb4ab1":3}},
+    {"id":"weakref","query":"WeakRef FinalizationRegistry","query_type":"javascript","relevance":{"mdn-javascript-20260820:314b2cb8e4c2d2113fa6e79d":3}},
+    {"id":"dynamic-import","query":"dynamic import modules","query_type":"modules","relevance":{"mdn-javascript-20260820:703efd70f9ff5f2c2d8f1406":3}},
+    {"id":"private-fields","query":"private class fields","query_type":"language","relevance":{"mdn-javascript-20260820:49c395723ae60d0d78e0411d":3}}
+  ]
+}

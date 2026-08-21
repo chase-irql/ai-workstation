@@ -2,6 +2,8 @@
 
 The documentation pipeline is the first corpus-neutral path beside Wikipedia. It keeps acquisition, parsing, indexing, and evaluation separate so a failed update cannot replace a working corpus or database.
 
+The language-documentation expansion also supports bounded resumable HTML site mirrors and MDN macro normalization. Its eight source-specific acquisition records, scales, redistribution constraints, evaluation scope, and update workflow are documented in [language-documentation-expansion.md](language-documentation-expansion.md).
+
 The same pipeline now handles the pinned official Docker and Kubernetes Markdown sites. Hugo presentation wrappers are removed without discarding their enclosed prose; human-visible glossary labels, links, feature-state markers, includes, and generated headings are converted to deterministic text. Literal shortcode examples inside fenced code blocks remain untouched. When safe archive extraction has encoded Windows-incompatible or case-sensitive member names, ingestion reverses that encoding before computing stable document IDs and source citations.
 
 Go source receives a language-aware documentation pass rather than ordinary source chunking. The parser masks strings and comments for deterministic declaration discovery, retains package documentation and exported functions, methods, types, public type bodies, constants, variables, generic signatures, and assembly-implemented declarations, and omits function bodies and unexported-only files. Corpus scoping excludes internal, vendored, test, and testdata trees. Known language HTML files receive canonical titles so the specification and memory model remain stable retrieval targets. No downloaded compiler binary is executed.
@@ -85,6 +87,12 @@ The HTTP acquisition wrapper supports resume through `.partial` files, retries w
 
 ```powershell
 .\scripts\acquire-dataset.ps1 -DatasetId python-3.14-docs -Extract
+```
+
+Versioned HTML publications use a bounded same-origin mirror. It checkpoints each fsynced page, resumes interrupted crawls, records broken 404/410 links, enforces registry file/byte limits, and retains the accepted mirror until a forced replacement has completed:
+
+```powershell
+.\scripts\acquire-site-mirror.ps1 -DatasetId java-se-jdk-26-docs
 ```
 
 SQLite uses the same command with its publisher-supplied SHA3-256 and version-pinned static HTML archive:

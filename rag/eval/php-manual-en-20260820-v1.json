@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "name": "PHP manual lexical gate",
+  "description": "Stable-document-ID gate for current PHP language features and database APIs.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"attributes","query":"attributes reflection","query_type":"language","relevance":{"php-manual-en-20260820:044293eca86997d0dc697b54":3}},
+    {"id":"fibers","query":"fibers suspend resume","query_type":"language","relevance":{"php-manual-en-20260820:dae9bfa8eb93249fa5c13565":3}},
+    {"id":"backed-enums","query":"backed enumerations","query_type":"language","relevance":{"php-manual-en-20260820:491356348d421d61e641438e":3}},
+    {"id":"match","query":"control structures match","query_type":"language","relevance":{"php-manual-en-20260820:da48e7e5449dfbebd6d9edd1":3}},
+    {"id":"yield-from","query":"yield from","query_type":"language","relevance":{"php-manual-en-20260820:b7f7ea9a85f6ed3f3fdda632":3}},
+    {"id":"readonly-properties","query":"readonly properties","query_type":"language","relevance":{"php-manual-en-20260820:18f4881ca7c9569aa2a48f76":3}},
+    {"id":"named-arguments","query":"named arguments","query_type":"language","relevance":{"php-manual-en-20260820:f20667c3b51e3bef0b818d25":3}},
+    {"id":"intersection-types","query":"intersection types","query_type":"types","relevance":{"php-manual-en-20260820:fcdcbd81428c6d96dec93efe":3}},
+    {"id":"pdo-transactions","query":"PDO transactions","query_type":"database","relevance":{"php-manual-en-20260820:7746bcc1c3d38efa5ce796d5":3}},
+    {"id":"nullsafe","query":"nullsafe operator","query_type":"language","relevance":{"php-manual-en-20260820:a6488193b6f1fd6072d6a95f":3}}
+  ]
+}

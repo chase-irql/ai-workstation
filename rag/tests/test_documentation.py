@@ -276,6 +276,23 @@ uses: action@{{% param "action_version" %}}
         self.assertTrue(any("action_version" in block.text for block in frontmatter.blocks if block.kind == "code"))
         self.assertEqual(frontmatter.blocks[0].heading_path, ("System and Service Credentials",))
 
+        mdn = parse_markdown(
+            '''---
+title: Array.fromAsync()
+---
+
+{{PreviousNext("Web/JavaScript/Reference", "Web/JavaScript/Guide")}}
+{{SeeCompatTable}}
+
+The {{jsxref("Array")}} method consumes an {{jsxref("AsyncIterator")}}.
+''',
+            "fallback",
+        )
+        mdn_text = "\n".join(block.text for block in mdn.blocks)
+        self.assertIn("The Array method consumes an AsyncIterator", mdn_text)
+        self.assertNotIn("PreviousNext", mdn_text)
+        self.assertNotIn("SeeCompatTable", mdn_text)
+
         kubernetes = parse_markdown(
             '''---
 title: Probes

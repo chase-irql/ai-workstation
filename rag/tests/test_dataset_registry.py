@@ -15,7 +15,7 @@ class DatasetRegistryTests(unittest.TestCase):
     def test_project_registry_is_valid_and_budgeted(self):
         path = Path(__file__).resolve().parents[2] / "config" / "datasets.json"
         datasets = load_registry(path)
-        self.assertEqual(len(datasets), 72)
+        self.assertEqual(len(datasets), 80)
         dataset_ids = {dataset.dataset_id for dataset in datasets}
         self.assertIn("devops-stackexchange", dataset_ids)
         self.assertIn("security-stackexchange", dataset_ids)
@@ -96,8 +96,8 @@ class DatasetRegistryTests(unittest.TestCase):
             }.issubset(dataset_ids)
         )
         summary = storage_summary(datasets)
-        self.assertLess(summary["download_max_bytes"], 20_000_000_000)
-        self.assertLess(summary["indexed_max_bytes"], 141_000_000_000)
+        self.assertLess(summary["download_max_bytes"], 30_000_000_000)
+        self.assertLess(summary["indexed_max_bytes"], 150_000_000_000)
 
     def test_duplicate_ids_and_escaping_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -282,6 +282,51 @@ class DatasetRegistryTests(unittest.TestCase):
             }
             registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "unsafe or duplicate exclusion"):
+                load_registry(registry)
+
+    def test_http_site_mirror_constraints_are_validated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            registry = Path(directory) / "datasets.json"
+            template = {
+                "dataset_id": "site-mirror",
+                "name": "Site mirror",
+                "description": "Versioned documentation site",
+                "category": "docs",
+                "official_source_url": "https://docs.example.invalid/v1/",
+                "license": "test",
+                "attribution": "test",
+                "release": "1",
+                "update_frequency": "release",
+                "scope": "all HTML",
+                "formats": ["HTML"],
+                "acquisition": {
+                    "method": "http-site-mirror",
+                    "location": "https://docs.example.invalid/v1/",
+                    "allowed_prefix": "https://docs.example.invalid/v1/",
+                    "max_files": 100,
+                    "max_bytes": 1000000,
+                    "max_concurrency": 4,
+                },
+                "storage": {
+                    "download_min_bytes": 1,
+                    "download_max_bytes": 1000000,
+                    "extracted_max_bytes": 1000000,
+                    "indexed_max_bytes": 2000000,
+                },
+                "paths": {
+                    "raw": "raw/site",
+                    "processed": "processed/site",
+                    "index": "indexes/site.sqlite3",
+                },
+                "status": "planned",
+                "notes": "",
+            }
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [template]}), encoding="utf-8")
+            self.assertEqual(load_registry(registry)[0].acquisition["method"], "http-site-mirror")
+
+            invalid = {**template, "acquisition": {**template["acquisition"], "max_concurrency": 17}}
+            registry.write_text(json.dumps({"schema_version": 1, "datasets": [invalid]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "must not exceed 16"):
                 load_registry(registry)
 
 

@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "name": "Ruby 4.0 documentation lexical gate",
+  "description": "Stable-document-ID gate for Ruby syntax, core APIs, concurrency, and security guidance.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"pattern-pin","query":"pin operator pattern matching","query_type":"language","relevance":{"ruby-4.0-docs:5360ca0ce874078fa4e8a7c1":3}},
+    {"id":"proc-lambda","query":"Proc lambda","query_type":"language","relevance":{"ruby-4.0-docs:66d10b59d4c717f02a8f0fc8":3}},
+    {"id":"ractor","query":"Ractor shareable objects","query_type":"concurrency","relevance":{"ruby-4.0-docs:181761d5501885573bfcd83c":3}},
+    {"id":"fiber","query":"Fiber scheduler","query_type":"concurrency","relevance":{"ruby-4.0-docs:6d952b17ff41d76c90a97978":3}},
+    {"id":"refinements","query":"refinements lexical scope","query_type":"language","relevance":{"ruby-4.0-docs:7a9c9c204c6d8528908e556a":3}},
+    {"id":"keywords","query":"keyword arguments","query_type":"language","relevance":{"ruby-4.0-docs:416d94c7a5e5ae895dc1645b":3}},
+    {"id":"lazy","query":"Enumerable lazy","query_type":"core-api","relevance":{"ruby-4.0-docs:fe4925f9e7de0f955b4e806e":3}},
+    {"id":"gc-compact","query":"GC compact","query_type":"runtime","relevance":{"ruby-4.0-docs:94f78df6f22d0dca173fc61e":3}},
+    {"id":"marshal-security","query":"Marshal load security","query_type":"security","relevance":{"ruby-4.0-docs:b5c591cb81473f859a61fba7":3}},
+    {"id":"encodings","query":"string encoding","query_type":"language","relevance":{"ruby-4.0-docs:4d52b6b5b57235287f9def0d":3}}
+  ]
+}

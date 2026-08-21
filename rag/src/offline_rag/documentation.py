@@ -48,6 +48,8 @@ HUGO_SHORTCODE_RE = re.compile(r"\{\{[<%]\s*(.*?)\s*[>%]\}\}")
 HUGO_HEADING_RE = re.compile(r'^\s*\{\{[<%]\s*heading\s+["\']([^"\']+)["\']\s*[>%]\}\}\s*$')
 HUGO_COMMENT_OPEN_RE = re.compile(r"^\s*\{\{[<%]\s*comment(?:\s+.*?)?\s*[>%]\}\}\s*$")
 HUGO_COMMENT_CLOSE_RE = re.compile(r"^\s*\{\{[<%]\s*/\s*comment\s*[>%]\}\}\s*$")
+MDN_MACRO_RE = re.compile(r"\{\{\s*([A-Za-z][A-Za-z0-9_]*)\s*\((.*?)\)\s*\}\}")
+MDN_BARE_MACRO_RE = re.compile(r"\{\{\s*([A-Za-z][A-Za-z0-9_]*)\s*\}\}")
 DOCFX_INCLUDE_RE = re.compile(r"(?im)^\s*\[!INCLUDE\s+\[[^\]]*\]\(([^)]+)\)\]\s*$")
 MARKDOWN_HEADING_ATTRIBUTE_RE = re.compile(r"\s+\{#[A-Za-z0-9_.:-]+\}\s*$")
 MAN_MACRO_RE = re.compile(r"^\.([A-Za-z]{1,4})\s*(.*)$")
@@ -339,7 +341,25 @@ def _render_hugo_shortcode(match: re.Match[str]) -> str:
 
 
 def _clean_markdown_content(value: str) -> str:
-    """Remove Hugo rendering syntax while retaining its human-visible meaning."""
+    """Remove site rendering syntax while retaining its human-visible meaning."""
+
+    def render_mdn(match: re.Match[str]) -> str:
+        name = match.group(1).casefold()
+        if name in {"previousnext", "previous", "next", "inheritancediagram"} or name.endswith("_header"):
+            return ""
+        quoted = re.search(r'''["']([^"']+)["']''', match.group(2))
+        if quoted:
+            return quoted.group(1)
+        return ""
+
+    def render_bare_mdn(match: re.Match[str]) -> str:
+        name = match.group(1).casefold()
+        if name in {"seecompattable", "securecontext_header", "availableinworkers"} or name.endswith("_header"):
+            return ""
+        return ""
+
+    value = MDN_MACRO_RE.sub(render_mdn, value)
+    value = MDN_BARE_MACRO_RE.sub(render_bare_mdn, value)
 
     previous = None
     while previous != value:

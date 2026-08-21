@@ -27,6 +27,14 @@ This catalog is the human-readable inventory of every corpus currently published
 | `kubernetes-docs-20260820` | Official Kubernetes website commit `5184b9b…`, 2026-08-20 | CC-BY-4.0 | 1,605 documents; 14,164 chunks | BM25 |
 | `rust-1.97-docs` | Rust 1.97.1 stable documentation distribution | MIT OR Apache-2.0; component notices retained | 7,570 documents; 57,178 chunks | BM25 |
 | `typescript-docs-20260820` | Official TypeScript website commit `90e92beb…`, 2026-08-20 | CC-BY-4.0 | 77 documents; 935 chunks | BM25 |
+| `java-se-jdk-26-docs` | Java SE and JDK 26 versioned Oracle publication, mirrored 2026-08-20 | Oracle documentation terms; private local reference only | 6,266 documents; 59,627 chunks | BM25 + chunk-level semantic/hybrid |
+| `mdn-javascript-20260820` | Official `mdn/content` commit `69010c9e…`, 2026-08-20 | CC-BY-SA-2.5-or-later; code samples under documented MDN terms | 9,415 documents; 53,684 chunks | BM25 + chunk-level semantic/hybrid |
+| `ecmascript-2026-spec` | Signed `es2026-errata` tag, commit `d89c03f2…` | Ecma text copyright policy; embedded software under Ecma's software policy | 2 documents; 1,783 structural chunks | BM25 + chunk-level semantic/hybrid |
+| `cppreference-20250209` | cppreference offline HTML book, 2025-02-09 | CC-BY-SA-3.0 and GFDL | 6,635 documents; 49,307 chunks | BM25 + chunk-level semantic/hybrid |
+| `kotlin-docs-20260820` | Official Kotlin website commit `0f0ac326…`, 2026-08-20 | Apache-2.0 | 303 documents; 4,289 chunks | BM25 + chunk-level semantic/hybrid |
+| `php-manual-en-20260820` | Official generated English manual, 2026-08-20 | CC-BY-3.0-or-later | 11,788 documents; 65,592 chunks | BM25 + chunk-level semantic/hybrid |
+| `ruby-4.0-docs` | Ruby 4.0 versioned RDoc publication, mirrored 2026-08-20 | Ruby license and BSD-2-Clause; component notices retained | 1,254 documents; 6,192 chunks | BM25 + chunk-level semantic/hybrid |
+| `swift-book-20260820` | Official `swiftlang/swift-book` commit `fb79af5d…`, 2026-08-20 | Apache-2.0 | 43 documents; 769 chunks | BM25 + chunk-level semantic/hybrid |
 | `gdb-17.2-manual` | GNU GDB 17.2 last-release manual | GFDL 1.3 or later with stated invariant and cover texts | 863 documents; 2,225 chunks | BM25 |
 | `gcc-16.2-manual` | GNU Compiler Collection 16.2 user manual | GFDL 1.3 or later with stated invariant and cover texts | 523 documents; 1,695 chunks | BM25 |
 | `linux-kernel-7.2-docs` | Linux 7.2 official source documentation | GPL-2.0-only and per-file SPDX licenses retained | 4,154 documents; 29,142 chunks | BM25 |

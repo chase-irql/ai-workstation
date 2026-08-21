@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "name": "Java SE and JDK 26 documentation lexical gate",
+  "description": "Stable-document-ID gate for current Java language, concurrency, core API, modules, runtime, and native interoperation guidance.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1,5,10], "recall_cutoffs": [5,10,50], "mrr_cutoff": 10, "ndcg_cutoff": 10, "query_mode": "and",
+  "cases": [
+    {"id":"virtual-threads","query":"virtual threads","query_type":"concurrency","relevance":{"java-se-jdk-26-docs:195c18f288c0368337f6b27c":3}},
+    {"id":"structured-concurrency","query":"structured concurrency","query_type":"concurrency","relevance":{"java-se-jdk-26-docs:631c01d6d607d73e225025df":3}},
+    {"id":"records","query":"record classes","query_type":"language","relevance":{"java-se-jdk-26-docs:737c467dd474f9ce08136268":3}},
+    {"id":"sealed","query":"sealed classes","query_type":"language","relevance":{"java-se-jdk-26-docs:0e70f6d08ce73604b4f26a1d":3}},
+    {"id":"switch-patterns","query":"pattern matching switch","query_type":"language","relevance":{"java-se-jdk-26-docs:bccece5473e8c8a6df062f81":3}},
+    {"id":"gatherers","query":"stream gatherers","query_type":"collections","relevance":{"java-se-jdk-26-docs:ceab410b4e714d6859613142":3}},
+    {"id":"completable-future","query":"CompletableFuture thenCompose","query_type":"core-api","relevance":{"java-se-jdk-26-docs:c3ce024433417e2ac8431f78":3}},
+    {"id":"modules","query":"module declarations requires exports","query_type":"modules","relevance":{"java-se-jdk-26-docs:9a9a2ce217f1f4d83faffeb9":3}},
+    {"id":"gc-tuning","query":"garbage collection tuning guide","query_type":"runtime","relevance":{"java-se-jdk-26-docs:56b01f6cfd51e2270c7cbe1d":3}},
+    {"id":"ffm","query":"foreign function memory API","query_type":"interop","relevance":{"java-se-jdk-26-docs:74e38bc19724476da8d282f3":3}}
+  ]
+}
