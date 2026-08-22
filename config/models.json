@@ -59,6 +59,24 @@
       "notes": "Abliterated vision/tool/reasoning model. Verified 100% GPU-resident on the RTX 5080 at 65,536 context; VRAM headroom is minimal and safety alignment is substantially removed."
     },
     {
+      "id": "qwen35-4b-abliterated-bf16",
+      "ollama_model": "qwen3.5-4b-abliterated:bf16",
+      "role": "general-agent",
+      "architecture": "dense-hybrid-4.2b",
+      "quantization": "BF16",
+      "download_gb": 8.43,
+      "priority": 2,
+      "context_tokens": 32768,
+      "max_output_tokens": 8192,
+      "kv_cache": "f16",
+      "thinking": true,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "source_repo": "https://huggingface.co/wangzhang/Qwen3.5-4B-abliterated",
+      "notes": "Locally converted from the source BF16 Safetensors to a BF16 GGUF. Verified 100% GPU-resident on the RTX 5080 at 32,768 context with FP16 K/V cache and Flash Attention. Abliteration substantially removes safety alignment."
+    },
+    {
       "id": "qwen3-embedding-0.6b",
       "ollama_model": "qwen3-embedding:0.6b",
       "role": "embedding",

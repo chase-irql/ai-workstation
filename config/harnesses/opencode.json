@@ -37,6 +37,10 @@
         "orcarouter/Qwen3.8-27B-Uncensored:iq3_xxs": {
           "name": "Qwen3.8 27B Uncensored IQ3_XXS",
           "limit": { "context": 65536, "output": 8192 }
+        },
+        "qwen3.5-4b-abliterated:bf16": {
+          "name": "Qwen3.5 4B Abliterated BF16",
+          "limit": { "context": 32768, "output": 8192 }
         }
       }
     }

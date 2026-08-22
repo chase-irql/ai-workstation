@@ -201,7 +201,7 @@ After the BM25 index passes its evaluation gate, build and evaluate an independe
   -Suite rag\eval\python-docs-semantic-v1.json
 ```
 
-The embedding model is selected from [models.json](config/models.json). Vectors are published only after the generation passes structural validation.
+The embedding model is selected from [models.json](config/models.json). Vectors are published only after the generation passes structural validation. See the [Qwen3.5 4B Abliterated BF16 installation report](docs/qwen35-4b-abliterated-bf16.md) for the verified 32K/F16-KV local-model profile.
 
 ## Use the knowledge system with an agent
 
