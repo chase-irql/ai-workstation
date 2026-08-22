@@ -68,7 +68,9 @@ def search_documents(
 
     Strict AND remains the primary retrieval. When ``allow_relaxation`` is true
     and a query of four or more terms has no exact-title hit, leave-one-term-out
-    variants are fused using RRF.
+    variants are fused using RRF. If strict retrieval is empty, bounded title
+    windows also recover wording from author/year descriptions
+    without degrading into an unrestricted OR query.
     A candidate whose title terms are contained in the original query is then
     resolved through exact-title search so agents receive its lead passage.
     This recovers from one guessed or overly specific term without degrading
@@ -91,9 +93,38 @@ def search_documents(
     ):
         relaxed = True
         terms = original_plan.normalized_terms
-        for dropped_index in range(min(len(terms), 6)):
-            variant = " ".join(term for index, term in enumerate(terms) if index != dropped_index)
-            variants.append((variant, search(database, variant, limit=candidate_limit, mode="and"), 0.8))
+        searched_variants = {query.casefold()}
+
+        def add_title_windows(width: int, weight: float) -> bool:
+            for start in range(min(len(terms) - width + 1, 6)):
+                variant = " ".join(terms[start : start + width])
+                if variant.casefold() in searched_variants:
+                    continue
+                searched_variants.add(variant.casefold())
+                candidates = search(database, variant, limit=candidate_limit, mode="and")
+                variants.append((variant, candidates, weight))
+                if candidates:
+                    return True
+            return False
+
+        # Long publication descriptions commonly contain several metadata
+        # terms. Try their likely title windows before expensive leave-one-out
+        # variants, which cannot recover from several extra terms at once.
+        window_hit = False
+        if len(terms) > 6:
+            window_hit = add_title_windows(4, 0.65)
+            if not window_hit:
+                window_hit = add_title_windows(3, 0.55)
+        if not window_hit:
+            for dropped_index in range(min(len(terms), 6)):
+                variant = " ".join(term for index, term in enumerate(terms) if index != dropped_index)
+                if variant.casefold() not in searched_variants:
+                    searched_variants.add(variant.casefold())
+                    variants.append((variant, search(database, variant, limit=candidate_limit, mode="and"), 0.8))
+        if not primary and not window_hit and len(terms) > 4:
+            window_hit = add_title_windows(4, 0.65)
+            if not window_hit:
+                add_title_windows(3, 0.55)
 
     scores: dict[str, float] = {}
     representatives: dict[str, dict[str, object]] = {}

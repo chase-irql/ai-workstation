@@ -23,6 +23,8 @@ class KnowledgeCorpus:
     provider_factory: Callable[[], EmbeddingProvider] | None = None
     default_retrieval: str = "bm25"
     query_aliases: tuple[tuple[str, str], ...] = ()
+    relax_bm25_on_empty: bool = False
+    query_route_patterns: tuple[str, ...] = ()
 
 
 def _rewrite_query(query: str, aliases: Sequence[tuple[str, str]]) -> str:
@@ -43,6 +45,8 @@ class KnowledgeRuntime:
             raise ValueError("at least one knowledge corpus is required")
         self._runtimes: OrderedDict[str, RetrievalRuntime] = OrderedDict()
         self._query_aliases: dict[str, tuple[tuple[str, str], ...]] = {}
+        self._relax_bm25_on_empty: dict[str, bool] = {}
+        self._query_routes: dict[str, tuple[re.Pattern[str], ...]] = {}
         seen_databases: set[Path] = set()
         for corpus in corpora:
             corpus_id = corpus.corpus_id.strip()
@@ -67,6 +71,16 @@ class KnowledgeRuntime:
                 seen_aliases.add(folded)
                 normalized_aliases.append((source, target))
             self._query_aliases[corpus_id] = tuple(normalized_aliases)
+            self._relax_bm25_on_empty[corpus_id] = bool(corpus.relax_bm25_on_empty)
+            route_patterns: list[re.Pattern[str]] = []
+            for pattern in corpus.query_route_patterns:
+                if not pattern or len(pattern) > 1_000:
+                    raise ValueError(f"invalid query route pattern for {corpus_id!r}")
+                try:
+                    route_patterns.append(re.compile(pattern, re.IGNORECASE))
+                except re.error as error:
+                    raise ValueError(f"invalid query route pattern for {corpus_id!r}: {error}") from error
+            self._query_routes[corpus_id] = tuple(route_patterns)
             self._runtimes[corpus_id] = RetrievalRuntime(
                 database,
                 vector_directory=corpus.vector_directory,
@@ -91,6 +105,17 @@ class KnowledgeRuntime:
             if corpus_id not in selected:
                 selected.append(corpus_id)
         return selected
+
+    def _route_corpora(self, query: str, corpus_ids: Sequence[str] | None) -> tuple[list[str], dict[str, Any]]:
+        if corpus_ids:
+            return self._select(corpus_ids), {"applied": False, "reason": "explicit_corpora"}
+        matched: list[str] = []
+        for corpus_id, patterns in self._query_routes.items():
+            if any(pattern.search(query) for pattern in patterns):
+                matched.append(corpus_id)
+        if matched:
+            return matched, {"applied": True, "reason": "registry_query_route", "corpora": matched}
+        return self._select(None), {"applied": False, "reason": "no_route_match"}
 
     def search(
         self,
@@ -117,7 +142,7 @@ class KnowledgeRuntime:
         if retrieval not in {"auto", "default", *RETRIEVAL_MODES}:
             raise ValueError("retrieval must be auto, default, bm25, semantic, or hybrid")
 
-        selected = self._select(corpus_ids)
+        selected, corpus_route = self._route_corpora(query, corpus_ids)
         # Reranking can only promote evidence that survives candidate generation.
         # Keep a bounded but meaningfully broader pool than the final response.
         per_corpus_limit = min(50, max(32, limit * 4))
@@ -154,7 +179,9 @@ class KnowledgeRuntime:
                     query_mode=mode,
                     retrieval_mode=selected_mode,
                     candidate_limit=min(400, max(80, per_corpus_limit * 20)),
-                    allow_relaxation=selected_mode != "bm25",
+                    allow_relaxation=(
+                        selected_mode != "bm25" or self._relax_bm25_on_empty[corpus_id]
+                    ),
                 )
             except RetrievalUnavailableError as error:
                 if selected_mode == "bm25":
@@ -167,7 +194,7 @@ class KnowledgeRuntime:
                     query_mode=mode,
                     retrieval_mode="bm25",
                     candidate_limit=min(400, max(80, per_corpus_limit * 20)),
-                    allow_relaxation=False,
+                    allow_relaxation=self._relax_bm25_on_empty[corpus_id],
                 )
             results = list(response.get("results", []))
             candidate_documents[corpus_id] = len(results)
@@ -178,6 +205,8 @@ class KnowledgeRuntime:
                 "fallback_reason": fallback_reason,
                 "route_reason": route_reason,
                 "latency_ms": response.get("latency_ms"),
+                "query_relaxed": bool(response.get("query_relaxed", False)),
+                "variants_searched": int(response.get("variants_searched", 1)),
             }
             for rank, value in enumerate(results, 1):
                 item = dict(value)
@@ -216,6 +245,7 @@ class KnowledgeRuntime:
             "ranking_unit": "document",
             "fusion": "reciprocal_rank_per_corpus",
             "corpora_searched": selected,
+            "corpus_route": corpus_route,
             "resolved_queries": resolved_queries,
             "candidate_documents": candidate_documents,
             "retrieval_by_corpus": retrieval_state,
@@ -260,6 +290,8 @@ class KnowledgeRuntime:
                 corpus_id: {
                     **runtime.lexical_status,
                     "query_alias_count": len(self._query_aliases[corpus_id]),
+                    "relax_bm25_on_empty": self._relax_bm25_on_empty[corpus_id],
+                    "query_route_count": len(self._query_routes[corpus_id]),
                     "retrieval": runtime.status(),
                 }
                 for corpus_id, runtime in self._runtimes.items()

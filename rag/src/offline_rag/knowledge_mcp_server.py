@@ -32,7 +32,8 @@ def create_knowledge_mcp_server(
         title="Offline Knowledge",
         description="Read-only retrieval across independently versioned local knowledge corpora.",
         instructions=(
-            "Use search_knowledge to find cited evidence across local corpora. Pass a corpus filter "
+            "Always begin with search_knowledge to find cited evidence across local corpora. Never "
+            "guess a document_id or chunk_id or call a retrieval tool before search. Pass a corpus filter "
             "when the source type is known. Search results include the knowledge_corpus and chunk_id; "
             "pass both to retrieve_knowledge_context for focused neighboring evidence. Use "
             "retrieve_knowledge_document only for small paginated reads. Cite with the returned "
@@ -52,7 +53,7 @@ def create_knowledge_mcp_server(
         rerank: bool = True,
         deduplicate: bool = True,
     ) -> dict[str, Any]:
-        """Search cited evidence across all or selected offline knowledge corpora."""
+        """Mandatory first step: discover cited evidence and valid retrieval IDs."""
 
         requested_limit = limit
         limit = max(1, min(int(limit), 20))
@@ -74,12 +75,18 @@ def create_knowledge_mcp_server(
 
     @server.tool(structured_output=True)
     def retrieve_knowledge_document(
-        corpus: str,
-        document_id: str,
+        corpus: Annotated[
+            str,
+            Field(description="Exact knowledge_corpus copied from a successful search_knowledge result."),
+        ],
+        document_id: Annotated[
+            str,
+            Field(description="Complete document_id copied verbatim from a successful search_knowledge result; never guess it."),
+        ],
         chunk_offset: int = 0,
         chunk_limit: Annotated[int, Field(description="Requested page size; clamped to 1 through 12.")] = 4,
     ) -> dict[str, Any]:
-        """Retrieve a small ordered page from a known corpus and document."""
+        """After search_knowledge, read a small ordered page from its known document."""
 
         requested_offset = chunk_offset
         requested_limit = chunk_limit
@@ -104,12 +111,18 @@ def create_knowledge_mcp_server(
 
     @server.tool(structured_output=True)
     def retrieve_knowledge_context(
-        corpus: str,
-        chunk_id: str,
+        corpus: Annotated[
+            str,
+            Field(description="Exact knowledge_corpus copied from a successful search_knowledge result."),
+        ],
+        chunk_id: Annotated[
+            str,
+            Field(description="Exact chunk_id copied verbatim from a successful search_knowledge result; never guess it."),
+        ],
         before: Annotated[int, Field(description="Requested preceding chunks; clamped to 0 through 3.")] = 1,
         after: Annotated[int, Field(description="Requested following chunks; clamped to 0 through 3.")] = 1,
     ) -> dict[str, Any]:
-        """Expand a search hit with a bounded number of neighboring chunks."""
+        """After search_knowledge, expand one returned hit with neighboring chunks."""
 
         requested_before = before
         requested_after = after
@@ -159,6 +172,16 @@ def _query_aliases(values: Sequence[str], corpus_ids: Sequence[str]) -> dict[str
             raise ValueError("--query-alias must use an existing CORPUS=SOURCE=>TARGET mapping")
         aliases[corpus_id].append((source.strip(), target.strip()))
     return {corpus_id: tuple(items) for corpus_id, items in aliases.items()}
+
+
+def _query_routes(values: Sequence[str], corpus_ids: Sequence[str]) -> dict[str, tuple[str, ...]]:
+    routes: dict[str, list[str]] = {corpus_id: [] for corpus_id in corpus_ids}
+    for value in values:
+        corpus_id, separator, pattern = value.partition("=")
+        if not separator or corpus_id not in routes or not pattern.strip():
+            raise ValueError("--query-route must use an existing CORPUS=REGEX mapping")
+        routes[corpus_id].append(pattern.strip())
+    return {corpus_id: tuple(patterns) for corpus_id, patterns in routes.items()}
 
 
 def _provider_factories(
@@ -227,6 +250,20 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="CORPUS=SOURCE=>TARGET",
         help="Repeatable corpus-owned terminology rewrite applied before retrieval",
     )
+    parser.add_argument(
+        "--relax-bm25-on-empty",
+        action="append",
+        default=[],
+        metavar="CORPUS",
+        help="Enable bounded strict-AND relaxation for a corpus when primary BM25 returns no candidates",
+    )
+    parser.add_argument(
+        "--query-route",
+        action="append",
+        default=[],
+        metavar="CORPUS=REGEX",
+        help="Route an unfiltered matching query to the named corpus; explicit corpus filters take precedence",
+    )
     return parser
 
 
@@ -246,6 +283,13 @@ def main(argv: Iterable[str] | None = None) -> int:
     if unknown_vectors:
         raise ValueError(f"Semantic vector mappings name unknown corpora: {', '.join(unknown_vectors)}")
     query_aliases = _query_aliases(args.query_alias, tuple(indexes))
+    query_routes = _query_routes(args.query_route, tuple(indexes))
+    relaxed_corpora = set(args.relax_bm25_on_empty)
+    if len(relaxed_corpora) != len(args.relax_bm25_on_empty):
+        raise ValueError("duplicate --relax-bm25-on-empty corpus")
+    unknown_relaxed = sorted(relaxed_corpora - set(indexes))
+    if unknown_relaxed:
+        raise ValueError(f"BM25 relaxation names unknown corpora: {', '.join(unknown_relaxed)}")
     provider_factories = _provider_factories(
         vector_indexes,
         models=args.models,
@@ -261,6 +305,8 @@ def main(argv: Iterable[str] | None = None) -> int:
             provider_factory=provider_factories.get(corpus_id),
             default_retrieval=args.default_vector_retrieval if corpus_id in vector_indexes else "bm25",
             query_aliases=query_aliases[corpus_id],
+            relax_bm25_on_empty=corpus_id in relaxed_corpora,
+            query_route_patterns=query_routes[corpus_id],
         )
         for corpus_id, database in indexes.items()
     ]

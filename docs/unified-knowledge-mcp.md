@@ -15,6 +15,7 @@ The current OpenCode configuration exposes:
 - `sqlite-docs`: SQLite 3.53.4 documentation.
 - `devops-stackexchange`: DevOps Stack Exchange June 2026 retained questions and answers.
 - `security-stackexchange`: Information Security Stack Exchange June 2026 retained questions and answers.
+- `pubmed-baseline-2026`: complete PubMed 2026 annual bibliographic baseline, with BM25 over titles, abstracts, MeSH terms, keywords, chemicals, and publication metadata.
 
 Python, Git, Linux man-pages, RFC Editor, SQLite, iFixit, DevOps Stack Exchange, and Information Security Stack Exchange have independently published chunk-level semantic generations. The DevOps corpus uses a 1,024-dimensional profile because it measurably outperformed the default 256-dimensional profile; iFixit and Information Security use 256 dimensions because their measured retrieval gains do not currently justify quadrupling vector storage. The server resolves each corpus's exact model profile from its signed vector manifest and shares query caches only between identical profiles; a global `--model-id` override is rejected at startup if it conflicts with any generation. This allows 256- and 1,024-dimensional indexes to coexist safely. Wikipedia retains its article-level semantic generation, while IANA remains BM25/structured-first. All semantic resources are lazy: server startup and `knowledge_index_status` do not invoke Ollama or load an embedding model. A caller can request `retrieval: "bm25"` to guarantee a CPU-only search. If a semantic backend is unavailable, the federated tool reports the reason and explicitly falls back to BM25 for that corpus.
 
@@ -24,15 +25,23 @@ IANA is table-aware: each nested registry is a document and each registry record
 
 `search_knowledge` searches every corpus by default. Its optional `corpora` array restricts work when the source is known. `retrieval="auto"` is the default: exact identifiers, quoted phrases, and IANA lookups stay on BM25, while conceptual language uses hybrid retrieval wherever a verified vector generation exists. Explicit `bm25`, `semantic`, `hybrid`, and legacy `default` selections remain available. The MCP-facing result limit is clamped to 1-20 and reports the requested and effective values; the evaluation runtime may request as many as 50 candidates. Each result includes `knowledge_corpus`, `document_id`, `chunk_id`, evidence text, source version, URL, `citation_reference`, and server-generated `citation_markdown`.
 
-`retrieve_knowledge_context` accepts the result's `knowledge_corpus` and `chunk_id`, then returns a bounded neighboring window. This is the preferred expansion tool.
+`search_knowledge` is always the first knowledge-tool call. Retrieval identifiers are opaque: copy them from a successful search result rather than guessing them from a title, URL, PMID, or model memory.
 
-`retrieve_knowledge_document` returns a small paginated document read. It requires the corpus and stable document ID and safely clamps page size.
+`retrieve_knowledge_context` accepts the result's `knowledge_corpus` and `chunk_id`, then returns a bounded neighboring window. This is the preferred expansion tool after search.
+
+`retrieve_knowledge_document` returns a small paginated document read after search. It requires the exact corpus and stable document ID copied from a result and safely clamps page size.
 
 `knowledge_index_status` reports each database's build identity, version, document/chunk counts, available retrieval modes, and semantic load state.
 
 Search and retrieval responses include a deduplicated `copy_ready_citations` block. Agents cite claims with its stable `[S#]` references and copy the matching Markdown source lines verbatim. The server constructs each link from the stored URL without normalization, so underscores and other significant path characters survive; agents must not rebuild URLs from titles or filenames.
 
 Datasets may declare reviewed `ingestion.query_aliases` when users and a source use different established terminology. The configuration script passes these aliases to the corpus runtime, which rewrites only that corpus's query and reports the resolved form. Aliases are retrieval metadata, not agent prompt recipes; they do not contain answers, quantities, or procedure steps.
+
+PubMed is bibliographic evidence rather than a clinical-guidance corpus. Use its exact corpus ID for literature searches and PMID lookups, prefer review/guideline publications when the question calls for synthesis, and describe conclusions as findings reported by the retrieved publications. Do not present one abstract as current medical advice.
+
+PubMed also enables its registry-owned `relax_bm25_on_empty` policy. Strict AND runs first. Only when it returns no candidates, the server tries bounded leave-one-term-out and four-term title windows, then reports the relaxation and searched-variant count. This recovers titles embedded in author/year descriptions without enabling an unbounded OR query or changing other corpora.
+
+Registry-owned query routes keep unfiltered literature questions from scanning every database. When a PubMed literature pattern matches, the server searches only PubMed and reports `corpus_route.applied=true`; an explicit caller-supplied corpus list always takes precedence. Routing patterns select a corpus only—they do not contain answers or rewrite the user's query.
 
 BM25 magnitudes are not comparable across databases with radically different sizes. Cross-corpus candidate generation therefore begins with deterministic reciprocal rank by corpus. The `deterministic-evidence-v2` reranker keeps that semantic/hybrid rank dominant and uses bounded title, heading, passage, identifier, exact-title, and dual-retrieval evidence as transparent tie-breakers over a 32–50 document pool. Common question scaffolding is excluded from coverage calculations. Exact `content_id` duplicates and passages with at least 0.92 token Jaccard overlap are suppressed before applying the final result limit. A retained result records `alternate_sources` and `alternate_document_ids` when equivalent evidence occurred in another document, so deduplication does not erase a valid citation or evaluation judgment. Source BM25/vector scores, per-corpus ranks, rerank components, routing reasons, and removed duplicates remain visible.
 

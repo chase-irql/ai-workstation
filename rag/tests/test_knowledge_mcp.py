@@ -20,6 +20,7 @@ from offline_rag.knowledge import KnowledgeCorpus, KnowledgeRuntime
 from offline_rag.knowledge_mcp_server import (
     _provider_factories,
     _query_aliases,
+    _query_routes,
     close_knowledge_mcp_server,
     create_knowledge_mcp_server,
 )
@@ -41,6 +42,13 @@ class KnowledgeMCPTests(unittest.TestCase):
         self.assertEqual(aliases["docs"], ())
         with self.assertRaisesRegex(ValueError, "CORPUS=SOURCE=>TARGET"):
             _query_aliases(["missing=old=>new"], ["health"])
+
+    def test_query_route_parser_validates_corpus_owned_patterns(self):
+        routes = _query_routes([r"docs=\bmanual\b"], ["docs", "other"])
+        self.assertEqual(routes["docs"], (r"\bmanual\b",))
+        self.assertEqual(routes["other"], ())
+        with self.assertRaisesRegex(ValueError, "CORPUS=REGEX"):
+            _query_routes(["missing=paper"], ["docs"])
 
     def test_corpus_vector_manifests_select_matching_embedding_profiles(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -152,6 +160,18 @@ Connection migration allows an endpoint to move to a new network path.
                         "retrieve_knowledge_document",
                         "knowledge_index_status",
                     },
+                )
+                tools_by_name = {tool.name: tool for tool in tools}
+                self.assertIn("Mandatory first step", tools_by_name["search_knowledge"].description)
+                document_schema = tools_by_name["retrieve_knowledge_document"].input_schema
+                self.assertIn(
+                    "successful search_knowledge",
+                    document_schema["properties"]["document_id"]["description"],
+                )
+                context_schema = tools_by_name["retrieve_knowledge_context"].input_schema
+                self.assertIn(
+                    "never guess",
+                    context_schema["properties"]["chunk_id"]["description"],
                 )
                 search = asyncio.run(
                     server.call_tool(
@@ -288,6 +308,67 @@ Connection migration allows an endpoint to move to a new network path.
                 self.assertEqual(result["results"][0]["query"], "moving connection preparation instructions")
                 self.assertEqual(result["results"][0]["knowledge_query"], "connection migration preparation instructions")
                 self.assertEqual(runtime.status()["corpora"]["test-docs"]["query_alias_count"], 1)
+            finally:
+                runtime.close()
+
+    def test_bm25_relaxation_is_corpus_owned_and_recovers_title_window(self):
+        with tempfile.TemporaryDirectory() as directory:
+            _, documentation = self.prepare(Path(directory))
+            strict = KnowledgeRuntime([KnowledgeCorpus("test-docs", documentation)])
+            relaxed = KnowledgeRuntime(
+                [KnowledgeCorpus("test-docs", documentation, relax_bm25_on_empty=True)]
+            )
+            query = "Apollo Guidance Computer imagined-author 1969"
+            try:
+                strict_result = strict.search(
+                    query,
+                    corpus_ids=["test-docs"],
+                    retrieval="bm25",
+                )
+                self.assertEqual(strict_result["results"], [])
+
+                relaxed_result = relaxed.search(
+                    query,
+                    corpus_ids=["test-docs"],
+                    retrieval="bm25",
+                )
+                self.assertEqual(relaxed_result["results"][0]["title"], "Spacecraft Operations")
+                state = relaxed_result["retrieval_by_corpus"]["test-docs"]
+                self.assertTrue(state["query_relaxed"])
+                self.assertGreater(state["variants_searched"], 1)
+                self.assertTrue(relaxed.status()["corpora"]["test-docs"]["relax_bm25_on_empty"])
+            finally:
+                strict.close()
+                relaxed.close()
+
+    def test_registry_query_route_prevents_unnecessary_federated_search(self):
+        with tempfile.TemporaryDirectory() as directory:
+            wikipedia, documentation = self.prepare(Path(directory))
+            runtime = KnowledgeRuntime(
+                [
+                    KnowledgeCorpus("wikipedia", wikipedia),
+                    KnowledgeCorpus(
+                        "test-docs",
+                        documentation,
+                        query_route_patterns=(r"\bprotocol\b",),
+                    ),
+                ]
+            )
+            try:
+                routed = runtime.search("protocol connection migration", retrieval="bm25")
+                self.assertEqual(routed["corpora_searched"], ["test-docs"])
+                self.assertTrue(routed["corpus_route"]["applied"])
+                self.assertEqual(routed["results"][0]["title"], "Test Transport Protocol")
+
+                explicit = runtime.search(
+                    "protocol Apollo Guidance Computer",
+                    corpus_ids=["wikipedia"],
+                    retrieval="bm25",
+                )
+                self.assertEqual(explicit["corpora_searched"], ["wikipedia"])
+                self.assertFalse(explicit["corpus_route"]["applied"])
+                self.assertEqual(explicit["corpus_route"]["reason"], "explicit_corpora")
+                self.assertEqual(runtime.status()["corpora"]["test-docs"]["query_route_count"], 1)
             finally:
                 runtime.close()
 

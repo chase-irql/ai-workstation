@@ -2,13 +2,13 @@
 
 This is the shareable inventory of the local, offline knowledge system. It lists what the system can search; it does **not** include or redistribute the corpus files themselves.
 
-Updated: 2026-08-20
+Updated: 2026-08-22
 
 ## At a glance
 
 - **108 total corpus families**: English Wikipedia plus 107 registry-managed datasets.
-- **106 registry datasets indexed locally**; **21** currently also have semantic/vector retrieval.
-- **1 registry dataset is registered, downloading, or being processed.**
+- **107 registry datasets indexed locally**; **21** currently also have semantic/vector retrieval.
+- **0 registry datasets are registered, downloading, or being processed.**
 - Retrieval uses SQLite FTS5/BM25 as the durable baseline, with per-corpus semantic/hybrid search where embeddings are available.
 - Every registry entry records its official source, pinned release/snapshot, license or usage terms, local paths, and update notes.
 - Source archives, processed text, indexes, vectors, books, manuals, and other large datasets stay outside the public Git repository.
@@ -23,7 +23,7 @@ Updated: 2026-08-20
 
 | Corpus | What it covers | Pinned version / snapshot | Local state |
 |---|---|---|---|
-| PubMed 2026 Annual Baseline (`pubmed-baseline-2026`) | Complete NLM PubMed bibliographic baseline with titles, abstracts where available, authors, journals, publication dates, identifiers, publication types, chemicals, grants, and MeSH indexing. | 2026 annual baseline published 2026-01-29 | Registered / queued |
+| PubMed 2026 Annual Baseline (`pubmed-baseline-2026`) | Complete NLM PubMed bibliographic baseline with titles, abstracts where available, authors, journals, publication dates, identifiers, publication types, chemicals, grants, and MeSH indexing. | 2026 annual baseline published 2026-01-29 | Indexed (BM25) |
 
 ## Build System Documentation
 

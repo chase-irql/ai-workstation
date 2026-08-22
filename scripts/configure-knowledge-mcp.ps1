@@ -35,6 +35,8 @@ $mcpCommand = @(
 )
 $semanticMappings = @()
 $queryAliasMappings = @()
+$relaxationMappings = @()
+$queryRouteMappings = @()
 foreach ($dataset in $evaluated) {
     $database = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.index)))
     if (-not (Test-Path -LiteralPath $database -PathType Leaf)) {
@@ -49,6 +51,17 @@ foreach ($dataset in $evaluated) {
             $queryAliasMappings += @('--query-alias', "$($dataset.dataset_id)=$([string]$alias.from)=>$([string]$alias.to)")
         }
     }
+    if ($dataset.PSObject.Properties['ingestion'] -and
+            $dataset.ingestion.PSObject.Properties['relax_bm25_on_empty'] -and
+            [bool]$dataset.ingestion.relax_bm25_on_empty) {
+        $relaxationMappings += @('--relax-bm25-on-empty', [string]$dataset.dataset_id)
+    }
+    if ($dataset.PSObject.Properties['ingestion'] -and $dataset.ingestion.PSObject.Properties['query_routes']) {
+        foreach ($pattern in @($dataset.ingestion.query_routes)) {
+            if (-not $pattern) { throw "Dataset '$($dataset.dataset_id)' has an empty ingestion.query_routes entry." }
+            $queryRouteMappings += @('--query-route', "$($dataset.dataset_id)=$([string]$pattern)")
+        }
+    }
     if ($dataset.paths.PSObject.Properties['semantic_index']) {
         $semantic = [System.IO.Path]::GetFullPath((Join-Path $root ([string]$dataset.paths.semantic_index)))
         if (Test-Path -LiteralPath (Join-Path $semantic 'manifest.json') -PathType Leaf) {
@@ -57,6 +70,8 @@ foreach ($dataset in $evaluated) {
     }
 }
 $mcpCommand += $queryAliasMappings
+$mcpCommand += $relaxationMappings
+$mcpCommand += $queryRouteMappings
 
 if ($WikipediaRetrieval -ne 'bm25') {
     if (-not (Test-Path -LiteralPath (Join-Path $wikipediaVectors 'manifest.json') -PathType Leaf)) {

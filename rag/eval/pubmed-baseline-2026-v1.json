@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "name": "PubMed 2026 annual baseline lexical coverage gate",
+  "description": "Stable-PMID retrieval gate spanning foundational and review literature across biomedical domains. This validates exact lexical retrieval and corpus coverage; it does not evaluate clinical correctness, full-text availability, or currency beyond the 2026 annual baseline.",
+  "candidate_chunks": 50,
+  "success_cutoffs": [1, 5, 10],
+  "recall_cutoffs": [5, 10, 50],
+  "mrr_cutoff": 10,
+  "ndcg_cutoff": 10,
+  "query_mode": "and",
+  "cases": [
+    {
+      "id": "crispr-cas9-endonuclease-001",
+      "query": "programmable dual RNA guided DNA endonuclease CRISPR Cas9",
+      "query_type": "molecular-biology",
+      "relevance": {"pubmed-baseline-2026:pmid:22745249": 3}
+    },
+    {
+      "id": "human-genome-sequencing-001",
+      "query": "human genome initial sequencing analysis",
+      "query_type": "genomics",
+      "relevance": {"pubmed-baseline-2026:pmid:11237011": 3}
+    },
+    {
+      "id": "helicobacter-peptic-ulcer-001",
+      "query": "Helicobacter pylori peptic ulcer disease",
+      "query_type": "infectious-disease",
+      "relevance": {"pubmed-baseline-2026:pmid:8007082": 3, "pubmed-baseline-2026:pmid:29206536": 2}
+    },
+    {
+      "id": "mrna-vaccine-phase-three-001",
+      "query": "messenger RNA vaccine COVID-19 efficacy phase 3",
+      "query_type": "vaccines",
+      "relevance": {"pubmed-baseline-2026:pmid:35131133": 3, "pubmed-baseline-2026:pmid:35535503": 2}
+    },
+    {
+      "id": "deep-learning-medical-imaging-001",
+      "query": "deep learning medical imaging diagnosis",
+      "query_type": "medical-imaging",
+      "relevance": {"pubmed-baseline-2026:pmid:36416869": 3, "pubmed-baseline-2026:pmid:29745591": 2}
+    },
+    {
+      "id": "intensive-glucose-cardiovascular-001",
+      "query": "glycated hemoglobin cardiovascular diabetes intensive glucose control",
+      "query_type": "clinical-trials",
+      "relevance": {"pubmed-baseline-2026:pmid:19140564": 3, "pubmed-baseline-2026:pmid:20733112": 2}
+    },
+    {
+      "id": "gut-microbiome-obesity-twins-001",
+      "query": "gut microbiome obesity twins",
+      "query_type": "microbiome",
+      "relevance": {"pubmed-baseline-2026:pmid:19043404": 3}
+    },
+    {
+      "id": "pd1-checkpoint-cancer-001",
+      "query": "checkpoint blockade cancer PD-1 immunotherapy",
+      "query_type": "oncology",
+      "relevance": {"pubmed-baseline-2026:pmid:35548349": 3, "pubmed-baseline-2026:pmid:25533942": 2}
+    },
+    {
+      "id": "polymerase-chain-reaction-001",
+      "query": "polymerase chain reaction DNA amplification",
+      "query_type": "molecular-biology",
+      "relevance": {"pubmed-baseline-2026:pmid:34266217": 3, "pubmed-baseline-2026:pmid:2288446": 2}
+    },
+    {
+      "id": "alzheimer-amyloid-biomarkers-001",
+      "query": "Alzheimer amyloid beta biomarkers",
+      "query_type": "neurology",
+      "relevance": {"pubmed-baseline-2026:pmid:28733956": 3}
+    }
+  ]
+}

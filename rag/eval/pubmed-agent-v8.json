@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "name": "PubMed offline-knowledge agent gate v8",
+  "description": "End-to-end GLM tool-use gate for ordinary literature questions against the registered PubMed 2026 baseline. Version 8 retains the v7 prompts and accepts two additional meaning-equivalent phrasings observed in a source-grounded GLM trace.",
+  "cases": [
+    {
+      "id": "crispr-cas9-abstract-001",
+      "prompt": "Using our offline library, what did the 2012 paper about a programmable dual-RNA-guided DNA endonuclease report about how Cas9 cuts DNA and its potential use?",
+      "required_tools": ["search_knowledge"],
+      "expected_corpora": ["pubmed-baseline-2026"],
+      "expected_document_ids": ["pubmed-baseline-2026:pmid:22745249"],
+      "required_citation_urls": ["https://pubmed.ncbi.nlm.nih.gov/22745249/"],
+      "expected_answer_concepts": [
+        {"id": "double-stranded-cleavage", "alternatives": ["double stranded DNA breaks", "double stranded DNA cleavage", "double stranded breaks", "double stranded ds breaks", "double stranded breaks in target DNA"]},
+        {"id": "hnh-complementary", "alternatives": ["HNH nuclease domain cleaves the complementary strand", "HNH domain cleaves the complementary strand", "HNH domain cuts the complementary strand"]},
+        {"id": "ruvc-noncomplementary", "alternatives": ["RuvC like domain cleaves the noncomplementary strand", "RuvC domain cuts the noncomplementary strand"]},
+        {"id": "programmable-editing", "alternatives": ["RNA programmable genome editing", "potential for programmable genome editing"]}
+      ]
+    },
+    {
+      "id": "gut-microbiome-twins-003",
+      "prompt": "Using our offline library, summarize what the obese and lean twin study found about both a core gut microbiome and obesity-associated differences.",
+      "required_tools": ["search_knowledge"],
+      "expected_corpora": ["pubmed-baseline-2026"],
+      "expected_document_ids": ["pubmed-baseline-2026:pmid:19043404"],
+      "required_citation_urls": ["https://pubmed.ncbi.nlm.nih.gov/19043404/"],
+      "expected_answer_concepts": [
+        {"id": "functional-core", "alternatives": ["core microbiome at the gene level", "core microbiome at gene rather than organismal lineage level", "core microbiome at the gene rather than organismal lineage level", "functional core microbiome at the gene level", "gene level core microbiome", "core set of microbial genes", "functional core rather than organismal lineage"]},
+        {"id": "obesity-associations", "alternatives": ["reduced bacterial diversity", "lower bacterial diversity", "altered representation of bacterial genes and metabolic pathways", "altered representations of bacterial genes and metabolic pathways", "changes in bacterial genes and metabolic pathways"]}
+      ]
+    },
+    {
+      "id": "alzheimer-blood-biomarkers-001",
+      "prompt": "Using our offline library, what limitations and promising technologies did the review titled 'Amyloid Beta and Tau as Alzheimer's Disease Blood Biomarkers: Promise From New Technologies' identify?",
+      "required_tools": ["search_knowledge"],
+      "expected_corpora": ["pubmed-baseline-2026"],
+      "expected_document_ids": ["pubmed-baseline-2026:pmid:28733956"],
+      "required_citation_urls": ["https://pubmed.ncbi.nlm.nih.gov/28733956/"],
+      "expected_answer_concepts": [
+        {"id": "assay-limit", "alternatives": ["lack of ultra sensitive assays", "ultra sensitive assays were unavailable"]},
+        {"id": "blood-measurement", "alternatives": ["lower than levels in cerebrospinal fluid", "assay interfering factors"]},
+        {"id": "immunomagnetic-reduction", "alternatives": ["immunomagnetic reduction"]},
+        {"id": "single-molecule-array", "alternatives": ["single molecule array"]},
+        {"id": "validation-needed", "alternatives": ["requires further validation", "further validation required", "further validation", "need further validation"]}
+      ]
+    }
+  ]
+}
